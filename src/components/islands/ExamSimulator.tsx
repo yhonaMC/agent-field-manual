@@ -5,7 +5,8 @@ import { buildExam } from "../../lib/exam-builder";
 import { mulberry32 } from "../../lib/rng";
 import { scoreExam, type ExamResult } from "../../lib/scoring";
 import { $examSession } from "../../stores/exam-session";
-import { answer as recordAnswer, saveExam } from "../../stores/progress-store";
+import { $progress, answer as recordAnswer, saveExam } from "../../stores/progress-store";
+import { allDomainsPassed, domainPassed } from "../../lib/progress";
 
 const EXAM_SIZE = 60;
 const EXAM_MINUTES = 90;
@@ -17,6 +18,7 @@ function fmt(ms: number): string {
 
 export default function ExamSimulator({ pool }: { pool: Question[] }) {
   const session = useStore($examSession);
+  const progress = useStore($progress);
   const [now, setNow] = useState(() => Date.now());
   const [result, setResult] = useState<ExamResult | null>(null);
   const [cursor, setCursor] = useState(0);
@@ -38,6 +40,23 @@ export default function ExamSimulator({ pool }: { pool: Question[] }) {
   useEffect(() => {
     if (session && !result && remaining <= 0) submit(); // time up → auto-submit
   }, [remaining, session, result]);
+
+  if (!allDomainsPassed(progress) && !session && !result) {
+    return (
+      <div className="mono" style={{ maxWidth: "var(--measure)" }}>
+        <p style={{ letterSpacing: ".12em", fontWeight: 600 }}>■ EXAMINATION LOCKED</p>
+        <p>Pass all five domain drills to sit the final exam:</p>
+        <ul style={{ listStyle: "none", padding: 0 }}>
+          {[1, 2, 3, 4, 5].map((d) => (
+            <li key={d} style={{ margin: ".3rem 0" }}>
+              {domainPassed(progress, d) ? "■" : "□"} <a href={`/manual/${d}`}>§ {d}.0 drill</a>
+              {domainPassed(progress, d) ? " — passed" : " — pending"}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
 
   function start() {
     const seed = (Date.now() % 2 ** 31) | 0;

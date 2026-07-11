@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from "astro:content";
 import ManualLayout from "../../../layouts/ManualLayout.astro";
-import QuizEngine from "../../../components/islands/QuizEngine";
+import DrillGate from "../../../components/islands/DrillGate";
 import DomainGauge from "../../../components/islands/DomainGauge";
 import { practiceQuestions } from "../../../lib/question-bank";
 
@@ -37,6 +37,6 @@ const questions = practiceQuestions(entry.data.domain);
   </article>
   <section style="margin-top:4rem">
     <h2><span class="section-no">DRILL</span>Practice quiz — {questions.length} questions</h2>
-    <QuizEngine client:visible questions={questions} />
+    <DrillGate client:visible domain={entry.data.domain} questions={questions} />
   </section>
 </ManualLayout>

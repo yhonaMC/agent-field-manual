@@ -1,7 +1,7 @@
 import { persistentAtom } from "@nanostores/persistent";
 import {
   ProgressSchema, emptyProgress, recordAnswer, markLessonRead, appendExam,
-  parseImported, type ProgressState, type ExamRecord,
+  parseImported, recordDrill, type ProgressState, type ExamRecord,
 } from "../lib/progress";
 
 export const $progress = persistentAtom<ProgressState>("afm:v1", emptyProgress(), {
@@ -23,6 +23,9 @@ export const readLesson = (lessonId: string) =>
 
 export const saveExam = (record: ExamRecord) =>
   $progress.set(appendExam($progress.get(), record));
+
+export const saveDrill = (domain: number, correct: number, total: number) =>
+  $progress.set(recordDrill($progress.get(), domain, correct, total));
 
 export const exportProgress = (): string => JSON.stringify($progress.get(), null, 2);
 

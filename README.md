@@ -8,7 +8,7 @@ A free, open study manual for the Claude Certified Agent Fluency (CCAF) exam —
 
 - **18 lessons** across 5 domains, written as numbered field-manual sections
 - **190+ practice questions** with worked explanations
-- **Per-domain drills** with a retry-missed loop, so weak spots get repeated until cleared
+- **Per-domain drills** with a retry-missed loop and progressive unlocking (pass one domain at 70%+ to open the next; final exam unlocks after all five)
 - **60-question timed exam simulator** — resumable, with per-domain scoring at the end
 - **Spaced-repetition review deck** on a 1 / 3 / 7 / 16 / 35-day ladder
 - **Scenario deep-dives** for applied, judgment-call style questions

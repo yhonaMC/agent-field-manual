@@ -1,17 +1,19 @@
 import { useMemo, useState } from "react";
 import type { Question } from "../../lib/question-schema";
 import { mulberry32, shuffle, shuffleOptions } from "../../lib/rng";
-import { answer } from "../../stores/progress-store";
+import { answer, saveDrill } from "../../stores/progress-store";
+import { DRILL_PASS_THRESHOLD } from "../../lib/progress";
 
-interface Props { questions: Question[] }
+interface Props { questions: Question[]; domain: number }
 
-export default function QuizEngine({ questions }: Props) {
+export default function QuizEngine({ questions, domain }: Props) {
   const [runIds, setRunIds] = useState<string[] | null>(null); // null = not started
   const [seed, setSeed] = useState(1);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [missed, setMissed] = useState<string[]>([]);
   const [correctCount, setCorrectCount] = useState(0);
+  const [isFullRun, setIsFullRun] = useState(false);
 
   const byId = useMemo(() => new Map(questions.map((q) => [q.id, q])), [questions]);
   const run = runIds?.map((id) => byId.get(id)!).filter(Boolean) ?? [];
@@ -24,6 +26,7 @@ export default function QuizEngine({ questions }: Props) {
   function start(ids: string[]) {
     setRunIds(shuffle(ids, mulberry32(seed)));
     setIndex(0); setSelected(null); setMissed([]); setCorrectCount(0);
+    setIsFullRun(ids.length === questions.length);
   }
 
   function choose(pos: number) {
@@ -48,6 +51,13 @@ export default function QuizEngine({ questions }: Props) {
         <p className="mono" style={{ fontSize: "1.4rem" }}>
           {correctCount}/{run.length || runIds.length} correct
         </p>
+        {isFullRun && (
+          (correctCount / (run.length || runIds.length)) >= DRILL_PASS_THRESHOLD ? (
+            <p className="mono" style={{ color: "var(--ok)", fontWeight: 600 }}>DRILL PASSED — the next domain is now unlocked.</p>
+          ) : (
+            <p className="mono" style={{ color: "var(--stamp-red)" }}>Below {Math.round(DRILL_PASS_THRESHOLD * 100)}% — retake the full drill to unlock the next domain.</p>
+          )
+        )}
         {missed.length > 0 && (
           <button className="btn" onClick={() => { setSeed((s) => s + 1); start(missed); }}>
             Retry the {missed.length} missed
@@ -94,7 +104,10 @@ export default function QuizEngine({ questions }: Props) {
         <div style={{ borderLeft: "3px solid var(--accent)", padding: ".3rem 1rem", maxWidth: "var(--measure)" }}>
           <p style={{ margin: 0 }}>{q.explanation}</p>
           <button className="btn" style={{ marginTop: ".8rem" }}
-            onClick={() => { setIndex((i) => i + 1); setSelected(null); }}>
+            onClick={() => {
+              if (index + 1 >= run.length && isFullRun) saveDrill(domain, correctCount, run.length);
+              setIndex((i) => i + 1); setSelected(null);
+            }}>
             {index + 1 < run.length ? "Next item" : "Finish drill"}
           </button>
         </div>
