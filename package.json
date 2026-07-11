@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "prebuild": "vitest run --passWithNoTests",
+    "prebuild": "vitest run",
     "build": "astro build",
     "preview": "astro preview",
     "test": "vitest",
