@@ -1,0 +1,42 @@
+---
+import { getCollection, render } from "astro:content";
+import ManualLayout from "../../../layouts/ManualLayout.astro";
+import QuizEngine from "../../../components/islands/QuizEngine";
+import DomainGauge from "../../../components/islands/DomainGauge";
+import { practiceQuestions } from "../../../lib/question-bank";
+
+export async function getStaticPaths() {
+  const domains = await getCollection("domains");
+  return domains.map((d) => ({ params: { domain: String(d.data.domain) }, props: { entry: d } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const lessons = (await getCollection("lessons", (l) => l.data.domain === entry.data.domain))
+  .sort((a, b) => a.data.chapter - b.data.chapter);
+const questions = practiceQuestions(entry.data.domain);
+---
+<ManualLayout title={entry.data.title} description={entry.data.summary}>
+  <article class="prose">
+    <span class="section-no">§ {entry.data.domain}.0</span>
+    <h1>{entry.data.title}</h1>
+    <DomainGauge client:load domain={entry.data.domain} questionIds={questions.map((q) => q.id)} />
+    <Content />
+    <h2>Official exam objectives</h2>
+    <ul>{entry.data.objectives.map((o) => <li>{o}</li>)}</ul>
+    <h2>Chapters</h2>
+    <ul style="list-style:none; padding:0">
+      {lessons.map((l) => (
+        <li class="rule-row">
+          <a href={`/manual/${l.data.domain}/${l.id.split("/")[1]}`}>
+            <span class="mono">§ {l.data.section}</span> {l.data.title}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </article>
+  <section style="margin-top:4rem">
+    <h2><span class="section-no">DRILL</span>Practice quiz — {questions.length} questions</h2>
+    <QuizEngine client:visible questions={questions} />
+  </section>
+</ManualLayout>

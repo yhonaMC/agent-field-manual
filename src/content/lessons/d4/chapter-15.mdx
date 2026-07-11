@@ -1,0 +1,100 @@
+---
+title: "Validation, Retry, and Feedback Loops"
+domain: 4
+chapter: 15
+section: "4.3"
+summary: "Catching semantic errors schemas miss, retrying with specific error feedback, self-correcting cross-validations, and the anti-patterns that poison downstream data."
+---
+
+Structured output via `tool_use` guarantees the shape of your data but says nothing about its meaning. Production systems need a validation layer, retries that carry specific feedback, and loops that improve prompts over time.
+
+## Semantic errors the schema misses
+
+A JSON schema enforces shape, not correctness. These errors all pass schema validation while being semantically wrong:
+
+- An invoice whose `line_items` subtotals do not add up to the declared `total`.
+- A `shipping_address` field that actually holds the `billing_address`, since both are valid strings.
+- A `publication_date` of "2024-01-01" on a document that is clearly from 2026.
+
+Catching these requires validation at the application level, not just at the schema.
+
+## Retry with error feedback
+
+The central pattern: when validation fails, do not retry blindly. Send the model the specific error alongside the failed extraction so it knows what to fix.
+
+```javascript
+// First attempt: extraction that fails validation
+const first = await extract(document);
+const errors = validate(first);
+
+if (errors.length) {
+  // Second attempt: include the document, the failed output, and the errors
+  const retry = await client.messages.create({
+    messages: [
+      { role: "user", content: `Document: ${document}` },
+      { role: "assistant", content: JSON.stringify(first) },
+      {
+        role: "user",
+        content: `Your extraction failed validation with these errors: ${errors.join("\n")} Fix the affected fields and keep the rest.`,
+      },
+    ],
+  });
+}
+```
+
+Passing the concrete error gives the model a chance at guided self-correction instead of guessing what changed.
+
+## When retry will not help
+
+Retries fix format and structure problems. They are useless when the required information is simply absent from the source document.
+
+| Error type | Retry useful? |
+| --- | --- |
+| Field in the wrong place | Yes |
+| Wrong date format | Yes |
+| Sums that do not match | Yes (re-check source) |
+| Required field absent from document | No (change the schema or the source) |
+| Information in an external doc not provided | No |
+
+If the data is not in the document, a thousand retries will not conjure it.
+
+## Self-correcting cross-validations
+
+A strong technique is to have the model extract two versions of the same value and flag any mismatch. Asking for both a stated total and an independently calculated total lets the system catch discrepancies with no external check.
+
+```json
+{
+  "stated_total": 1450.00,
+  "calculated_total": 1450.00,
+  "totals_match": true,
+  "conflict_detected": false
+}
+```
+
+When `totals_match` is `false`, the system knows automatically that something is wrong.
+
+## Pattern tracking to improve prompts
+
+Adding a `detected_pattern` field to each structured finding lets you analyze which code constructs generate the most false positives. When developers dismiss findings, you can segment by `detected_pattern` to see what kind of code is producing noise, then refine the prompt or criterion accordingly.
+
+## Anti-patterns
+
+### Blind retries
+
+Repeating the same prompt without appending the specific error has a low success rate. The model has no idea what to change.
+
+### Infinite retries
+
+If the information is not in the document, endless retries will not invent it. Set a sensible cap, such as two retries, and define a fallback.
+
+### Suppressing validation errors
+
+Marking a failed extraction as successful poisons everything downstream. It is better to fail with a clear message or route the item to human review.
+
+## Field Notes
+
+- Schemas remove syntax errors but not semantic ones; semantic validation must live in the application.
+- Retry with the specific error and the failed output attached to enable guided self-correction.
+- Retries help with format and structure but cannot recover information absent from the source.
+- Cross-validations like stated vs. calculated totals detect inconsistencies automatically.
+- Track `detected_pattern` on findings to systematically refine prompts and criteria.

@@ -1,0 +1,193 @@
+---
+title: "Structured Errors, tool_choice, and Tool Distribution"
+domain: 2
+chapter: 8
+section: "2.3"
+summary: "How the MCP isError flag and structured error metadata let agents recover intelligently, how tool_choice controls selection, and why scoping tools by role keeps selection reliable."
+---
+
+An agent can only recover well from a failure it understands. That means signalling errors clearly, tagging them with enough metadata to drive a decision, controlling when the model must call a tool, and keeping each agent's tool set small enough to choose from reliably.
+
+## The MCP isError flag
+
+When an MCP tool fails, it reports the failure with `isError: true` in the response. That flag tells the agent the operation did not succeed and that it needs to make a recovery decision:
+
+```json
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Customer not found: ID 'cust_999' does not exist in the active customer database."
+    }
+  ],
+  "isError": true
+}
+```
+
+Without the flag, the agent may read an error message as a valid result and keep going down the wrong path.
+
+## Error categories
+
+Not every failure calls for the same response. Classifying errors lets the agent recover appropriately.
+
+**Transient (retry).** Temporary failures that a retry may clear — network timeouts, rate limiting (429), a service that's briefly unavailable (503).
+
+**Validation (fix input).** The supplied input doesn't meet requirements — a malformed email or date, a missing required field, or a value outside the allowed range.
+
+**Business (domain rule).** The operation breaks a policy or rule — "cannot cancel an already-shipped order," "maximum allowed discount is 30%," "user has no active subscription."
+
+**Permission (access denied).** The caller lacks the rights — an expired or invalid token, insufficient role, or a resource outside the user's scope.
+
+## The problem with uniform errors
+
+When every failure returns the same generic shape, the agent is stuck:
+
+```json
+{
+  "content": [{ "type": "text", "text": "Operation failed" }],
+  "isError": true
+}
+```
+
+It cannot tell whether to retry, fix the input, inform the user, or escalate. That ambiguity produces either infinite retry loops or premature abandonment.
+
+## Structured error metadata
+
+Attach metadata so the agent can decide:
+
+```json
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Cannot apply a 50% discount. Maximum allowed is 30% per company policy."
+    }
+  ],
+  "isError": true,
+  "_meta": {
+    "errorCategory": "business",
+    "isRetryable": false,
+    "errorCode": "DISCOUNT_LIMIT_EXCEEDED",
+    "maxAllowed": 30,
+    "requested": 50
+  }
+}
+```
+
+The fields worth including:
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `errorCategory` | string | transient, validation, business, or permission |
+| `isRetryable` | boolean | Does retrying make sense? |
+| `errorCode` | string | Machine-readable code for conditional logic |
+| `description` | string | Human-readable explanation for the user |
+
+### Business rules: retryable false plus explanation
+
+For business-rule failures, always set `isRetryable: false` and include an explanation the agent can pass straight to the user:
+
+```json
+{
+  "isError": true,
+  "_meta": {
+    "errorCategory": "business",
+    "isRetryable": false,
+    "description": "Reservations must be made at least 24 hours in advance."
+  }
+}
+```
+
+Now the agent knows not to retry and already has a clear message to relay.
+
+## Recovery patterns
+
+### Local recovery in subagents
+
+Each subagent should resolve its own transient and validation errors before bubbling anything up:
+
+```
+Search subagent:
+  1. Try search_products(query)
+  2. If timeout -> retry with backoff (up to 3 attempts)
+  3. If validation error -> fix query and retry
+  4. If business/permission error -> propagate to coordinator
+```
+
+Propagate only the errors that can't be fixed locally. Don't escalate a timeout the subagent could have cleared with a retry.
+
+### Access failures versus empty results
+
+These two look similar but demand opposite handling:
+
+```json
+// Access failure — something broke, retry
+{
+  "isError": true,
+  "_meta": { "errorCategory": "transient", "isRetryable": true }
+}
+// Valid empty result — the search ran fine, just no matches
+{
+  "content": [{ "type": "text", "text": "No results found for query 'xyz'" }],
+  "isError": false,
+  "_meta": { "resultCount": 0 }
+}
+```
+
+An `isError: false` response with zero results is **not** an error — it's a valid answer the agent should accept without retrying.
+
+## tool_choice: controlling selection
+
+The `tool_choice` parameter governs how Claude picks tools.
+
+**auto (default).** Claude decides for itself whether to call a tool or reply with text. Right for most conversations where relevance varies.
+
+```json
+{ "tool_choice": { "type": "auto" } }
+```
+
+**any (force some tool).** Claude must call one of the available tools and cannot respond with text alone. Right for pipeline steps where an action is always required.
+
+```json
+{ "tool_choice": { "type": "any" } }
+```
+
+**Forced (specific tool).** Claude must call one named tool. Right for predetermined steps where you already know exactly which tool is needed.
+
+```json
+{ "tool_choice": { "type": "tool", "name": "search_database" } }
+```
+
+## Tool limits per agent
+
+Selection quality falls off as the tool count rises:
+
+| Available tools | Selection quality |
+| --- | --- |
+| 4-5 | Excellent — accurate selection |
+| 8-10 | Good — occasional errors |
+| 15+ | Degraded — frequent misrouting |
+
+### Scoped tool access
+
+Rather than handing eighteen tools to one agent, distribute them by role:
+
+```
+Search agent:   search_products, filter_results, sort_results, get_details
+Purchase agent: create_order, apply_discount, process_payment, send_confirmation
+Support agent:  get_ticket, update_status, search_knowledge_base, escalate
+```
+
+Each agent gets four or five tools from its own domain, plus limited cross-role access for high-frequency needs — for example, everyone can call `get_customer_info`.
+
+### Practical rule
+
+If an agent is holding more than five or six tools, ask whether it should really be two agents.
+
+## Field Notes
+
+- `isError: true` signals a failure the agent must act on; without it, an error can masquerade as a valid result.
+- Classify errors as transient, validation, business, or permission, and attach structured `_meta` so the agent can retry, fix, escalate, or inform.
+- Business-rule errors are non-retryable — set `isRetryable: false` and include a user-facing explanation.
+- Recover transient and validation errors locally in subagents; propagate only what can't be fixed. Treat an empty result set as valid, not an error.
+- Use `tool_choice` to force behavior (`any` for required actions, forced for known tools), and keep each agent scoped to 4-5 role-relevant tools to preserve selection accuracy.

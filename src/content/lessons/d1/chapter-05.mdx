@@ -1,0 +1,196 @@
+---
+title: "Sessions, Resumption, and Forking"
+domain: 1
+chapter: 5
+section: "1.5"
+summary: "Resuming named sessions, forking for divergent exploration, and choosing fixed prompt chaining vs. dynamic decomposition for complex work."
+---
+
+Smart session management lets you continue prior work, explore alternatives, and split large tasks into manageable passes.
+
+## Resuming named sessions
+
+Each Claude Code session can carry a name. To resume it later:
+
+```bash
+# Start a named session
+claude --session "auth-refactor"
+# Resume it later
+claude --resume "auth-refactor"
+```
+
+On resume, Claude recovers the session history and picks up where it left off. The prior context — messages, tool results, files read — is available again.
+
+For unnamed sessions:
+
+```bash
+# List recent sessions
+claude --resume
+# Resume the most recent one
+claude --continue
+```
+
+## When to resume vs. start fresh
+
+| Situation | Action |
+| --- | --- |
+| Prior context is mostly still valid | Resume |
+| Many files have changed since the last session | Start fresh with a summary |
+| Task is a direct continuation of the previous one | Resume |
+| The context window was nearly full | Start fresh |
+| You want a completely different approach | Start fresh |
+
+## Inform the agent about changes when resuming
+
+If relevant files changed between sessions, tell Claude at the start:
+
+```
+> Since the last session:
+> - src/auth/token.ts was updated (new field refresh_token)
+> - src/utils/deprecated.ts was deleted
+> - tests were added in tests/auth/token.test.ts
+> Continue refactoring the authentication module.
+```
+
+Without this, Claude might reason about a file state that no longer exists. Starting a new session with a structured summary is more reliable than resuming with stale tool results.
+
+## fork_session for divergent exploration
+
+`fork_session` creates an exploration branch from the current state. The fork shares the baseline (filesystem, history up to the fork point) but then operates independently.
+
+```
+Main session ------------------->
+   |
+   |-- fork_session("approach-sql-raw") -->
+   |
+   |-- fork_session("approach-orm") ----->
+```
+
+Use cases:
+
+- **Design exploration** — try 2–3 approaches before committing to one.
+
+```bash
+# From the main session
+fork_session("caching-redis")
+# -> explore a Redis-based implementation
+fork_session("caching-memcached")
+# -> explore a Memcached-based implementation
+```
+
+- **Risky changes** — try a refactor without affecting stable work.
+- **Quick proofs of concept** — validate an idea before investing in the full implementation.
+
+### Fork vs. parallel spawning
+
+| Aspect | fork_session | Parallel spawning (Task) |
+| --- | --- | --- |
+| State | Inherits the full filesystem | Isolated context |
+| Purpose | Explore alternatives | Split up work |
+| Output | One winning approach | Multiple combined outputs |
+| History | Inherits up to the fork point | Clean |
+
+## Task decomposition: fixed vs. dynamic
+
+### Fixed prompt chaining
+
+A predefined sequence of steps where each feeds the next:
+
+```
+Step 1: Extract schema ->
+Step 2: Generate TypeScript types ->
+Step 3: Create Zod validators ->
+Step 4: Generate tests
+```
+
+Each step is a different prompt. The output of step N is the input of step N+1, and the flow is always the same.
+
+- **Pros:** predictable, easy to debug, each step is testable.
+- **Cons:** doesn't adapt to unexpected cases, wastes steps when the task is simple.
+
+### Adaptive dynamic decomposition
+
+The coordinator analyzes the task and decides at runtime which subtasks to create:
+
+```
+Coordinator analyzes: "Migrate the payments module to a new provider"
+   |
+   |-- High complexity detected
+   |    Subtask: Map the new provider's API
+   |    Subtask: Adapt existing interfaces
+   |    Subtask: Migrate tests
+   |    Subtask: Update documentation
+   |
+   vs.
+   |
+   |-- Low complexity detected
+        Single subtask: Update endpoint and credentials
+```
+
+- **Pros:** adapts to actual complexity, doesn't waste resources.
+- **Cons:** the coordinator must have good judgment to decompose correctly.
+
+### When to use each
+
+| Situation | Approach |
+| --- | --- |
+| Well-defined pipeline that doesn't change | Fixed prompt chaining |
+| Tasks with variable complexity | Dynamic decomposition |
+| Regulatory processes with mandatory steps | Fixed prompt chaining |
+| Open-ended user requests | Dynamic decomposition |
+
+## Splitting large code reviews
+
+Large code reviews benefit from a two-pass approach.
+
+**Pass 1: per-file review.** Each file is reviewed individually by a subagent, focusing on internal quality — style, bugs, security, performance:
+
+```
+Subagent A: Reviews src/auth/login.ts    -> 2 issues (input validation, error handling)
+Subagent B: Reviews src/auth/token.ts    -> 1 issue (token expiration check)
+Subagent C: Reviews src/auth/middleware.ts -> 0 issues
+```
+
+**Pass 2: integration review (cross-file).** A subagent or the coordinator reviews interactions across files:
+
+```
+Integration review:
+  - Do login.ts and token.ts use the same token format?
+  - Does middleware.ts handle every error login.ts can throw?
+  - Are shared interfaces consistent?
+  - Are imports correct and free of circular dependencies?
+```
+
+### Why two passes
+
+A single pass reviewing everything at once can:
+
+- exhaust the context window with large files,
+- lose per-file detail by focusing on integration, or
+- lose cross-file issues by focusing on detail.
+
+Two passes ensure full coverage: per-file depth plus cross-file breadth.
+
+The coordinator aggregates findings from both passes:
+
+```typescript
+interface CodeReviewResult {
+  per_file_issues: FileIssue[];        // From pass 1
+  integration_issues: IntegrationIssue[]; // From pass 2
+  summary: string;
+  severity_breakdown: {
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+  };
+}
+```
+
+## Field Notes
+
+- Resume named sessions with `--resume <name>` when prior context is still valid; start fresh with a summary when it's stale.
+- Always tell a resumed session about file changes so it doesn't reason about a nonexistent state.
+- Use `fork_session` to branch from a shared baseline and explore divergent approaches independently.
+- Choose fixed prompt chaining for predictable, mandatory-step pipelines; use dynamic decomposition for variable, open-ended work.
+- Split large code reviews into a per-file pass plus a cross-file integration pass to get both depth and breadth.

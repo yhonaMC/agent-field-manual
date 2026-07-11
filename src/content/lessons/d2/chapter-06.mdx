@@ -1,0 +1,146 @@
+---
+title: "Effective Tool Design and Descriptions"
+domain: 2
+chapter: 6
+section: "2.1"
+summary: "Why the tool description drives Claude's selection, how to eliminate ambiguous overlap between tools, and when to split a generic tool into specific ones."
+---
+
+When Claude can reach several tools, the field it leans on to pick the right one is the `description` — not the name, not the schema. A weak description is the most common reason a model reaches for the wrong tool.
+
+## The description is the selection mechanism
+
+Consider a tool defined this way:
+
+```json
+{
+  "name": "analyze_content",
+  "description": "Analyzes content"
+}
+```
+
+That single vague line gives Claude almost nothing to work with. If a sibling tool `analyze_document` carries the equally thin description "Analyzes a document," the model has no basis to tell them apart, and it will misroute again and again.
+
+## What belongs in a strong description
+
+An effective description answers five questions:
+
+1. **What the tool actually does** — a concrete purpose, not a generic verb.
+2. **Input formats** — the kinds of data the tool accepts.
+3. **Example queries** — the situations that should trigger it.
+4. **Edge cases** — what the tool is *not* meant to handle.
+5. **Boundaries** — where its responsibility stops.
+
+A description that hits all five reads more like this:
+
+```json
+{
+  "name": "analyze_sentiment",
+  "description": "Analyzes the emotional sentiment of customer feedback text. Input: a raw text string from a review or support message. Returns a sentiment label and score. Do not use for topic classification or document parsing."
+}
+```
+
+## Ambiguous overlap between tools
+
+When two tools share names or descriptions, Claude cannot reliably decide between them. A few common collisions:
+
+| Tool A | Tool B | The confusion |
+| --- | --- | --- |
+| `analyze_content` | `analyze_document` | Plain text vs. PDF — which is which? |
+| `search_records` | `find_entries` | Synonyms with no real distinction |
+| `process_data` | `transform_data` | Generic verbs, identical semantics |
+
+### Diagnosing misrouting
+
+When you catch Claude calling the wrong tool, work through three checks:
+
+1. Read the descriptions — do they share words that blur the line between them?
+2. Compare the input schemas — do both accept the same types?
+3. Inspect the system prompt — is it creating an unintended association?
+
+## System prompts create hidden associations
+
+The wording of a system prompt can quietly bias selection. A line like "When the user asks to analyze something, use the available tools" teaches Claude to bind the word *analyze* to any tool with "analyze" in its name, regardless of the user's real intent.
+
+The fix is to be explicit about *when* each tool applies:
+
+> "For sentiment analysis of feedback, use `analyze_sentiment`. For classifying documents by category, use `classify_document`."
+
+## Strategies to remove overlap
+
+**Rename tools with specific verbs.** Replace vague names with ones that describe the action precisely:
+
+- `analyze_content` becomes `extract_sentiment`
+- `analyze_document` becomes `classify_document_type`
+- `process_data` becomes `normalize_csv_records`
+
+**Update the description whenever you rename.** A new name alone fixes nothing — the name is the secondary signal and the description is the primary one. Change both together.
+
+**Split generic tools into specific ones.** A single tool that "does everything" is worse than a handful of focused tools with clear contracts. Instead of one catch-all:
+
+```json
+{
+  "name": "data_tool",
+  "description": "Handles all data operations",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "action": { "enum": ["search", "create", "update", "delete"] },
+      "data": { "type": "object" }
+    }
+  }
+}
+```
+
+give each operation its own tool with a defined input/output contract:
+
+```json
+[
+  {
+    "name": "search_customers",
+    "description": "Search customer records by name, email, or ID. Input: a search query string or partial match.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": { "type": "string" },
+        "limit": { "type": "number", "default": 10 }
+      },
+      "required": ["query"]
+    }
+  },
+  {
+    "name": "create_customer",
+    "description": "Creates a new customer record. Requires name and email. Returns the created customer.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" }
+      },
+      "required": ["name", "email"]
+    }
+  }
+]
+```
+
+## Defined I/O contracts
+
+Every tool should declare:
+
+- **Input contract** — exact types, which fields are required versus optional, and validation rules.
+- **Output contract** — the shape of a success response and the shape of an error.
+- **Boundary** — accepted ranges, maximum sizes, and formats.
+
+A tool like `resize_image` might state that it takes an image URL or base64 string up to 10 MB and returns the resized image, making its limits unambiguous.
+
+## The golden rule
+
+If you cannot explain in one sentence when to reach for tool A versus tool B, neither your users nor Claude will manage it either. The practical test: describe to a colleague when each tool applies. If it takes more than ten seconds to draw the line, the design needs rework.
+
+## Field Notes
+
+- The `description` is the primary selection signal — invest in it before touching names or schemas.
+- A good description covers purpose, inputs, example triggers, edge cases, and boundaries.
+- Overlapping names and descriptions cause chronic misrouting; rename with specific verbs and update the descriptions.
+- Prefer several focused tools with explicit I/O contracts over one generic do-everything tool.
+- If you can't state in one sentence when to use tool A versus tool B, redesign.

@@ -1,0 +1,50 @@
+---
+import { getCollection } from "astro:content";
+import ManualLayout from "../layouts/ManualLayout.astro";
+
+const domains = (await getCollection("domains")).sort((a, b) => a.data.domain - b.data.domain);
+const lessons = (await getCollection("lessons")).sort((a, b) => a.data.chapter - b.data.chapter);
+const scenarios = (await getCollection("scenarios")).sort((a, b) => a.data.order - b.data.order);
+---
+<ManualLayout title="Cover" description="A field manual for the Claude certification: 18 lessons, practice drills per domain, scenario deep-dives, and a full 60-question exam simulator.">
+  <section class="prose">
+    <span class="section-no">DOC. AFM-CCAF-2026 · REV A</span>
+    <h1 style="font-size:3rem">The Agent Field Manual</h1>
+    <p style="font-size:1.15rem">
+      Operating instructions for Claude agents. Study the manual, run the drills,
+      pass the certification. Free, no account, your progress stays in your browser.
+    </p>
+    <p>
+      <a class="btn" href="/manual/1" style="text-decoration:none">Open § 1.0</a>
+      <a class="btn ghost" href="/exam" style="text-decoration:none">Exam simulator</a>
+    </p>
+  </section>
+
+  <section id="contents" style="margin-top:4rem">
+    <h2><span class="section-no">INDEX</span>Table of Contents</h2>
+    {domains.map((d) => (
+      <div class="rule-row">
+        <a href={`/manual/${d.data.domain}`} style="font-weight:600; text-decoration:none">
+          <span class="mono" style="color:var(--accent)">§ {d.data.domain}.0</span> {d.data.title}
+        </a>
+        <ul style="list-style:none; padding-left:2.2rem; margin:.4rem 0 0">
+          {lessons.filter((l) => l.data.domain === d.data.domain).map((l) => (
+            <li>
+              <a href={`/manual/${l.data.domain}/${l.id.split("/")[1]}`}>
+                <span class="mono">§ {l.data.section}</span> {l.data.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+    <div class="rule-row">
+      <span class="mono" style="color:var(--accent)">§ 6.0</span> <strong>Scenario deep-dives</strong>
+      <ul style="list-style:none; padding-left:2.2rem; margin:.4rem 0 0">
+        {scenarios.map((s) => (
+          <li><a href={`/scenarios/${s.data.order}`}><span class="mono">§ 6.{s.data.order}</span> {s.data.title}</a></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</ManualLayout>

@@ -1,0 +1,222 @@
+---
+title: "Multi-step Workflows, Hooks, and Handoffs"
+domain: 1
+chapter: 4
+section: "1.4"
+summary: "Programmatic enforcement vs. prompt guidance, PostToolUse and PreToolUse hooks, prerequisite gates, and structured handoff summaries."
+---
+
+Real workflows need more than task delegation. They require rule enforcement, data normalization, prerequisites, and structured transfers between agents or to humans.
+
+## Programmatic enforcement vs. prompt guidance
+
+There are two ways to control an agent's behavior.
+
+**Prompt guidance** is an instruction in the system prompt or task that Claude *should* follow:
+
+```
+System prompt: "Never process a refund over $500 without approval."
+```
+
+Claude will follow this most of the time — but there is no deterministic guarantee. In high-stakes scenarios, guidance is not enough.
+
+**Programmatic enforcement** is code that *prevents* an action unless conditions are met:
+
+```typescript
+function processRefund(amount: number, approved: boolean) {
+  if (amount > 500 && !approved) {
+    throw new Error("Refunds > $500 require manager approval");
+  }
+  // process...
+}
+```
+
+### When to use each
+
+| Scenario | Mechanism |
+| --- | --- |
+| Preferred response format | Guidance (prompt) |
+| Communication tone and style | Guidance (prompt) |
+| Identity verification before financial operations | Enforcement (code) |
+| Refund limits | Enforcement (code) |
+| Blocking destructive actions | Enforcement (code) |
+| Suggested step order | Guidance (prompt) |
+
+The rule: if non-compliance causes material harm (money, data, safety), use programmatic enforcement. If it's a preference, use guidance.
+
+## PostToolUse hooks
+
+`PostToolUse` hooks intercept a tool's result *after* execution and *before* Claude processes it. They are ideal for normalizing data.
+
+**Timestamp normalization.** An external tool might return timestamps in inconsistent formats — a Unix epoch, an ISO 8601 string, or plain text. A `PostToolUse` hook rewrites them all to one format:
+
+```typescript
+const postToolHook = {
+  event: "PostToolUse",
+  matcher: { toolNames: ["get_order", "get_payment", "get_shipment"] },
+  handler: async (result) => {
+    // Normalize all date fields to ISO 8601
+    return normalizeTimestamps(result);
+  },
+};
+```
+
+Claude always receives ISO 8601 regardless of the source.
+
+**Status code normalization.** Different APIs use different conventions, so a hook can map them onto one vocabulary:
+
+```typescript
+const statusMap = {
+  "ACTIVE": "active", "Active": "active", "1": "active",
+  "INACTIVE": "inactive", "Inactive": "inactive", "0": "inactive",
+  "PENDING": "pending", "In Progress": "pending",
+};
+```
+
+## PreToolUse hooks: blocking actions
+
+Hooks can intercept a tool call *before* it runs (`PreToolUse`) to block actions that violate policy.
+
+**Escalation by amount:**
+
+```typescript
+const refundGuard = {
+  event: "PreToolUse",
+  matcher: { toolNames: ["process_refund"] },
+  handler: async (toolCall) => {
+    if (toolCall.input.amount > 500) {
+      return {
+        blocked: true,
+        message: "Refund > $500 requires escalation to manager",
+        action: "escalate",
+        metadata: {
+          customer_id: toolCall.input.customer_id,
+          amount: toolCall.input.amount,
+          reason: toolCall.input.reason,
+        },
+      };
+    }
+    return { blocked: false };
+  },
+};
+```
+
+**Blocking operations without prerequisites:**
+
+```typescript
+const requireCustomerFirst = {
+  event: "PreToolUse",
+  matcher: { toolNames: ["process_refund", "update_subscription"] },
+  handler: async (toolCall, context) => {
+    if (!context.toolHistory.includes("get_customer")) {
+      return {
+        blocked: true,
+        message: "Must call get_customer before financial operations",
+      };
+    }
+    return { blocked: false };
+  },
+};
+```
+
+## Programmatic prerequisite gates
+
+A prerequisite gate blocks tool execution until prior conditions are satisfied:
+
+```
+get_customer   --prereq--> process_refund
+get_customer   --prereq--> update_subscription
+verify_identity --prereq--> transfer_funds
+```
+
+Implementation:
+
+```typescript
+const prerequisites: Record<string, string[]> = {
+  "process_refund": ["get_customer"],
+  "update_subscription": ["get_customer"],
+  "transfer_funds": ["verify_identity", "get_account"],
+};
+
+function checkPrerequisites(toolName: string, history: string[]): boolean {
+  const required = prerequisites[toolName] || [];
+  return required.every((req) => history.includes(req));
+}
+```
+
+This is programmatic enforcement: no matter what the prompt says, `process_refund` cannot run without a prior `get_customer`.
+
+Why gates beat guidance:
+
+| Aspect | Guidance (prompt) | Prerequisite gate |
+| --- | --- | --- |
+| Guarantee | Best-effort | Deterministic |
+| Bypass | Claude could skip steps | Impossible |
+| Auditing | Hard to verify | Easy to log |
+| Maintenance | Update prompts | Versioned code |
+
+## Structured handoff summaries
+
+When an agent transfers a conversation to another agent or to a human, the handoff summary must be structured to avoid information loss:
+
+```typescript
+interface HandoffSummary {
+  customer_id: string;
+  root_cause: string;
+  actions_taken: string[];
+  refund_amount: number;
+  recommended_action: string;
+  conversation_sentiment: "positive" | "neutral" | "frustrated";
+  unresolved_issues: string[];
+}
+```
+
+A concrete example:
+
+```json
+{
+  "customer_id": "CUST-12345",
+  "root_cause": "Defective product received (model XYZ-100)",
+  "actions_taken": [
+    "Verified customer identity",
+    "Confirmed order #ORD-98765",
+    "Reviewed photos of damaged product"
+  ],
+  "refund_amount": 750,
+  "recommended_action": "Manager approval for refund > $500",
+  "conversation_sentiment": "frustrated",
+  "unresolved_issues": [
+    "Customer also requests free shipping on next order"
+  ]
+}
+```
+
+Why structured:
+
+- The next agent or human doesn't need to read the entire conversation.
+- Required fields ensure no critical information is omitted.
+- It's easy to parse programmatically for automatic routing.
+- Every handoff is auditable with concrete data.
+
+## A complete workflow: customer support
+
+Combining all the concepts:
+
+1. Customer contacts the support agent.
+2. Agent calls `get_customer` (prerequisite satisfied).
+3. Agent diagnoses — root cause identified.
+4. Agent attempts `process_refund($750)`.
+5. The `PreToolUse` hook blocks it: amount > $500.
+6. Agent generates a structured handoff summary.
+7. Escalation to manager with full metadata.
+8. Manager approves — the refund is processed.
+
+Each step has programmatic enforcement where it matters and guidance where it's only a preference.
+
+## Field Notes
+
+- Use programmatic enforcement (hooks, gates) when non-compliance causes material harm; use prompt guidance for preferences.
+- `PostToolUse` hooks normalize heterogeneous data (timestamps, status codes) before the model sees it.
+- `PreToolUse` hooks block policy-violating actions and enforce prerequisites deterministically.
+- Prerequisite gates guarantee ordering that a prompt cannot — and they are auditable and versioned.
+- Structured handoff summaries with required fields prevent information loss during escalation.

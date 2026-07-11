@@ -1,0 +1,108 @@
+---
+title: "Reliability, Escalation, and Human-in-the-Loop"
+domain: 5
+chapter: 18
+section: "5.2"
+summary: "Matching each error type to the right recovery strategy, escalating to humans with structured summaries, calibrating confidence-based routing, and monitoring production agents."
+---
+
+Production agents fail in different ways, and each failure mode calls for a different response. This lesson pairs the three main error types with their strategies, then covers when and how to bring a human into the loop, how to route work by confidence, and what to monitor once the system is live.
+
+## Error handling patterns
+
+The core idea is that error type dictates strategy — retrying a bad-data error is as wrong as failing fast on a transient network blip.
+
+### Transient errors — retry
+
+Temporary network errors, rate limits, and timeouts are worth retrying. Use exponential backoff, cap the attempts at roughly 3–5, keep the request unchanged between retries, and log every attempt so failures are debuggable.
+
+### Validation errors — fail fast
+
+Bad data, schema violations, and invalid inputs will not fix themselves. Do not retry — the same input yields the same error. Return a descriptive error right away, state which field failed and why, and let the caller correct it and resubmit.
+
+### Business logic errors — escalate
+
+Some situations need human judgment: a case outside the defined rules, a conflict between policies, or a high-impact decision such as a refund above a threshold or access to sensitive data. Escalate these with a structured summary rather than a raw transcript.
+
+## Human-in-the-loop workflows
+
+Several distinct triggers should route work to a human:
+
+| Trigger | Example | Action |
+| --- | --- | --- |
+| Policy violation | Request that contradicts terms of service | Escalate with context |
+| Ambiguity | Instructions readable in two or more ways | Ask for clarification |
+| High value | Transaction above a large dollar threshold | Require approval |
+| Low confidence | Model reports confidence below threshold | Route to a human |
+| Exception | Case not covered by existing rules | Escalate for a decision |
+
+### Escalate with a structured summary
+
+An effective escalation is a compact, structured object — the reason for escalating, the relevant customer context, what the agent already attempted, its recommended action, and a confidence level:
+
+```json
+{
+  "escalation_reason": "Refund amount exceeds the approval threshold",
+  "customer_context": "Premium tier, 3-year tenure, no prior refunds",
+  "attempted_resolution": "Offered a partial refund, which was declined",
+  "recommended_action": "Approve the full refund given customer value",
+  "confidence": "medium"
+}
+```
+
+Handing over the raw transcript instead is ineffective: the human has to read the whole conversation, the relevant detail is buried in irrelevant context, and it wastes the reviewer's time. For the exam: escalation must always carry a structured summary — reason, context, what was attempted, and a recommendation — not the raw transcript.
+
+## Self-evaluation and confidence routing
+
+Claude can report a confidence level, which is useful for routing work:
+
+- High confidence — process automatically.
+- Medium confidence — queue for non-urgent human review.
+- Low confidence — escalate immediately.
+
+That threshold has to be calibrated empirically rather than guessed. Collect a batch of cases with reported confidence, compare them against ground truth verified by a human, adjust the thresholds until routing behaves well, and monitor for drift so you can recalibrate periodically.
+
+Self-evaluation has real limits. Claude tends to over-report confidence, its confidence is not a calibrated probability, and it works better as a routing signal than as an absolute metric. For higher reliability, pair it with programmatic validation.
+
+## Monitoring and observability
+
+Watch operational metrics — latency per pipeline step, error rate broken down by type (transient, validation, business), token usage per request, and the human escalation rate. Track quality metrics too: resolution rate without escalation, user satisfaction where it applies, the reopen rate on tickets the agent resolved, and extraction accuracy via periodic sampling.
+
+Set alerts on the meaningful shifts: a spike in error rate may signal an infrastructure problem or a change in inputs; a spike in escalation rate may indicate drift in model behavior; a jump in token usage may point to an infinite loop or context bloat; and a drop in resolution rate may mean quality is degrading.
+
+Each agent step should log the input received (sanitized, no PII), the tool calls made, the output produced, tokens consumed, duration, and any errors encountered.
+
+## Fallback strategies
+
+When an external tool is unavailable, degrade gracefully rather than crashing. Retry in case the outage is transient, switch to a fallback tool if one exists, produce a partial response for what can be done without the tool, tell the user what could not be completed and why, and queue the task for when the tool returns.
+
+If an intermediate step in a multi-step pipeline fails, do not push forward with incomplete data — garbage in, garbage out. Return a clearly marked partial result, indicate which steps completed and which did not, and allow the failed step to be retried without reprocessing everything.
+
+For tools that fail repeatedly, use a circuit breaker: after N consecutive failures, stop calling the tool (open the circuit); periodically test whether it has recovered (half-open); once it works again, resume normal use (close the circuit). This prevents cascading timeouts from dragging down the whole system.
+
+## Combined reliability patterns
+
+A robust production pipeline gives each stage its own error-handling strategy:
+
+```
+flowchart LR
+    A[Request] --> B[Validation]
+    B --> C[Processing]
+    C --> D[Verification]
+    D --> E[Response]
+    A -- error --> A1[Reject]
+    B -- error --> B1[Fail-fast]
+    C -- error --> C1[Retry 3x]
+    C1 -- fails --> C2[Fallback/Partial]
+    D -- error --> D1[Escalate]
+```
+
+Reading the stages: validation fails fast with no retry; processing retries with backoff for transient errors; verification escalates when semantic validation fails; and response falls back to a partial result if something breaks.
+
+## Field Notes
+
+- Match the strategy to the error: retry transient failures, fail fast on validation errors, escalate business-logic cases.
+- Always escalate with a structured summary (reason, context, attempt, recommendation) — never a raw transcript.
+- Treat model confidence as a routing signal, not an absolute metric; calibrate thresholds empirically and pair with programmatic checks.
+- Monitor latency, error rate by type, escalation rate, and token usage, and alert on meaningful spikes or drops.
+- Degrade gracefully: a marked partial response beats a total crash, and a circuit breaker stops repeated tool failures from cascading.

@@ -1,0 +1,617 @@
+[
+  {
+    "id": "d1-p1-q01",
+    "domain": 1,
+    "sources": ["practice-1", "final-pool"],
+    "stem": "An agent audits a large codebase for security flaws. The scope is initially vague, and early findings frequently surface new areas worth investigating. The current build follows a fixed chain (scan, analyze, report), so newly discovered issues never feed back into the process. Which approach best resolves this?",
+    "options": [
+      "Supply examples showing how to spot extra vulnerabilities inside the existing fixed workflow",
+      "Let the agent create follow-up tasks on the fly from intermediate results as it runs",
+      "Append additional stages to the fixed pipeline to broaden coverage of known flaw categories",
+      "Execute the same pipeline several times using different scanning configurations each pass"
+    ],
+    "correctIndex": 1,
+    "explanation": "Open-ended work benefits from adaptive decomposition, where fresh discoveries shape the next actions rather than being locked out by a rigid sequence.",
+    "tags": ["task-decomposition", "agent-loops"]
+  },
+  {
+    "id": "d1-p1-q02",
+    "domain": 1,
+    "sources": ["practice-1"],
+    "stem": "After running your system on \"economic impact of renewable energy adoption,\" every subagent succeeds individually, yet the final output covers only solar and omits wind, hydro, and geothermal. The coordinator's logs show it split the task into \"solar job creation,\" \"solar infrastructure investment,\" and \"solar market growth.\" What is the most likely root cause?",
+    "options": [
+      "The data collection agent is not pulling from diverse enough sources and needs broader query strategies",
+      "The analysis agent discards non-solar findings because its relevance filter is too strict",
+      "The synthesis agent has no instructions to flag missing coverage across energy sectors",
+      "The coordinator's decomposition is too narrow, so the broader topic is only partially covered"
+    ],
+    "correctIndex": 3,
+    "explanation": "The coordinator defines the scope of the whole system by choosing which subtasks run. Here it wrongly constrained the topic to solar only.",
+    "tags": ["task-decomposition", "multi-agent"]
+  },
+  {
+    "id": "d1-p1-q03",
+    "domain": 1,
+    "sources": ["practice-1"],
+    "stem": "Your coordinator breaks broad research queries into many tiny subtasks. In evaluation you see higher latency, duplicated findings across subagents, and fragmented synthesis; but cutting the subtask count makes coverage patchy. Which adjustment best handles this tradeoff?",
+    "options": [
+      "Give stricter instructions so subagents avoid doing overlapping work",
+      "Add more subagents so each one handles a smaller slice of the load",
+      "Bundle related subtasks into fewer, well-scoped assignments that keep coverage without heavy fragmentation",
+      "Leave the decomposition as is but add deduplication logic in the synthesis stage"
+    ],
+    "correctIndex": 2,
+    "explanation": "Good decomposition balances coverage and efficiency by giving each subtask a distinct but meaningful scope. Over-splitting causes duplication and fragmentation, while under-splitting misses key areas.",
+    "tags": ["task-decomposition", "multi-agent"]
+  },
+  {
+    "id": "d1-p1-q04",
+    "domain": 1,
+    "sources": ["practice-1"],
+    "stem": "You build a multi-agent research system with a coordinator plus three subagents (search, analysis, synthesis). In testing, subagents sometimes call each other directly (for example analysis calling search), producing inconsistent results and failures that are hard to debug. What is the most effective fix?",
+    "options": [
+      "Route all communication between subagents through the coordinator agent",
+      "Permit subagents to call one another but log every interaction for debugging",
+      "Add prompt instructions discouraging subagents from invoking other subagents",
+      "Restrict each subagent to a smaller tool set to cut down on cross-agent calls"
+    ],
+    "correctIndex": 0,
+    "explanation": "In a hub-and-spoke design the coordinator owns all communication and routing, which keeps control flow consistent and observable.",
+    "tags": ["multi-agent", "orchestration"]
+  },
+  {
+    "id": "d1-p1-q05",
+    "domain": 1,
+    "sources": ["practice-1"],
+    "stem": "You review an agentic loop for a support agent. In production it behaves inconsistently, sometimes running past task completion and sometimes stopping too early. Loop completion is currently decided by checking whether the assistant's reply contains phrases like \"done\" or \"no further action needed.\" What is the most effective fix?",
+    "options": [
+      "Grow the list of completion phrases to better capture when the model has finished",
+      "Add few-shot examples showing the model how to signal completion clearly",
+      "Add a timeout that halts the loop after a fixed amount of time",
+      "Rely on the stop_reason field to decide whether to keep looping or terminate"
+    ],
+    "correctIndex": 3,
+    "explanation": "The stop_reason field is a structured, reliable signal of whether the model intends to call a tool or has finished, unlike brittle text matching.",
+    "tags": ["agent-loops", "stop-reason"]
+  },
+  {
+    "id": "d1-p1-q06",
+    "domain": 1,
+    "sources": ["practice-1"],
+    "stem": "A coordinator delegates to search, analysis, and synthesis subagents. The synthesis agent produces incomplete reports, missing key findings that earlier agents already retrieved. Investigation shows the coordinator invokes subagents correctly but passes only minimal instructions without including prior results. Which change most directly resolves this?",
+    "options": [
+      "Include the full outputs of prior subagents directly in the prompt when invoking the next subagent",
+      "Add instructions telling subagents to request missing information from other agents when needed",
+      "Rely on the model to recall prior steps automatically across subagent invocations",
+      "Increase the synthesis agent's maximum output length so its reports can cover more findings"
+    ],
+    "correctIndex": 0,
+    "explanation": "Subagents only see what is passed into their invocation. Forwarding the complete outputs of earlier agents gives the synthesis step all the information it needs; it cannot recall or request context it was never given.",
+    "tags": ["context-management", "multi-agent"]
+  },
+  {
+    "id": "d1-p1-q07",
+    "domain": 1,
+    "sources": ["practice-1"],
+    "stem": "Your coordinator delegates tasks to subagents, but results vary across queries: sometimes subagents follow rigid steps and fail to adapt when new information appears mid-execution. The coordinator prompt gives detailed step-by-step instructions for how subagents should do their work. What is the most effective improvement?",
+    "options": [
+      "Add even more procedural detail so subagents follow a consistent execution pattern",
+      "Give subagents fewer tools so they concentrate on the required steps",
+      "Provide examples showing how subagents should handle edge cases during execution",
+      "Rewrite the coordinator prompt to specify goals and quality criteria instead of step-by-step instructions"
+    ],
+    "correctIndex": 3,
+    "explanation": "Subagents perform best when given objectives and constraints rather than rigid procedures, which lets them adapt their approach to the context.",
+    "tags": ["prompt-design", "multi-agent"]
+  },
+  {
+    "id": "d1-p1-q08",
+    "domain": 1,
+    "sources": ["practice-1", "final-pool"],
+    "stem": "Your agent investigates billing issues and escalates cases it cannot resolve. Sometimes it escalates the moment it detects a possible issue even though more tools could have resolved it; other times it tries several uncertain actions before escalating, delaying resolution. What change would best improve escalation behavior?",
+    "options": [
+      "Escalate right away whenever the agent hits any ambiguity in the workflow",
+      "Require the agent to try every available tool before escalating any issue",
+      "Define clear escalation criteria distinguishing resolvable cases from those needing human intervention",
+      "Let the agent decide escalation timing purely from its own internal confidence"
+    ],
+    "correctIndex": 2,
+    "explanation": "Correct escalation timing depends on well-defined boundaries between agent-resolvable tasks and those needing a human, so the agent neither escalates too soon nor delays unnecessarily.",
+    "tags": ["escalation", "agent-design"]
+  },
+  {
+    "id": "d1-p1-q09",
+    "domain": 1,
+    "sources": ["practice-1"],
+    "stem": "Your agent processes refund requests via an agentic loop. Sometimes the model starts a tool sequence but only part of the required workflow completes (for instance, customer verification succeeds but order lookup is skipped), and the loop then terminates with stop_reason \"end_turn\" even though required steps remain. You confirm the loop correctly checks stop_reason and exits on \"end_turn.\" Which change most effectively addresses this?",
+    "options": [
+      "Add prompt instructions requiring the model to always finish all required steps before ending the turn",
+      "Enforce required workflow steps through prerequisites rather than relying solely on the model's choice to continue",
+      "Raise the maximum loop iteration count to give more chances for completion",
+      "Override the loop to keep running whenever expected tool calls were not observed in the prior iteration"
+    ],
+    "correctIndex": 1,
+    "explanation": "Even with correct loop control, the model may still signal completion prematurely. Critical workflow steps must be enforced at the system level to guarantee they execute.",
+    "tags": ["agent-loops", "workflow-enforcement"]
+  },
+  {
+    "id": "d1-p1-q10",
+    "domain": 1,
+    "sources": ["practice-1"],
+    "stem": "Your agent handles subscription cancellations and refunds. In production it sometimes calls issue_refund before confirming eligibility via check_subscription_status, so refunds get issued for inactive or expired accounts. What is the most effective way to guarantee correct workflow ordering?",
+    "options": [
+      "Update the system prompt to clearly state that subscription status must be verified before issuing refunds",
+      "Introduce a delay between tool calls so the agent evaluates eligibility before proceeding",
+      "Add a prerequisite check that blocks issue_refund until check_subscription_status confirms eligibility",
+      "Add few-shot examples showing the correct sequence of checking status before issuing refunds"
+    ],
+    "correctIndex": 2,
+    "explanation": "Programmatic enforcement guarantees critical steps always run before downstream actions, providing deterministic ordering rather than best-effort prompting.",
+    "tags": ["workflow-enforcement", "tool-use"]
+  },
+  {
+    "id": "d1-p1-q11",
+    "domain": 1,
+    "sources": ["practice-1", "final-pool"],
+    "stem": "Your agent retrieves customer data and then decides the next action from the result. In testing it sometimes makes wrong follow-up decisions even though the right tool was called and returned valid data. Investigation shows only a summarized version of the tool output is passed into the next iteration, dropping fields needed for the decision. What is the most effective improvement?",
+    "options": [
+      "Pass the complete tool results into the conversation context for the next iteration instead of partial summaries",
+      "Add few-shot examples showing how to interpret tool results correctly",
+      "Use a predefined decision tree to choose the next step instead of relying on the model",
+      "Add prompt instructions telling the model to reason carefully based on tool outputs"
+    ],
+    "correctIndex": 0,
+    "explanation": "The model depends on the full context of prior tool outputs to decide accurately. Dropping key fields leads to faulty reasoning.",
+    "tags": ["context-management", "agent-loops"]
+  },
+  {
+    "id": "d1-p1-q12",
+    "domain": 1,
+    "sources": ["practice-1", "practice-3"],
+    "stem": "You are designing an agent to review a large pull request and surface potential issues. The workflow needs consistent per-file analysis but also the ability to investigate unexpected patterns that emerge during review. Your current fully dynamic design gives inconsistent results, skipping some files with coverage that varies between runs. What is the most appropriate improvement?",
+    "options": [
+      "Let the agent freely choose which files to analyze based on perceived importance",
+      "Use a structured sequence for per-file analysis, then allow adaptive exploration for cross-file or unexpected findings",
+      "Run a separate dynamic analysis for each file and merge the results at the end",
+      "Convert the workflow into a fully fixed pipeline so every file is processed identically"
+    ],
+    "correctIndex": 1,
+    "explanation": "Combining prompt chaining for predictable tasks with dynamic decomposition for exploratory work balances consistency and flexibility.",
+    "tags": ["task-decomposition", "workflow-design"]
+  },
+  {
+    "id": "d1-p1-q13",
+    "domain": 1,
+    "sources": ["practice-1", "practice-3", "final-pool"],
+    "stem": "You use Claude Code to analyze a large codebase. After an initial session, your team modifies several files. You resume the previous session with --resume, but the agent gives outdated recommendations based on old file states. What is the most effective way to handle this?",
+    "options": [
+      "Use fork_session to branch from the previous session and continue analysis from there",
+      "Re-run the same prompts in the resumed session without changing the context",
+      "Keep using the resumed session and rely on the agent to detect changes automatically",
+      "Start a new session and provide a structured summary of prior findings plus the updated file context"
+    ],
+    "correctIndex": 3,
+    "explanation": "When prior tool results are stale, starting fresh with a structured summary ensures the agent works from accurate, current information.",
+    "tags": ["sessions", "context-management"]
+  },
+  {
+    "id": "d1-p1-q14",
+    "domain": 1,
+    "sources": ["practice-1", "practice-2", "final-pool"],
+    "stem": "A production audit finds that in roughly 9% of cases your agent calls issue_credit using a customer's email address without first confirming account ownership through verify_identity. This has applied credits to the wrong accounts when duplicate or outdated emails are supplied. Which change most effectively addresses this reliability issue?",
+    "options": [
+      "Add a programmatic prerequisite that blocks issue_credit and fetch_account until verify_identity returns a confirmed account ID",
+      "Add a pre-processing step that filters incoming requests and routes only high-confidence identity matches to issue_credit",
+      "Add few-shot examples demonstrating correct sequencing where verify_identity always runs before any account modification",
+      "Strengthen the system prompt to emphasize that identity verification must always occur before issuing credits"
+    ],
+    "correctIndex": 0,
+    "explanation": "This enforces the required tool sequence at the system level. Deterministic enforcement is required for critical business rules with financial impact.",
+    "tags": ["workflow-enforcement", "tool-use"]
+  },
+  {
+    "id": "d1-p1-q15",
+    "domain": 1,
+    "sources": ["practice-1", "practice-2"],
+    "stem": "Your support agent can issue account credits through an MCP tool. Company policy requires that any credit above $300 be reviewed by a human before approval. In testing the agent usually follows this when instructed in the system prompt, but occasionally still calls the credit tool directly for amounts over the threshold. What is the most effective way to guarantee compliance?",
+    "options": [
+      "Require the agent to explain its reasoning before every credit decision so violations can be caught more easily",
+      "Add few-shot examples showing the agent escalating high-value credit requests instead of approving them",
+      "Add a tool interception hook that blocks credit requests above $300 and redirects them to a human review workflow",
+      "Strengthen the system prompt to emphasize that credits above $300 always require human approval"
+    ],
+    "correctIndex": 2,
+    "explanation": "A hook provides deterministic enforcement by intercepting the outgoing tool call before the action occurs, which guarantees policy compliance.",
+    "tags": ["hooks", "workflow-enforcement"]
+  },
+  {
+    "id": "d1-p2-q01",
+    "domain": 1,
+    "sources": ["practice-2"],
+    "stem": "Your coordinator invokes a synthesis subagent after running both search and analysis agents, but forwards only the summarized findings from the analysis agent while omitting the detailed search results. Sometimes the synthesis output looks coherent yet misses key supporting evidence and reaches incomplete conclusions. What is the most effective fix?",
+    "options": [
+      "Increase the depth of analysis performed before passing results to synthesis",
+      "Add instructions asking the synthesis agent to infer missing details from the provided summaries",
+      "Include both the raw search results and the analysis outputs when invoking the synthesis subagent",
+      "Run the synthesis agent multiple times to improve coverage of missing information"
+    ],
+    "correctIndex": 2,
+    "explanation": "Providing complete context gives the synthesis agent access to both detailed evidence and processed insights, improving accuracy and reducing the risk of missing critical information.",
+    "tags": ["context-management", "multi-agent"]
+  },
+  {
+    "id": "d1-p2-q02",
+    "domain": 1,
+    "sources": ["practice-2"],
+    "stem": "Your coordinator passes results from a search subagent to a synthesis subagent. The context bundles extracted content and metadata (such as source URLs and timestamps) into a single unstructured block of text. In evaluation the synthesis agent produces summaries without proper attribution and sometimes confuses which facts came from which sources. Which change would most effectively improve this?",
+    "options": [
+      "Add instructions telling the synthesis agent to carefully track sources during summarization",
+      "Provide examples showing how to reference sources correctly in the output",
+      "Reduce the amount of metadata passed to simplify the input context",
+      "Separate content and metadata into a structured format when passing context between subagents"
+    ],
+    "correctIndex": 3,
+    "explanation": "Structured context preserves the relationship between data and its source, letting the model reason accurately and maintain attribution while reducing ambiguity.",
+    "tags": ["context-management", "multi-agent"]
+  },
+  {
+    "id": "d1-p2-q04",
+    "domain": 1,
+    "sources": ["practice-2"],
+    "stem": "You are optimizing an agentic loop with a sequence of multi-tool operations. To improve reliability, a developer hardcodes a fixed order of tool calls that always executes regardless of the model's intermediate reasoning. This improves consistency but the agent now fails in edge cases where some steps are unnecessary or need different ordering based on context. What is the most appropriate adjustment?",
+    "options": [
+      "Add more prompt instructions explaining when steps can be skipped within the fixed sequence",
+      "Require the model to justify each step before executing it in the sequence",
+      "Keep the fixed sequence but expand it to cover more edge cases and variations",
+      "Let the model choose the next tool dynamically based on context while enforcing only the truly required steps"
+    ],
+    "correctIndex": 3,
+    "explanation": "Agentic loops are built for model-driven decisions with context-based flexibility. Only critical steps should be enforced, leaving the model in control of the non-deterministic parts of the workflow.",
+    "tags": ["agent-loops", "workflow-enforcement"]
+  },
+  {
+    "id": "d1-p2-q05",
+    "domain": 1,
+    "sources": ["practice-2", "final-pool"],
+    "stem": "Your system has a lightweight lookup subagent and a deep analysis subagent. In testing, the coordinator frequently invokes the deep analysis subagent for simple fact-based queries, adding latency without improving results. Which change would most effectively improve this behavior?",
+    "options": [
+      "Update the coordinator to assess query complexity and pick the appropriate subagent based on task requirements",
+      "Add prompt instructions encouraging the deep analysis agent to respond faster for simple queries",
+      "Remove the lightweight lookup agent to simplify the system",
+      "Run both subagents for every query and pick the best output during synthesis"
+    ],
+    "correctIndex": 0,
+    "explanation": "The coordinator should route dynamically by complexity, so simple queries use lightweight agents while complex tasks use deeper analysis.",
+    "tags": ["orchestration", "multi-agent"]
+  },
+  {
+    "id": "d1-p2-q06",
+    "domain": 1,
+    "sources": ["practice-2"],
+    "stem": "You are building an agent to refactor a legacy codebase. The task needs to first understand the structure, then identify high-impact areas, and finally apply targeted improvements from discovered dependencies. A developer implements a hybrid design: a fixed pipeline for structure mapping followed by a rigid sequence of refactoring steps applied to every component regardless of findings. In testing the agent makes unnecessary changes in some areas and misses critical improvements in others. What is the most appropriate adjustment?",
+    "options": [
+      "Expand the fixed pipeline to include more predefined refactoring steps for broader coverage",
+      "Use dynamic decomposition after the initial structure mapping so refactoring steps adapt to discovered dependencies",
+      "Run the same refactoring steps multiple times to ensure coverage across components",
+      "Add examples showing when certain refactoring steps should be skipped"
+    ],
+    "correctIndex": 1,
+    "explanation": "Hybrid strategies should pair structured initial analysis with adaptive execution. Applying rigid steps after discovery ignores context and produces inefficient or incorrect changes.",
+    "tags": ["task-decomposition", "workflow-design"]
+  },
+  {
+    "id": "d1-p2-q07",
+    "domain": 1,
+    "sources": ["practice-2", "final-pool"],
+    "stem": "You resume a previous session with --resume to keep analyzing a codebase. Several files have changed since the last session, but the overall system structure is largely unchanged. After resuming, the agent keeps referencing outdated implementations and produces incorrect recommendations. Which action most effectively corrects this?",
+    "options": [
+      "Continue the session and rely on the agent to adapt to the updated code automatically",
+      "Re-run all previous prompts to refresh the agent's understanding of the system",
+      "Start a completely new session and discard all previous context",
+      "Tell the agent about the specific file changes so it can re-analyze only the affected areas"
+    ],
+    "correctIndex": 3,
+    "explanation": "When most of the context is still valid, targeted updates let the agent focus on what changed without redoing the entire analysis.",
+    "tags": ["sessions", "context-management"]
+  },
+  {
+    "id": "d1-p2-q09",
+    "domain": 1,
+    "sources": ["practice-2"],
+    "stem": "You are building an agent to add comprehensive test coverage to a large legacy codebase. The structure is unclear, dependencies are poorly documented, and the agent must decide where to focus first. Which approach most effectively begins the task decomposition?",
+    "options": [
+      "Begin with the files that have the fewest dependencies so the agent shows early progress quickly",
+      "Generate tests for all files in parallel without analyzing dependencies or relationships first",
+      "Start by mapping the codebase structure and identifying high-impact areas before generating a prioritized plan",
+      "Define a fixed sequence of steps upfront and require the agent to follow them regardless of findings"
+    ],
+    "correctIndex": 2,
+    "explanation": "When structure is unclear, mapping the codebase first grounds the plan in real dependencies and focuses effort on the highest-impact areas, rather than guessing, starting with easy files, or committing to a rigid sequence upfront.",
+    "tags": ["task-decomposition", "workflow-design"]
+  },
+  {
+    "id": "d1-p2-q10",
+    "domain": 1,
+    "sources": ["practice-2"],
+    "stem": "A customer reports a complex issue involving billing, refund, and account closure. When your agent escalates the case to a human, it forwards little context, forcing the human to manually re-investigate from scratch. Which change would most effectively improve the escalation handoff?",
+    "options": [
+      "Instruct the agent to resolve the most urgent issue first and ignore secondary concerns",
+      "Let the human agent access the full conversation transcript instead of providing a summary",
+      "Include a structured handoff summary with key details such as customer ID, issue type, root cause, and recommended actions",
+      "Have the agent retry the full investigation once more before escalating, to reduce how often handoffs occur"
+    ],
+    "correctIndex": 2,
+    "explanation": "A structured handoff summary gives the human reviewer the essential context at a glance, enabling efficient escalation without re-investigation. Raw transcripts force the human to reconstruct the case, and retries or ignoring concerns do not transfer context at all.",
+    "tags": ["escalation", "context-management"]
+  },
+  {
+    "id": "d1-p2-q11",
+    "domain": 1,
+    "sources": ["practice-2"],
+    "stem": "Your system generates reports via a coordinator that delegates to search, analysis, and synthesis subagents. In evaluation, reports are often partially complete, missing key areas even though all subagents executed successfully. The coordinator does a single pass: decompose, invoke subagents, return the final output without any further evaluation. What is the most effective way to improve coverage and completeness?",
+    "options": [
+      "Modify the synthesis agent to infer and fill in missing information when gaps are detected",
+      "Add a refinement loop where the coordinator evaluates the synthesized output for gaps and re-invokes subagents with targeted follow-up queries",
+      "Add more detailed instructions in the system prompt to encourage a comprehensive initial decomposition",
+      "Increase the number of initial subagent calls to cover more aspects of the topic in a single pass"
+    ],
+    "correctIndex": 1,
+    "explanation": "Iterative refinement lets the coordinator detect missing coverage and dynamically improve results rather than relying on a single pass.",
+    "tags": ["orchestration", "agent-loops"]
+  },
+  {
+    "id": "d1-p2-q12",
+    "domain": 1,
+    "sources": ["practice-2"],
+    "stem": "You are evaluating a multi-agent research system with a coordinator that delegates to two search subagents. In testing, both subagents frequently return overlapping results, analyzing the same sources and producing duplicate findings. The coordinator currently assigns both subagents the same high-level query without additional constraints. What is the most effective way to improve efficiency and result quality?",
+    "options": [
+      "Add instructions telling subagents to ignore results similar to previously retrieved content",
+      "Increase the number of subagents to improve coverage across the research domain",
+      "Have the synthesis agent remove duplicate findings before generating the final output",
+      "Partition the research scope so each subagent is assigned distinct subtopics or source types"
+    ],
+    "correctIndex": 3,
+    "explanation": "Proper task partitioning ensures each subagent contributes unique information, reducing duplication and improving overall coverage.",
+    "tags": ["task-decomposition", "multi-agent"]
+  },
+  {
+    "id": "d1-p2-q13",
+    "domain": 1,
+    "sources": ["practice-2"],
+    "stem": "You are designing an agent to perform compliance checks across a codebase. The workflow is consistent: validate naming conventions, check access controls, and verify logging requirements for every file. A developer implements a fully dynamic decomposition where the agent decides which checks to run from intermediate findings. In evaluation, results become inconsistent, some files are skipped, and required checks are occasionally omitted. Which change would most effectively improve reliability?",
+    "options": [
+      "Increase the number of iterations so the agent has more chances to cover missed checks",
+      "Use a fixed sequence of checks for each file so all required validations are consistently applied",
+      "Let the agent prioritize the files it considers most critical before applying checks",
+      "Add more examples to guide the agent in deciding which checks to run dynamically"
+    ],
+    "correctIndex": 1,
+    "explanation": "Predictable, repeatable workflows benefit from prompt chaining, which guarantees all required steps run. Dynamic decomposition introduces variability that can leave coverage incomplete.",
+    "tags": ["task-decomposition", "workflow-design"]
+  },
+  {
+    "id": "d1-p2-q14",
+    "domain": 1,
+    "sources": ["practice-2"],
+    "stem": "Your coordinator always invokes the full pipeline of subagents (search, analysis, synthesis) for every request. In evaluation you find that even simple queries, like retrieving a known fact, trigger all subagents, adding unnecessary latency and cost. Which approach would most effectively handle simple queries efficiently?",
+    "options": [
+      "Optimize each subagent to run faster so the full pipeline becomes less expensive",
+      "Lower each subagent's output token limits so simple queries complete more quickly",
+      "Add caching to reuse outputs from previous queries whenever possible",
+      "Define lightweight execution paths for simple queries that bypass the full pipeline"
+    ],
+    "correctIndex": 3,
+    "explanation": "Lightweight execution paths let simple queries skip the full pipeline entirely, eliminating the unnecessary work. Speeding up or truncating subagents that should not run at all still pays the cost of invoking them.",
+    "tags": ["orchestration", "efficiency"]
+  },
+  {
+    "id": "d1-p2-q15",
+    "domain": 1,
+    "sources": ["practice-2"],
+    "stem": "You review an agentic loop that checks stop_reason to decide whether to continue, but also adds a second condition: if the response contains any tool-related content, the loop continues. In production, some requests keep looping even after all required actions are complete, especially when final responses include tool outputs. What is the most effective fix?",
+    "options": [
+      "Add prompt instructions asking the model to avoid including tool-related content in final responses",
+      "Introduce a maximum iteration limit to stop loops from running indefinitely",
+      "Use only the stop_reason field to control loop termination and remove the additional content-based conditions",
+      "Keep both conditions but refine the logic to better detect when tool output indicates completion"
+    ],
+    "correctIndex": 2,
+    "explanation": "The stop_reason is the authoritative loop-control signal and should not be combined with secondary heuristics. Mixing it with content-based checks introduces ambiguity.",
+    "tags": ["agent-loops", "stop-reason"]
+  },
+  {
+    "id": "d1-p3-q02",
+    "domain": 1,
+    "sources": ["practice-3"],
+    "stem": "You are analyzing a legacy codebase and have already identified several refactoring areas. You now want to explore two approaches, one focused on performance optimization and one on maintainability. Both should start from the same baseline analysis but evolve independently without affecting each other. What is the most appropriate approach?",
+    "options": [
+      "Start two new sessions and manually re-provide the full analysis context in each",
+      "Use --resume with the same session name in parallel to explore both approaches",
+      "Use fork_session to create separate branches from the current session for each approach",
+      "Continue in the same session and alternate between both approaches during execution"
+    ],
+    "correctIndex": 2,
+    "explanation": "Forking lets you branch from a shared baseline while keeping each exploration independent, enabling parallel investigation without interfering with prior reasoning.",
+    "tags": ["sessions", "context-management"]
+  },
+  {
+    "id": "d1-p3-q04",
+    "domain": 1,
+    "sources": ["practice-3"],
+    "stem": "You are analyzing a codebase with Claude Code. You previously completed a detailed architecture investigation, some files have since received minor changes, and most of your previous analysis remains valid. Before branching into any new explorations, which action is most appropriate for bringing the session up to date?",
+    "options": [
+      "Start a completely new session and discard previous analysis to avoid stale context",
+      "Immediately use fork_session to create new branches without telling the agent about the file changes",
+      "Use --resume and inform the agent about the specific file changes before continuing",
+      "Continue in the same session and assume the agent will notice the modified files on its own"
+    ],
+    "correctIndex": 2,
+    "explanation": "Since most context remains valid, resuming and pointing the agent at the specific file changes corrects the stale state without repeating prior analysis. Discarding everything wastes valid context, and forking or continuing without an update propagates outdated file states into all future work.",
+    "tags": ["sessions", "context-management"]
+  },
+  {
+    "id": "d1-p3-q05",
+    "domain": 1,
+    "sources": ["practice-3"],
+    "stem": "Your agent handles billing issues. For a request it successfully retrieves account details and identifies a charge discrepancy, but resolving it requires a policy exception the agent is not authorized to apply. When escalating to a human, the system forwards only the original user request, so the human repeats the entire investigation the agent already performed. Which change would most effectively prevent this duplicated investigation?",
+    "options": [
+      "Pass the results of completed tool calls so the human agent can see what has already been investigated",
+      "Instruct the human agent to re-run the same checks to ensure consistency before taking action",
+      "Delay escalation until the agent attempts all possible actions, even if they may violate policy",
+      "Attach the agent's entire raw conversation log and let the human reconstruct the investigation from it"
+    ],
+    "correctIndex": 0,
+    "explanation": "Forwarding the completed tool-call results preserves the investigation context so the human can pick up exactly where the agent stopped. Re-running checks or digging through raw logs duplicates the effort, and delaying escalation to attempt unauthorized actions violates policy.",
+    "tags": ["escalation", "context-management"]
+  },
+  {
+    "id": "d1-p3-q06",
+    "domain": 1,
+    "sources": ["practice-3", "final-pool"],
+    "stem": "Your agent handles product replacements. The correct workflow verifies warranty eligibility with check_warranty before generating a shipping label with create_replacement_order. In production, the agent occasionally creates replacement orders for products no longer under warranty, even though the system prompt clearly defines the correct sequence. What is the most effective way to ensure correct workflow execution?",
+    "options": [
+      "Update the system prompt to emphasize that warranty checks must always occur before replacement",
+      "Add examples showing the correct sequence of warranty verification followed by replacement",
+      "Require the agent to confirm eligibility in its response before calling the replacement tool",
+      "Add a prerequisite that blocks create_replacement_order until check_warranty confirms eligibility"
+    ],
+    "correctIndex": 3,
+    "explanation": "This enforces the correct sequence at the system level, guaranteeing eligibility is verified before any replacement is issued.",
+    "tags": ["workflow-enforcement", "tool-use"]
+  },
+  {
+    "id": "d1-p3-q07",
+    "domain": 1,
+    "sources": ["practice-3"],
+    "stem": "Your agent retrieves status codes from multiple tools. To standardize outputs, a developer implements a hook that intercepts outgoing tool calls and tries to normalize the expected response format before the tool executes. In production the agent still misinterprets status values and inconsistencies persist across tool outputs. What is the most effective fix?",
+    "options": [
+      "Apply a PostToolUse hook to normalize tool results after they are returned",
+      "Modify the system prompt to explain how different status codes should be interpreted",
+      "Add examples showing how to convert status values into a consistent format",
+      "Enforce a rule that all tools must return standardized outputs before being used"
+    ],
+    "correctIndex": 0,
+    "explanation": "Data normalization must happen after a tool returns its output, not before execution. A PostToolUse hook ensures the model receives consistent, transformed data for accurate reasoning.",
+    "tags": ["hooks", "tool-use"]
+  },
+  {
+    "id": "d1-p3-q08",
+    "domain": 1,
+    "sources": ["practice-3"],
+    "stem": "Your coordinator agent currently routes every request through all subagents in sequence (search, analysis, synthesis). You notice inefficiencies when handling simple queries like fact lookups, where invoking all agents adds unnecessary latency and cost. What is the most effective improvement?",
+    "options": [
+      "Update the coordinator to evaluate the query and invoke only the subagents required for that task",
+      "Keep the fixed pipeline but optimize each subagent to respond faster",
+      "Add prompt instructions encouraging subagents to return early when tasks are simple",
+      "Introduce caching at the synthesis stage to reduce repeated processing"
+    ],
+    "correctIndex": 0,
+    "explanation": "The coordinator should dynamically decide which subagents to invoke based on task complexity, reducing unnecessary work and lowering latency.",
+    "tags": ["orchestration", "efficiency"]
+  },
+  {
+    "id": "d1-p3-q09",
+    "domain": 1,
+    "sources": ["practice-3"],
+    "stem": "Your coordinator agent delegates research tasks to multiple subagents. Currently it invokes each subagent sequentially across separate turns, which increases latency for broad research queries. You want to improve performance by running subagents in parallel. What is the most effective way to achieve this?",
+    "options": [
+      "Add prompt instructions encouraging subagents to work faster when handling requests",
+      "Emit multiple Task tool calls within a single coordinator response to spawn subagents in parallel",
+      "Configure each subagent to automatically trigger other subagents when additional work is needed",
+      "Invoke each subagent in separate turns but reduce the prompt size to speed up execution"
+    ],
+    "correctIndex": 1,
+    "explanation": "The Task tool spawns subagents, and issuing multiple Task calls in a single response lets them run concurrently.",
+    "tags": ["parallelism", "multi-agent"]
+  },
+  {
+    "id": "d1-p3-q10",
+    "domain": 1,
+    "sources": ["practice-3"],
+    "stem": "Your agent retrieves order details with a tool and then decides next steps from the result. In production the agent repeatedly calls the same tool with identical inputs, failing to make progress toward resolution. Investigation shows tool results are not included in subsequent requests to the model. Which change would most effectively resolve this?",
+    "options": [
+      "Add few-shot examples showing the correct sequence of tool usage and decision-making",
+      "Introduce a rule preventing the same tool from being called twice with identical inputs",
+      "Modify the system prompt to remind the model to avoid repeating tool calls unnecessarily",
+      "Append tool results to the conversation history before the next loop iteration so the model can incorporate new information into its reasoning"
+    ],
+    "correctIndex": 3,
+    "explanation": "Agentic loops rely on updated context to guide decisions across iterations. Without tool results in the history, the model has no awareness of prior actions.",
+    "tags": ["context-management", "agent-loops"]
+  },
+  {
+    "id": "d1-p3-q11",
+    "domain": 1,
+    "sources": ["practice-3"],
+    "stem": "You are implementing an agentic loop for a support agent that processes refund requests. In production the loop sometimes terminates early before completing required tool calls, even though more actions are needed. Your current implementation ends the loop when the assistant response contains no tool calls in the message text. What is the most effective fix?",
+    "options": [
+      "Continue the loop based on stop_reason, proceeding when it is \"tool_use\" and terminating only when it is \"end_turn\"",
+      "Enforce a minimum number of loop iterations before allowing termination",
+      "Modify the prompt to instruct the model to explicitly state when all actions are complete before ending the loop",
+      "Require the model to include a specific keyword such as \"COMPLETE\" to signal termination"
+    ],
+    "correctIndex": 0,
+    "explanation": "The stop_reason is the authoritative signal for controlling agentic loop execution. The loop should continue while it is \"tool_use\" and stop on \"end_turn.\"",
+    "tags": ["agent-loops", "stop-reason"]
+  },
+  {
+    "id": "d1-p3-q12",
+    "domain": 1,
+    "sources": ["practice-3"],
+    "stem": "Your agent handles account updates that may or may not require identity verification depending on the request type. To improve safety, a developer adds a prerequisite forcing identity verification before any account-related tool call. After deployment you observe increased latency and unnecessary verification steps for low-risk operations like updating notification preferences, hurting user experience. What is the most appropriate adjustment?",
+    "options": [
+      "Apply enforcement selectively so identity verification is required only for high-risk operations",
+      "Remove identity verification entirely to streamline the workflow",
+      "Add prompt instructions allowing the agent to skip verification when appropriate",
+      "Keep the prerequisite but optimize the verification process to reduce latency"
+    ],
+    "correctIndex": 0,
+    "explanation": "Enforcement should apply only where deterministic guarantees are necessary. Over-enforcement adds friction and reduces efficiency without improving safety for low-risk actions.",
+    "tags": ["workflow-enforcement", "agent-design"]
+  },
+  {
+    "id": "d1-p3-q13",
+    "domain": 1,
+    "sources": ["practice-3"],
+    "stem": "You are designing an agent to perform code reviews. The workflow is well-defined: analyze each file for local issues, then evaluate cross-file interactions for integration problems. The steps are consistent across all pull requests. Which task decomposition strategy is most appropriate?",
+    "options": [
+      "Let the agent dynamically generate tasks based on intermediate findings during the review",
+      "Run multiple independent review passes and combine the results at the end",
+      "Use a fixed sequential pipeline where each step runs in order, analyzing files individually and then performing a cross-file pass",
+      "Provide a high-level goal and let the agent determine all steps without any predefined structure"
+    ],
+    "correctIndex": 2,
+    "explanation": "Prompt chaining is ideal for predictable, repeatable workflows with clearly defined steps.",
+    "tags": ["task-decomposition", "workflow-design"]
+  },
+  {
+    "id": "d1-p3-q14",
+    "domain": 1,
+    "sources": ["practice-3"],
+    "stem": "Your agent retrieves data from multiple tools. One returns timestamps as Unix integers, another as ISO 8601 strings, and a third as custom formatted date text. In production you observe inconsistent reasoning and incorrect comparisons when the agent orders events by time. What is the most effective way to resolve this?",
+    "options": [
+      "Use a PostToolUse hook to normalize all timestamps into a consistent format before passing them to the model",
+      "Modify each tool individually so they all return data in the same format",
+      "Add instructions in the system prompt telling the model how to interpret different timestamp formats",
+      "Add few-shot examples showing how to compare timestamps across different formats"
+    ],
+    "correctIndex": 0,
+    "explanation": "PostToolUse hooks allow deterministic transformation of tool outputs before the model processes them. Normalizing the data ensures consistent reasoning.",
+    "tags": ["hooks", "tool-use"]
+  },
+  {
+    "id": "d1-p3-q15",
+    "domain": 1,
+    "sources": ["practice-3"],
+    "stem": "You are testing a coordinator agent designed to delegate work to subagents using the Task tool. However, during execution the coordinator never invokes any subagents and instead tries to answer all queries directly. Reviewing the configuration shows the coordinator has access to several tools but not the Task tool. What is the most effective fix?",
+    "options": [
+      "Increase the number of subagents available to the coordinator",
+      "Add Task to the coordinator's allowedTools so it can spawn subagents",
+      "Update the system prompt to explicitly instruct the coordinator to delegate tasks to subagents",
+      "Add few-shot examples demonstrating how to invoke subagents using the Task tool"
+    ],
+    "correctIndex": 1,
+    "explanation": "The Task tool is required for subagent invocation. Without it, the coordinator cannot delegate work regardless of prompt instructions.",
+    "tags": ["multi-agent", "tool-configuration"]
+  }
+]

@@ -1,0 +1,21 @@
+---
+title: "Output Quality & Reliability"
+domain: 4
+summary: "Techniques for reliable, consistent output: explicit criteria, few-shot examples, structured output via tool_use with JSON schemas, validation and retry loops, batch processing, and multi-pass review architectures."
+objectives:
+  - "Design prompts with explicit categorical criteria to raise precision and cut false positives."
+  - "Apply few-shot examples to make output consistent and to handle ambiguous or edge cases."
+  - "Enforce structured output with tool_use and JSON schemas, controlling tool_choice for routing and pipelines."
+  - "Design schemas with nullable fields, enum plus detail patterns, and prompt-level format normalization."
+  - "Implement validation, retry-with-error-feedback, and self-correcting cross-validation loops for extraction quality."
+  - "Design efficient batch processing strategies with the Message Batches API and custom_id correlation."
+  - "Design multi-instance and multi-pass review architectures using independent instances instead of self-review."
+---
+
+Domain 4 is about squeezing reliable, consistent output out of Claude in production. It moves past getting a single good answer and into the engineering that keeps quality high across thousands of calls: precise criteria, demonstration through examples, guaranteed structure, validation with feedback, and cost-efficient execution at scale.
+
+The domain's central lesson is that vague guidance produces unreliable results. Telling Claude to "be conservative" or "check that this is accurate" leaves too much to interpretation, so the work is to replace ambiguity with explicit categorical criteria, and where rules alone fall short, to show the desired behavior with a handful of reasoned few-shot examples. False positives are treated as a first-class problem, because noisy categories destroy a developer's trust in the accurate ones.
+
+Structure and correctness are handled separately. Using `tool_use` with JSON schemas guarantees the shape of the output and removes syntax errors entirely, and the `tool_choice` parameter controls whether Claude may respond in text, must call some tool, or must call one specific tool for a pipeline step. But schemas only guarantee shape, never meaning, so semantic errors such as totals that do not add up or data in the wrong field must be caught by an application-level validation layer, followed by retries that carry the specific error back to the model for guided self-correction.
+
+Finally, the domain covers running these reliable prompts efficiently. The Message Batches API trades latency for a 50% cost reduction, which fits nightly and weekly workloads but not interactive pre-merge checks. For hard review tasks, independent instances beat self-review because a fresh instance carries no reasoning bias, and multi-pass architectures split large jobs into local per-file analysis, cross-file integration, and confidence-scored verification. Work through the four lessons, and use the objectives above as a checklist to confirm you can choose the right technique for each production scenario.

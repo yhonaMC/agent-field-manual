@@ -1,0 +1,183 @@
+---
+title: "Plan Mode and Iterative Refinement"
+domain: 3
+chapter: 11
+section: "3.3"
+summary: "Deciding between plan mode and direct execution, and refining work through concrete examples, test-driven iteration, the interview pattern, and issue batching."
+---
+
+Not every task needs a plan. The skill is recognizing when planning pays off and when it just slows you down — and then knowing which refinement techniques drive a task to a good result.
+
+## When to use plan mode
+
+| Situation | Why plan |
+| --- | --- |
+| Complex tasks | Multiple interdependent steps |
+| Large-scale changes | Touch many files or modules |
+| Architectural decisions | Trade-offs that need evaluation |
+| Multi-file refactoring | Risk of inconsistencies between files |
+
+Example: "Migrate authentication from a custom JWT scheme to OAuth2 with refresh tokens." That warrants a plan because it ripples through middleware, routes, models, tests, configuration, and possibly the frontend.
+
+## When to use direct execution
+
+| Situation | Why go direct |
+| --- | --- |
+| Simple changes | One file, clear intent |
+| Well-defined bug fixes | You know exactly what to change |
+| Single-file changes | No cross-file dependencies |
+| Mechanical tasks | Renaming, formatting, import ordering |
+
+Example: "Fix the typo on line 42 of `config.ts`." No plan needed — it is an atomic, unambiguous correction.
+
+## Plan mode enables safe exploration
+
+The real value of plan mode is that Claude can *explore without committing changes*. It reads files, analyzes dependencies, and proposes a strategy before touching any code. If the plan is unconvincing, you adjust it without having modified anything — which prevents costly rework.
+
+## The Explore subagent
+
+For heavy investigation, use an explore subagent that isolates verbose discovery:
+
+```markdown
+---
+context: fork
+allowed-tools: ["Read", "Grep", "Glob"]
+argument-hint: "topic or area of the codebase to explore"
+---
+# Explore codebase
+1. Use Grep to locate relevant files
+2. Read the main files
+3. Trace data flows and dependencies
+4. Return a structured summary of the findings
+```
+
+With `context: fork`, all the file reads and searches stay contained. Only the final summary reaches the main conversation, protecting the context window during multi-phase work.
+
+## Combining plan and direct execution
+
+The most effective pattern for medium-sized tasks separates thinking from doing:
+
+```text
+1. Plan mode -> investigation and design
+   "Analyze how the current cache system is implemented"
+   -> Claude explores, reads files, proposes a plan
+2. Direct execution -> implementation
+   "Implement step 1 of the plan: create the CacheProvider interface"
+   -> Claude carries out the concrete change
+```
+
+Splitting the two phases reduces errors: you validate the design before any code is written.
+
+## Communicate transformations with examples
+
+When prose can be read more than one way, concrete input/output examples remove the ambiguity. Instead of describing a transformation in words:
+
+```text
+Avoid: "Transform the user data so the name is capitalized and the email is normalized"
+```
+
+give a worked example:
+
+```text
+Input:
+{ "name": "juan perez", "email": "JUAN@EXAMPLE.COM" }
+Expected output:
+{ "name": "Juan Perez", "email": "juan@example.com" }
+```
+
+Concrete cases pin down exactly which transformation to apply. Adding a few more examples clarifies the edge cases:
+
+```text
+Input:  { "name": "", "email": "test@test.com" }
+Output: { "name": "", "email": "test@test.com" }
+// an empty name stays empty, not capitalized
+
+Input:  { "name": "Maria Jose", "email": "MJ@example.com" }
+Output: { "name": "Maria Jose", "email": "mj@example.com" }
+// an already-capitalized name is left as is; email is always lowercased
+```
+
+## Test-driven iteration
+
+A highly effective development pattern is to write the tests first, then iterate by sharing the failures:
+
+```text
+Step 1: "Write tests for a discount service that:
+         - applies 10% to purchases over $100
+         - applies 20% to purchases over $500
+         - does not discount purchases of $100 or less
+         - rejects negative amounts"
+Step 2: "Run the tests"
+         -> 4 tests failing (nothing implemented yet)
+Step 3: "Implement the service so the tests pass"
+         -> 3 passing, 1 failing
+Step 4: "The negative-amount test fails: it expected an error but got 0. Fix it."
+         -> 4 passing
+```
+
+It works because tests define expected behavior unambiguously, failures tell Claude precisely what is missing, each iteration is a short focused cycle, and the finished result has guaranteed coverage.
+
+### Share failures, not descriptions
+
+Vague reports slow things down. Paste the actual failure instead:
+
+```text
+Avoid: "The discount test isn't working"
+
+Prefer: "The test fails with:
+  Expected: Error('Amount cannot be negative')
+  Received: 0
+  At: src/services/discount.test.ts:34"
+```
+
+The exact error message hands Claude everything it needs to fix the problem.
+
+## The interview pattern
+
+Rather than dumping every instruction up front, let Claude surface the questions:
+
+```text
+User: "I need to implement a notifications system"
+Claude: "Before I implement, I need to understand a few things:
+1. Which channels? (email, push, SMS, in-app)
+2. Are notifications real-time or batched?
+3. Predefined templates or dynamic content?
+4. Do you need retries on delivery failures?
+5. Are there user preferences (opt-out per channel)?"
+```
+
+This is useful for ambiguous or incomplete requirements, design decisions with several valid options, complex features where details matter, and cases where you know the "what" but have not settled the "how." Skip it for simple tasks with clear instructions, bug fixes with a clear reproduction, or when you already provided all the details.
+
+## Batching issues
+
+How you group problems depends on whether they interact.
+
+**All issues in one message** — appropriate when the issues affect each other:
+
+```text
+"Fix these 3 issues in the UserForm component:
+1. The validation message doesn't clear when the field is corrected
+2. The submit button is enabled before all fields are valid
+3. The form state doesn't reset after a successful submit"
+-> Claude sees all 3 together and can build a coherent solution
+   that doesn't conflict between fixes.
+```
+
+**Sequential issues, one at a time** — appropriate when the issues are independent:
+
+```text
+Message 1: "Add lazy loading to catalog images"
+-> Claude implements, you verify
+Message 2: "Change the dashboard date format to DD/MM/YYYY"
+-> Claude implements, you verify
+```
+
+The decision rule: if fixing issue A might affect the solution to issue B, send them together; if they are fully independent, send them one at a time so you can verify each.
+
+## Field Notes
+
+- Reach for plan mode on complex, multi-file, or architectural work; use direct execution for simple, well-scoped changes.
+- Plan mode explores without committing changes, so you can revise the design before any code is touched.
+- Concrete input/output examples communicate transformations far more reliably than prose.
+- Write tests first and iterate by sharing exact failure messages, not vague descriptions.
+- Batch interacting issues into one message; send independent issues sequentially so each can be verified.

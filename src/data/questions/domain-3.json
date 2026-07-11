@@ -1,0 +1,452 @@
+[
+  {
+    "id": "d3-p1-q01",
+    "domain": 3,
+    "sources": ["practice-1"],
+    "stem": "A rule file at .claude/rules/testing.md uses the frontmatter paths: [\"tests/**\"] so testing conventions apply repository-wide. In practice the rule only reaches files sitting directly in tests/ and skips ones nested deeper, such as tests/unit/user.test.ts. What is the best fix?",
+    "options": [
+      "Relocate the rule into a root-level CLAUDE.md file instead",
+      "Change the glob to tests/**/* so the rule reaches nested files recursively",
+      "Create a separate rule for every subdirectory beneath tests/",
+      "Add prompt guidance describing the situations in which the rule should fire"
+    ],
+    "correctIndex": 1,
+    "explanation": "The original glob only matches one directory level deep. Appending /* makes the pattern recurse into every nested subdirectory so the rule applies everywhere.",
+    "tags": ["rules", "glob-patterns"]
+  },
+  {
+    "id": "d3-p1-q02",
+    "domain": 3,
+    "sources": ["practice-1"],
+    "stem": "You are refining a data transformation script that has several defects at once: wrong null handling, inconsistent field names, and output that drifts from the expected schema. These problems are interdependent, so fixing one shifts the others. Which refinement approach is most effective?",
+    "options": [
+      "Address each defect in its own separate iteration to keep changes isolated",
+      "Describe every defect together in one detailed instruction and iterate a single time",
+      "Discard the current code and regenerate the whole implementation from a new prompt",
+      "Correct the output format first and only then tackle the remaining defects"
+    ],
+    "correctIndex": 1,
+    "explanation": "When issues are coupled, handling them together in one pass keeps the solution internally consistent; sequential fixes tend to conflict with or undo earlier changes.",
+    "tags": ["iteration", "refinement"]
+  },
+  {
+    "id": "d3-p1-q03",
+    "domain": 3,
+    "sources": ["practice-1"],
+    "stem": "Your CI pipeline uses Claude Code to generate unit tests for new changes, but the output frequently repeats scenarios and overlooks edge cases already handled elsewhere in the suite. You want to raise both relevance and coverage without producing more unnecessary output. Which approach works best?",
+    "options": [
+      "Supply the existing test files as context so Claude can avoid duplication and spot coverage gaps",
+      "Cap the number of tests generated per run to cut down on redundancy",
+      "Regenerate the tests several times and manually pick the best version",
+      "Instruct Claude to only produce test cases that are unique and meaningful"
+    ],
+    "correctIndex": 0,
+    "explanation": "Giving Claude visibility into the current suite lets it reason about what is already covered and concentrate on the missing scenarios rather than guessing.",
+    "tags": ["test-generation", "context"]
+  },
+  {
+    "id": "d3-p1-q04",
+    "domain": 3,
+    "sources": ["practice-1", "final-pool"],
+    "stem": "You must migrate a legacy monolith into a modular service-based architecture. The work spans dozens of files and requires careful decisions about service boundaries, shared dependencies, and data flow between components. Which approach should you take?",
+    "options": [
+      "Use direct execution with detailed upfront instructions specifying each module's exact structure and responsibilities",
+      "Enter plan mode to explore the codebase, map dependencies, and design an approach before making any changes",
+      "Begin with direct execution and refactor incrementally so structure emerges as you implement",
+      "Start in direct execution and only switch to plan mode if unexpected complexity appears"
+    ],
+    "correctIndex": 1,
+    "explanation": "Plan mode is built for complex, multi-file work involving architectural decisions and several viable approaches, so exploring and designing first reduces costly rework.",
+    "tags": ["plan-mode", "architecture"]
+  },
+  {
+    "id": "d3-p1-q05",
+    "domain": 3,
+    "sources": ["practice-1"],
+    "stem": "A CI step runs claude \"Review this pull request for performance issues\" but the job never finishes because logs show Claude Code waiting for interactive input, hanging the pipeline. What is the correct way to run this command in a CI/CD environment?",
+    "options": [
+      "Export an environment variable CLAUDENONINTERACTIVE=true before running the command",
+      "Pipe an empty stream in: echo \"\" | claude \"Review this pull request for performance issues\"",
+      "Pass a --cl flag: claude --cl \"Review this pull request for performance issues\"",
+      "Add the -p flag: claude -p \"Review this pull request for performance issues\""
+    ],
+    "correctIndex": 3,
+    "explanation": "The -p (print) flag runs Claude Code non-interactively: it processes the prompt, prints the result, and exits immediately instead of waiting for input.",
+    "tags": ["cli", "ci-cd", "headless"]
+  },
+  {
+    "id": "d3-p1-q06",
+    "domain": 3,
+    "sources": ["practice-1", "final-pool"],
+    "stem": "You are using Claude to generate validation logic for a form processing system. The first version handles basic cases but breaks on edge cases like null values and invalid formats. You want to systematically improve it while guaranteeing correctness across all scenarios. Which approach is most effective?",
+    "options": [
+      "Add more written instructions describing how each edge case should be handled",
+      "Give a high-level description of every possible edge case in the prompt",
+      "Write test cases covering expected behavior and edge cases, then iterate by feeding back failing results",
+      "Regenerate the implementation repeatedly until it happens to produce the right behavior"
+    ],
+    "correctIndex": 2,
+    "explanation": "Test-driven iteration supplies concrete, verifiable feedback that steers the model toward correct behavior far more reliably than prose descriptions or blind regeneration.",
+    "tags": ["test-driven", "iteration"]
+  },
+  {
+    "id": "d3-p1-q07",
+    "domain": 3,
+    "sources": ["practice-1"],
+    "stem": "Your team builds a skill that performs bulk updates across many files. It emits verbose output during execution and could touch critical parts of the codebase. Your single most important requirement is that the skill must not modify anything outside a safe set of file operations. Which configuration best enforces that boundary?",
+    "options": [
+      "Configure allowed-tools to restrict the skill to a specific set of file-modification tools",
+      "Add prompt instructions telling the skill to avoid risky operations",
+      "Place the skill logic inside CLAUDE.md so it runs automatically",
+      "Add a post-run script that reverts any unexpected file changes"
+    ],
+    "correctIndex": 0,
+    "explanation": "Restricting allowed-tools enforces a hard safety boundary at the permission layer, guaranteeing the skill can only invoke approved file operations rather than relying on the model to behave.",
+    "tags": ["skills", "allowed-tools", "permissions"]
+  },
+  {
+    "id": "d3-p1-q08",
+    "domain": 3,
+    "sources": ["practice-1"],
+    "stem": "Your CI pipeline runs Claude Code to review pull requests and post inline comments. When developers push follow-up commits the review re-runs, and you notice Claude keeps reporting the same issues from earlier runs, creating duplicate comments and noise. What is the most effective way to improve this workflow?",
+    "options": [
+      "Include the prior review findings in the new run's context and instruct Claude to report only new or unresolved issues",
+      "Add prompt instructions asking Claude not to repeat itself when reviewing updated pull requests",
+      "Run Claude in a fresh session each time so earlier comments cannot influence the next run",
+      "Filter out duplicate comments after the run by matching repeated text in the CI system"
+    ],
+    "correctIndex": 0,
+    "explanation": "Supplying prior findings gives Claude the context to distinguish already-reported issues from newly introduced or still-unresolved ones, eliminating duplicate comments at the source.",
+    "tags": ["code-review", "context", "ci-cd"]
+  },
+  {
+    "id": "d3-p1-q09",
+    "domain": 3,
+    "sources": ["practice-1"],
+    "stem": "Your team's coding standards live in a CLAUDE.md at ~/.claude/CLAUDE.md, and on your machine Claude follows them consistently. When a new teammate clones the repository, Claude does not apply the same standards for them. What is the most likely cause?",
+    "options": [
+      "The configuration is defined at the user level and is therefore not shared through version control",
+      "The CLAUDE.md file must be referenced with @import syntax to take effect",
+      "The CLAUDE.md file is missing required frontmatter configuration",
+      "The repository lacks enough example files for Claude to learn the conventions"
+    ],
+    "correctIndex": 0,
+    "explanation": "Files under ~/.claude/ apply only to the local user and are never committed, so project-level standards must live in the repository to reach every teammate.",
+    "tags": ["claude-md", "configuration-scope"]
+  },
+  {
+    "id": "d3-p1-q10",
+    "domain": 3,
+    "sources": ["practice-1"],
+    "stem": "Two developers run the same command on the same repository but observe different behavior from Claude: one gets the testing conventions applied correctly and the other does not. Both confirm the .claude/CLAUDE.md file is present in the repo. What is the most effective way to diagnose the issue?",
+    "options": [
+      "Consolidate all configuration into a single centralized file",
+      "Re-run the command several times to check whether the behavior is consistent",
+      "Add more detailed instructions to the CLAUDE.md file",
+      "Use the /memory command to inspect which configuration files are loaded in each session"
+    ],
+    "correctIndex": 3,
+    "explanation": "The /memory command reveals which configuration sources are actually active in a session, exposing missing imports, scope problems, or inconsistent loading between the two developers.",
+    "tags": ["memory-command", "debugging", "configuration-scope"]
+  },
+  {
+    "id": "d3-p1-q11",
+    "domain": 3,
+    "sources": ["practice-1"],
+    "stem": "Your team creates a skill that performs deep codebase analysis and produces a large volume of intermediate output. After it runs, subsequent interactions behave inconsistently because the main conversation context is filled with verbose analysis data. Which change best addresses this?",
+    "options": [
+      "Move the skill logic into CLAUDE.md so it runs automatically",
+      "Add prompt instructions telling the skill to reduce its output verbosity",
+      "Enable context: fork so the skill runs in an isolated sub-agent context",
+      "Split the skill into several smaller commands"
+    ],
+    "correctIndex": 2,
+    "explanation": "A forked context isolates the skill's execution so its large output stays out of the main conversation, keeping later interactions clean and predictable.",
+    "tags": ["skills", "context-fork", "context-management"]
+  },
+  {
+    "id": "d3-p1-q12",
+    "domain": 3,
+    "sources": ["practice-1"],
+    "stem": "Your project has a large CLAUDE.md containing many different standards at once: API conventions, testing guidelines, and deployment rules. Different parts of the codebase need different subsets of these. You want to modularize the configuration so only the relevant rules load in each context. Which approach is most appropriate?",
+    "options": [
+      "Move all standards into user-level configuration to simplify the project files",
+      "Use .claude/rules/ with path-based scoping so only the relevant conventions load per file",
+      "Duplicate smaller CLAUDE.md files into each directory containing only its relevant rules",
+      "Keep everything in one CLAUDE.md and trust the model to apply the correct sections"
+    ],
+    "correctIndex": 1,
+    "explanation": "Path-scoped rules selectively load conventions based on file context, cutting irrelevant instructions and improving model performance without duplicating configuration everywhere.",
+    "tags": ["rules", "path-scoping", "configuration"]
+  },
+  {
+    "id": "d3-p1-q13",
+    "domain": 3,
+    "sources": ["practice-1"],
+    "stem": "You must migrate a large codebase to a new logging library. The change touches many modules and requires choosing among several integration approaches; once that approach is chosen the implementation steps are straightforward. What is the most appropriate workflow?",
+    "options": [
+      "Perform the entire task in plan mode to keep everything consistent",
+      "Use plan mode first to select the approach, then switch to direct execution for the implementation",
+      "Start directly in execution mode since the changes are well-defined",
+      "Alternate between plan mode and execution after every single step"
+    ],
+    "correctIndex": 1,
+    "explanation": "Plan mode is best for weighing the architectural decision, while direct execution is efficient for applying the now-known changes, so combining them fits this two-phase task.",
+    "tags": ["plan-mode", "workflow"]
+  },
+  {
+    "id": "d3-p1-q14",
+    "domain": 3,
+    "sources": ["practice-1"],
+    "stem": "You ask Claude to implement a caching layer for an API. The requirements are high-level and involve considerations like cache invalidation, expiration policies, and failure handling. Initial attempts produce incomplete implementations that miss important design considerations. What is the most effective next step?",
+    "options": [
+      "Write test cases immediately and iterate based on the failures",
+      "Regenerate the implementation multiple times using the same prompt",
+      "Use an interview-style approach where Claude asks clarifying questions before implementing",
+      "Provide much more detailed instructions describing every caching scenario"
+    ],
+    "correctIndex": 2,
+    "explanation": "When requirements are ambiguous and involve multiple design tradeoffs, the interview pattern surfaces missing constraints and decisions before any code is written.",
+    "tags": ["interview-pattern", "requirements"]
+  },
+  {
+    "id": "d3-p1-q15",
+    "domain": 3,
+    "sources": ["practice-1"],
+    "stem": "You are fixing a bug in a single function based on a clear stack trace. The issue is isolated and the required change is straightforward. A developer suggests using plan mode first to explore the codebase and weigh multiple approaches before making any modifications. What is the best course of action?",
+    "options": [
+      "Proceed with direct execution since the task is well-scoped and clearly understood",
+      "Use plan mode to make sure all possible approaches are considered before changing anything",
+      "Start in plan mode and switch to execution after reviewing the function",
+      "Use plan mode to confirm there are no hidden dependencies"
+    ],
+    "correctIndex": 0,
+    "explanation": "Direct execution suits simple, well-defined changes; invoking plan mode for an isolated one-function fix only adds unnecessary overhead.",
+    "tags": ["plan-mode", "workflow"]
+  },
+  {
+    "id": "d3-p2-q01",
+    "domain": 3,
+    "sources": ["practice-2"],
+    "stem": "Your codebase has areas with different conventions (frontend, backend, data access), and test files are scattered throughout, living next to the files they test (e.g. user.service.test.ts beside user.service.ts). You want every test file to follow the same conventions no matter where it lives. What is the most maintainable way to make Claude apply the correct conventions automatically?",
+    "options": [
+      "Create rule files in .claude/rules/ using YAML frontmatter with glob patterns that apply conventions based on file paths",
+      "Define all conventions in the root CLAUDE.md and rely on Claude to infer which rules apply in each context",
+      "Create separate skills in .claude/skills/ for each code type and embed conventions in each skill definition",
+      "Add a CLAUDE.md to every directory with localized rules specific to that part of the codebase"
+    ],
+    "correctIndex": 0,
+    "explanation": "Glob-based rule files apply conventions automatically by matching file paths, so consistently named test files inherit the same rules regardless of which directory they sit in.",
+    "tags": ["rules", "glob-patterns", "configuration"]
+  },
+  {
+    "id": "d3-p2-q02",
+    "domain": 3,
+    "sources": ["practice-2", "final-pool"],
+    "stem": "A platform team keeps org-wide standards in a root-level .claude/CLAUDE.md. During a production outage, infrastructure teams added directory-scoped CLAUDE.md files holding temporary emergency deployment overrides. Months later, unrelated workflows in those directories still follow the emergency behavior even though the incident is resolved. Which governance change prevents this persistent drift while still allowing emergency overrides when truly needed?",
+    "options": [
+      "Store all emergency operational procedures permanently in repository-scoped configuration so future incidents can reuse them automatically",
+      "Eliminate directory-scoped CLAUDE.md files entirely and force every workflow to inherit only root-level policy",
+      "Increase the context window so Claude can distinguish temporary instructions from long-term standards automatically",
+      "Move temporary incident-specific overrides into short-lived task context or explicitly versioned operational workflows instead of persistent scoped configuration"
+    ],
+    "correctIndex": 3,
+    "explanation": "Temporary overrides belong in ephemeral task context or versioned workflows, not persistent configuration files, so they expire naturally instead of silently governing unrelated future work.",
+    "tags": ["configuration-scope", "governance", "claude-md"]
+  },
+  {
+    "id": "d3-p2-q03",
+    "domain": 3,
+    "sources": ["practice-2"],
+    "stem": "An engineer asks Claude Code to investigate a distributed caching issue across several services. Early exploration reveals unexpected interactions between cache invalidation, async event handlers, and deployment timing. Instead of following a fixed sequence, Claude dynamically shifts strategy, tracing event propagation, spawning targeted dependency searches, and prioritizing recently modified modules, and finds the root cause far faster. Which principle BEST explains why this adaptive exploration improves investigation quality?",
+    "options": [
+      "Claude performs better when exploration steps are deliberately unstructured and randomized throughout an investigation",
+      "Reliability improves mainly because adaptive workflows maximize total context usage during execution",
+      "Dynamic exploration works chiefly because recently modified files are always the cause of distributed failures",
+      "Dynamic investigation refinement lets Claude adapt exploration depth and direction based on newly discovered evidence"
+    ],
+    "correctIndex": 3,
+    "explanation": "Adaptive investigation succeeds because Claude continuously redirects its exploration in response to fresh evidence, rather than because of randomness, context volume, or a fixed heuristic about recent files.",
+    "tags": ["investigation", "adaptive-exploration", "debugging"]
+  },
+  {
+    "id": "d3-p2-q04",
+    "domain": 3,
+    "sources": ["practice-2"],
+    "stem": "A large monorepo holds separate domains for frontend apps, infrastructure automation, and regulated financial services. The platform team maintains shared standards in a root-level .claude/CLAUDE.md while domain teams add directory-scoped CLAUDE.md files. Engineers find that infrastructure workflows sometimes inherit frontend-oriented testing and formatting guidance that conflicts with deployment validation. Which configuration strategy improves correctness while staying maintainable?",
+    "options": [
+      "Remove all domain-level CLAUDE.md files and rely entirely on user prompts during operational workflows",
+      "Use layered scoped configurations where shared global standards stay centralized while domain-specific workflows are isolated within their relevant directory boundaries",
+      "Move all domain-specific guidance into the root-level configuration so every workflow shares identical behavior",
+      "Increase the context window so Claude can reconcile conflicting instructions across unrelated domains automatically"
+    ],
+    "correctIndex": 1,
+    "explanation": "Layered scoping keeps shared standards central while confining domain-specific rules to their own directories, preventing one domain's guidance from bleeding into another.",
+    "tags": ["configuration-scope", "claude-md", "monorepo"]
+  },
+  {
+    "id": "d3-p2-q05",
+    "domain": 3,
+    "sources": ["practice-2"],
+    "stem": "A large engineering org uses shared @import-based configuration files to distribute standards across hundreds of repositories. Over time, some imported modules become deprecated after policy changes, yet many repos keep relying on the outdated imports because engineers do not know newer modules should replace them. Which governance approach best improves long-term configuration reliability and maintainability?",
+    "options": [
+      "Introduce versioned imported configuration modules with explicit deprecation and migration guidance workflows",
+      "Replace modular imports with fully duplicated repository-level instructions to remove dependency-management complexity",
+      "Allow repositories to keep using deprecated imports indefinitely so existing workflows remain stable",
+      "Increase the context window so Claude can automatically infer which imported configurations are outdated during execution"
+    ],
+    "correctIndex": 0,
+    "explanation": "Versioning imported modules with clear deprecation and migration guidance lets teams see what is outdated and how to upgrade, keeping shared configuration reliable at scale.",
+    "tags": ["import-syntax", "governance", "configuration"]
+  },
+  {
+    "id": "d3-p2-q06",
+    "domain": 3,
+    "sources": ["practice-2"],
+    "stem": "A platform team builds reusable Claude Code skills for dependency analysis, rollout validation, drift detection, and incident summarization. Engineers currently invoke them manually in different sequences per scenario. The org wants workflows to compose these skills dynamically based on runtime investigation signals while preserving consistency and maintainability. Which architectural approach best supports this?",
+    "options": [
+      "Keep the skills modular and orchestrate them dynamically using structured runtime decision logic",
+      "Duplicate commonly reused operational logic across every skill to minimize inter-skill dependencies",
+      "Replace the reusable skills with repository-level CLAUDE.md instructions so workflows stay globally accessible",
+      "Merge all operational skills into one centralized workflow containing every possible execution path"
+    ],
+    "correctIndex": 0,
+    "explanation": "Keeping skills modular and composing them through explicit runtime decision logic preserves reuse and maintainability while allowing dynamic, signal-driven orchestration.",
+    "tags": ["skills", "orchestration", "architecture"]
+  },
+  {
+    "id": "d3-p2-q07",
+    "domain": 3,
+    "sources": ["practice-2", "final-pool"],
+    "stem": "A reliability team uses Claude Code to investigate a complex cross-service latency issue, accumulating dependency maps, validated findings, disproven theories, and infrastructure observations over several hours. The investigation must then hand off to another team in a different time zone, who historically spend significant effort reconstructing context and sometimes revisit already-disproven hypotheses. Which workflow adjustment best improves investigation continuity across the handoff?",
+    "options": [
+      "Export the complete conversation transcript and require the receiving team to review the entire history before continuing",
+      "Create structured investigation artifacts summarizing validated findings, active hypotheses, rejected theories, and next-step recommendations",
+      "Restart the investigation from first principles so the receiving team forms unbiased independent conclusions",
+      "Increase the context window so future sessions can automatically include all historical investigation activity"
+    ],
+    "correctIndex": 1,
+    "explanation": "Structured artifacts capture what is known, what is still open, and what was ruled out, letting the receiving team resume efficiently without re-deriving context or repeating dead ends.",
+    "tags": ["investigation", "handoff", "artifacts"]
+  },
+  {
+    "id": "d3-p2-q08",
+    "domain": 3,
+    "sources": ["practice-2"],
+    "stem": "A large engineering org maintains shared coding standards, security requirements, and deployment procedures across many repositories. Teams first duplicated these across many separate CLAUDE.md files, but keeping them consistent grew harder as standards evolved, so they adopt the @import syntax inside CLAUDE.md. Which benefit BEST explains why this improves long-term maintainability?",
+    "options": [
+      "@import increases the effective context window by automatically compressing imported content",
+      "@import automatically merges all repository configurations into one global execution context regardless of scope",
+      "@import lets external markdown files be centrally maintained and reused across many Claude Code configurations",
+      "@import prevents repository-level configuration overrides so all teams inherit identical behavior permanently"
+    ],
+    "correctIndex": 2,
+    "explanation": "@import references shared markdown files that are maintained in one place and reused everywhere, so a single edit propagates to every configuration instead of requiring duplicate updates.",
+    "tags": ["import-syntax", "claude-md", "maintainability"]
+  },
+  {
+    "id": "d3-p2-q09",
+    "domain": 3,
+    "sources": ["practice-2"],
+    "stem": "A Claude-based code review pipeline runs four validation stages (security, architecture, performance, and style) sequentially, and total execution time has grown too long. You need to reduce overall pipeline runtime while keeping validation accuracy intact. Which workflow design best achieves this?",
+    "options": [
+      "Spawn independent subagents for each validation component and run them concurrently, then aggregate their results in a coordinating agent once all complete",
+      "Combine all four validation components into a single agent prompt and rely on the model to internally parallelize the analysis",
+      "Cache the results of previous pipeline runs and skip components whose inputs have not changed since the last execution",
+      "Run the validation components sequentially but shrink the scope of each one to reduce its individual execution time"
+    ],
+    "correctIndex": 0,
+    "explanation": "Independent subagents run the four validations in parallel and a coordinator merges their outputs, cutting wall-clock time while each component keeps its full analytical scope and accuracy.",
+    "tags": ["subagents", "parallelization", "performance"]
+  },
+  {
+    "id": "d3-p2-q10",
+    "domain": 3,
+    "sources": ["practice-2", "final-pool"],
+    "stem": "You are analyzing a large legacy codebase to understand dependencies before a refactor. The discovery phase produces extensive output, including file relationships, module usage, and configuration patterns. In testing you notice that after this analysis, later steps become less accurate and the model starts missing important details. What is the most appropriate improvement?",
+    "options": [
+      "Use the Explore subagent to isolate the discovery output and return a concise summary",
+      "Add prompt instructions asking the model to be more concise",
+      "Reduce the amount of analysis performed before starting implementation",
+      "Switch directly to execution mode to avoid producing large outputs"
+    ],
+    "correctIndex": 0,
+    "explanation": "The Explore subagent keeps bulky intermediate discovery output out of the main context and returns only a concise summary, preserving clarity and accuracy in the steps that follow.",
+    "tags": ["subagents", "explore", "context-management"]
+  },
+  {
+    "id": "d3-p2-q11",
+    "domain": 3,
+    "sources": ["practice-2", "final-pool"],
+    "stem": "An engineer uses Claude Code to debug an intermittent data corruption issue in a distributed pipeline. Two competing theories emerge, one about serialization inconsistencies and another about async retry ordering. The engineer wants to pursue both independently while ensuring that assumptions and reasoning from one path do not unintentionally bias the other. Which workflow best supports this?",
+    "options": [
+      "Merge all evidence from both theories into a shared summary document before continuing exploration sequentially",
+      "Restart the investigation from scratch for each theory to eliminate all prior contextual influence completely",
+      "Fork the investigation into isolated exploration branches that inherit shared baseline context but keep independent reasoning histories",
+      "Continue exploring both theories inside a single continuously evolving reasoning chain so all evidence stays globally visible"
+    ],
+    "correctIndex": 2,
+    "explanation": "Forking into isolated branches lets each theory start from the same baseline yet reason independently, preventing cross-contamination without discarding the shared context.",
+    "tags": ["context-fork", "investigation", "debugging"]
+  },
+  {
+    "id": "d3-p2-q12",
+    "domain": 3,
+    "sources": ["practice-2", "final-pool"],
+    "stem": "A Claude-based deployment orchestration workflow packs system policies, rollback procedures, compliance requirements, incident history, infrastructure metadata, and runtime diagnostics into one prompt before generating remediation recommendations. During incidents, the model occasionally prioritizes detailed diagnostic logs over critical deployment safety constraints defined earlier. Which configuration adjustment best ensures higher-priority organizational constraints get appropriate attention relative to lower-priority guidance?",
+    "options": [
+      "Compress all infrastructure diagnostics aggressively so the prompt holds only high-level summaries during remediation",
+      "Increase temperature so Claude balances operational diagnostics and deployment constraints more dynamically",
+      "Increase the context window so all operational information stays simultaneously visible during orchestration",
+      "Reassert critical deployment constraints near the decision-generation stages while structurally separating operational data from authoritative instructions"
+    ],
+    "correctIndex": 3,
+    "explanation": "Placing critical constraints close to where decisions are made and separating raw data from authoritative instructions ensures high-priority policies are not drowned out by voluminous diagnostics.",
+    "tags": ["context-management", "prompt-structure", "orchestration"]
+  },
+  {
+    "id": "d3-p2-q13",
+    "domain": 3,
+    "sources": ["practice-2"],
+    "stem": "An engineering team uses Claude Code to investigate production failures in a large distributed codebase. Some engineers immediately ask Claude to modify files after a brief description, while others first run exploration-oriented workflows using Grep, Glob, dependency tracing, and planning before requesting changes. The second group consistently produces more reliable fixes with fewer regressions. Which explanation BEST describes why exploration-first improves reliability?",
+    "options": [
+      "Exploration workflows let Claude gather architectural context and dependency relationships before making implementation decisions",
+      "Exploration workflows mainly improve reliability because they increase context window usage and expose more source code at once",
+      "Immediate implementation requests reduce reliability because Claude cannot modify files until all repository files are read completely",
+      "Claude performs best when implementation tasks are delayed because reasoning quality improves automatically over time"
+    ],
+    "correctIndex": 0,
+    "explanation": "Exploring first builds an accurate picture of architecture and dependencies, so the resulting changes account for real relationships and avoid the regressions that blind edits cause.",
+    "tags": ["investigation", "exploration", "reliability"]
+  },
+  {
+    "id": "d3-p2-q14",
+    "domain": 3,
+    "sources": ["practice-2"],
+    "stem": "An engineer uses Claude Code to investigate a cascading timeout issue in a distributed event-processing platform. Early investigation surfaces dozens of potentially related services, retry handlers, and async message flows, and Claude initially tries to explore every dependency path in parallel, causing context growth and reduced precision. The engineer wants Claude to stay adaptive while avoiding uncontrolled exploration. Which workflow adjustment best improves investigation quality?",
+    "options": [
+      "Continue exploring all dependency paths simultaneously so no potentially relevant signal is missed",
+      "Restrict exploration to only the directly failing services regardless of observed downstream interactions",
+      "Increase the context window so all explored dependencies stay permanently visible during debugging",
+      "Introduce iterative prioritization checkpoints that continuously rank investigation paths by newly discovered evidence and diagnostic value"
+    ],
+    "correctIndex": 3,
+    "explanation": "Periodic prioritization checkpoints keep the investigation focused on the highest-value paths as evidence accumulates, preserving adaptivity without letting exploration sprawl and dilute precision.",
+    "tags": ["investigation", "prioritization", "context-management"]
+  },
+  {
+    "id": "d3-p2-q15",
+    "domain": 3,
+    "sources": ["practice-2"],
+    "stem": "Your team creates a skill that runs a multi-step analysis: scan files, identify issues, then propose fixes. It is configured with context: fork to isolate execution. In testing, the final output is incomplete: the skill identifies issues but fails to propose fixes based on the earlier findings. What is the most likely cause?",
+    "options": [
+      "The skill should be split into multiple separate commands instead of one workflow",
+      "The CLAUDE.md file is missing required configuration for multi-step tasks",
+      "The skill needs more detailed prompt instructions to complete all steps",
+      "The forked context prevents earlier results from being available across the later steps"
+    ],
+    "correctIndex": 3,
+    "explanation": "context: fork isolates execution, which breaks workflows that depend on accumulating intermediate state, so the later fix-proposal step cannot see the findings from the earlier steps.",
+    "tags": ["skills", "context-fork", "state-management"]
+  }
+]

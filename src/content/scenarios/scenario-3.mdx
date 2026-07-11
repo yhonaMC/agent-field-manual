@@ -1,0 +1,27 @@
+---
+title: "Multi-Agent Research System"
+order: 3
+summary: "A coordinator delegates to specialized subagents to research topics and produce comprehensive, well-cited reports."
+---
+
+## The Situation
+
+You are building a multi-agent research system on the Claude Agent SDK. A coordinator agent orchestrates specialized subagents: one searches the web, one analyzes documents, one synthesizes findings, and one generates reports. Together they research a topic and produce a thorough, cited report. The relevant domains are agentic architecture, tool design and MCP, and reliability.
+
+## Walkthrough
+
+The architecture is hub-and-spoke. The coordinator routes all communication between subagents, which buys you two things: observability into what each agent is doing, and a single place to handle errors. The tempting shortcut — letting subagents talk directly to each other — breaks that observability and is the anti-pattern to avoid. Everything flows through the hub.
+
+Context isolation is the second load-bearing idea. Subagents run with their own isolated context; they do not automatically inherit the coordinator's history. So how do results move between them? Not by sharing a context window and not by the coordinator forwarding a full transcript to the next agent. Each subagent writes its results to files, and the coordinator reads those files and distributes what the next agent needs. Files are the hand-off medium precisely because context is not shared. This also keeps the coordinator lean: it delegates and aggregates rather than doing the detailed work itself, and it does not need every tool — tools belong to the subagents that use them.
+
+Good decomposition is a balance. Partition the research scope across subagents by distinct subtopics or source types to minimize duplicated effort. But over-narrowing the slices leaves gaps and yields incomplete coverage of the topic. The coordinator closes those gaps through iterative refinement: it evaluates the synthesis, spots what is missing, and re-delegates until coverage is sufficient.
+
+Finally, provenance. The system must keep a claim-to-source mapping. When sources conflict, the wrong instinct is to average the numbers or silently drop one. The correct behavior is to surface both values with attribution and let the reader see the disagreement. And every subagent needs a fallback path: when one fails, the coordinator should handle it rather than let the whole run collapse.
+
+## Field Notes
+
+- Use hub-and-spoke: the coordinator routes all inter-subagent communication for observability and error handling.
+- Subagents have isolated context — pass results through files, not a shared window or forwarded transcripts.
+- Keep the coordinator thin: it delegates and aggregates; tools live with the subagents.
+- Partition scope to cut duplication, but avoid over-narrow slices; refine iteratively until coverage is complete.
+- Preserve claim-to-source provenance and, on conflicts, present both values with attribution rather than averaging or discarding.

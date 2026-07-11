@@ -1,0 +1,22 @@
+---
+title: "Claude Code Customization for Teams"
+domain: 3
+summary: "Configuring Claude Code for teams: the CLAUDE.md hierarchy, custom commands and skills, path-specific rules, plan mode versus direct execution, iterative refinement, and CI/CD integration."
+objectives:
+  - "Configure CLAUDE.md files with the right hierarchy, scoping, and modular organization using @import and .claude/rules/."
+  - "Diagnose configuration issues with /memory and distinguish private user-level from shared project-level instructions."
+  - "Create project- and user-scoped slash commands for reusable team workflows."
+  - "Build skills with SKILL.md frontmatter — context: fork, allowed-tools, and argument-hint — and know when to use a skill versus CLAUDE.md."
+  - "Apply path-specific rules with YAML glob patterns so conventions load only when relevant files are edited."
+  - "Decide between plan mode and direct execution based on task complexity, scope, and architectural risk."
+  - "Apply iterative refinement: concrete input/output examples, test-driven iteration, the interview pattern, and issue batching."
+  - "Integrate Claude Code into CI/CD with the -p flag, structured JSON output, CLAUDE.md context, and session isolation."
+---
+
+Domain 3 shifts from building agents to customizing Claude Code so an entire team works consistently with it. The foundation is `CLAUDE.md`, the file through which Claude Code receives a project's instructions. It loads at three levels — user, project, and directory — in ascending order of priority, and the most specific level wins on conflicts. A recurring pitfall is placing shared team standards at the private user level, where teammates never see them; the `/memory` command exists precisely to diagnose which memory files are loaded when behavior looks inconsistent. To keep configuration maintainable, the domain favors modular organization through `@import` and topic-specific files in `.claude/rules/` over one sprawling monolith.
+
+On top of that base sit three ways to package behavior. Slash commands in `.claude/commands/` standardize prompts the team runs often. Skills in `.claude/skills/` go further: a `SKILL.md` adds frontmatter for isolation (`context: fork`), tool restrictions (`allowed-tools`), and parameter prompting (`argument-hint`), making them suited to multi-step workflows that should not pollute the main conversation. The dividing line with `CLAUDE.md` is loading behavior — `CLAUDE.md` is always loaded and belongs to standards that apply nearly everywhere, while skills load only on demand and can be extensive without a constant context cost. Path-specific rules complete the picture: with glob `paths` in their frontmatter, they activate conventions only when matching files are edited, which is the right tool for standards that span a file type across many directories.
+
+The domain also covers how to work effectively, not just how to configure. Plan mode fits complex, multi-file, or architecturally risky tasks because Claude can explore and propose a strategy without committing changes; direct execution fits simple, well-scoped edits. Refinement techniques make iteration productive — concrete input/output examples remove prose ambiguity, test-driven iteration turns exact failure messages into precise guidance, the interview pattern surfaces overlooked design questions, and batching groups interacting issues into one message while sending independent ones sequentially.
+
+Finally, all of this carries into automation. Running Claude Code with the `-p` (`--print`) flag makes it non-interactive so pipelines never hang, `--output-format json` (optionally with `--json-schema`) produces machine-parseable findings, and `CLAUDE.md` supplies the same testing standards, fixtures, and review criteria in CI that it does locally. Session isolation is a genuine advantage here: because each CI run is a fresh session, reviews avoid the self-review bias a generating session carries. Work through the four lessons, then use the objectives above as a checklist — if you can explain why user-level rules are private, when a skill beats a `CLAUDE.md` entry, and why `-p` is mandatory in CI, you have the core of Domain 3.

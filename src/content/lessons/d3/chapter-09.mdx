@@ -1,0 +1,90 @@
+---
+title: "CLAUDE.md: Hierarchy and Organization"
+domain: 3
+chapter: 9
+section: "3.1"
+summary: "How the three-level CLAUDE.md hierarchy decides which instructions apply, plus modular organization with @import and .claude/rules/."
+---
+
+`CLAUDE.md` is the primary channel through which Claude Code learns a project's instructions. Where those files live, and how they are organized, determines which rules take effect in any given context.
+
+## Three configuration levels
+
+Claude Code reads `CLAUDE.md` from three locations, and it applies them in ascending order of priority:
+
+```text
+1. ~/.claude/CLAUDE.md         <- user-level (private, not shared with the team)
+2. .claude/CLAUDE.md or CLAUDE.md   <- project-level (checked into version control)
+3. subdir/CLAUDE.md            <- directory-level (only under that path)
+```
+
+Instructions defined at the most specific level — a subdirectory — can override or add to those set at the project level, which in turn build on the user-level settings. The narrower the scope, the higher the precedence.
+
+## User-level versus project-level
+
+The difference between these two levels is a frequent source of confusion:
+
+- `~/.claude/CLAUDE.md` affects only *your* copy of Claude Code. It never reaches the repository and your teammates never see it.
+- `CLAUDE.md` at the project root applies to *everyone* on the team because it is versioned alongside the code.
+
+When a new teammate is not picking up an expected instruction, the first thing to inspect is whether that instruction is sitting at the user level (private) when it really belongs at the project level (shared).
+
+## Modularity with @import
+
+To keep a `CLAUDE.md` from turning into one giant file, use the `@import` directive to pull in external files:
+
+```text
+# CLAUDE.md (project root)
+
+@import .claude/rules/coding-standards.md
+@import .claude/rules/testing.md
+@import packages/api/standards.md
+```
+
+This lets you divide rules by topic or by owner, and — in a monorepo — include only the standards that matter for each package.
+
+## The .claude/rules/ directory
+
+Instead of one monolithic file, you can spread conventions across a `.claude/rules/` directory where each file covers a single topic:
+
+```text
+.claude/rules/
+├── testing.md
+├── api-conventions.md
+├── deployment.md
+└── git-workflow.md
+```
+
+This approach works well with path scoping (covered in the next lessons): each rule file can declare the scope where it applies through YAML frontmatter.
+
+## The /memory command
+
+When behavior seems inconsistent from one session to the next, the `/memory` command reveals exactly which memory files Claude Code has loaded. It is handy when:
+
+- A teammate is not receiving a set of instructions.
+- Behavior varies between different directories of the same project.
+- You suspect a private user-level `CLAUDE.md` is shadowing the project's version.
+
+## Anti-patterns to avoid
+
+**The 800-line monolith.** A single sprawling file is hard to maintain, is always loaded in full, and blends unrelated concerns. Break it apart with `@import` or `.claude/rules/`.
+
+**User-level rules that belong to the team.** A convention like "always use TypeScript strict mode" is a shared standard. It belongs in the repository, not tucked away in each developer's home directory.
+
+**Relying on implicit conventions.** If Claude has not been told a rule, it cannot follow it. The whole point of `CLAUDE.md` is to make the team's expectations explicit.
+
+## Quick reference
+
+| Level | Path | Shared? | Typical use |
+| --- | --- | --- | --- |
+| User | `~/.claude/CLAUDE.md` | No | Personal preferences |
+| Project | `.claude/CLAUDE.md` | Yes (versioned) | Team standards |
+| Directory | `subdir/CLAUDE.md` | Yes (versioned) | Module-specific rules |
+
+## Field Notes
+
+- Claude Code merges three levels of `CLAUDE.md`; the most specific (directory) level wins on conflicts.
+- User-level files are private and never versioned — put shared team standards at the project level instead.
+- Keep configuration modular with `@import` or a `.claude/rules/` directory rather than one enormous file.
+- Reach for `/memory` to diagnose why instructions load inconsistently across sessions or directories.
+- If it is not written down, Claude cannot honor it — make conventions explicit.

@@ -1,0 +1,99 @@
+---
+title: "Subagents: Invocation, Context, and Spawning"
+domain: 1
+chapter: 3
+section: "1.3"
+summary: "Spawning subagents with the Task tool, passing context explicitly, defining specialized agents, parallel spawning, and fork-based sessions."
+---
+
+Subagents are Claude instances that a coordinator agent invokes to delegate specific work. They run with isolated context and receive their instructions explicitly from the coordinator.
+
+## The Task tool spawns subagents
+
+Subagents are spawned through the special `Task` tool from the Agent SDK. For a coordinator to invoke subagents, its `allowedTools` configuration must include `"Task"`:
+
+```typescript
+const coordinator = {
+  systemPrompt: "Coordinate research by delegating to subagents...",
+  allowedTools: ["Task", "WebSearch"],
+};
+```
+
+Without `"Task"` in `allowedTools`, the coordinator cannot emit subagent calls at all — the tool simply isn't visible to the model.
+
+## Isolated context: nothing is inherited
+
+The defining rule of subagents: **they do not automatically inherit context from the coordinator.** They don't see the prior conversation, don't share memory, and don't have access to past tool results.
+
+Whatever a subagent needs must be passed explicitly in its prompt:
+
+```typescript
+// BAD: the subagent sees no context
+await spawn("synthesis_agent", "Synthesize the findings");
+
+// GOOD: context included in the prompt
+await spawn("synthesis_agent", `
+Synthesize these findings on AI in creative industries:
+
+[Finding 1] Source: arxiv.org/2024.123
+"Generative models transformed the workflow..."
+
+[Finding 2] Source: nytimes.com/2024/...
+"The music industry reports..."
+`);
+```
+
+## AgentDefinition: per-subagent specialization
+
+Each subagent type is described by an `AgentDefinition` that includes:
+
+- **Description** — when to use this subagent. This matters: the coordinator relies on it to pick the right agent.
+- **System prompt** — the subagent's role, tone, and output criteria.
+- **Tool restrictions** — only the tools relevant to its role.
+
+```typescript
+const synthesisAgent: AgentDefinition = {
+  name: "synthesis",
+  description: "Combines findings from multiple sources into a coherent report with attribution.",
+  systemPrompt: "You are a synthesis agent. Your output preserves claim-to-source mappings...",
+  allowedTools: ["verify_fact"],
+};
+```
+
+## Parallel spawning
+
+To run several subagents at once, the coordinator emits multiple `Task` calls in a single response — not across separate turns:
+
+```typescript
+// One coordinator response containing 3 tool_use blocks
+[
+  { type: "tool_use", name: "Task", input: { agent: "search", prompt: "..." } },
+  { type: "tool_use", name: "Task", input: { agent: "search", prompt: "..." } },
+  { type: "tool_use", name: "Task", input: { agent: "analyze", prompt: "..." } },
+]
+```
+
+This lets subagents work simultaneously, reducing total latency.
+
+## Fork-based session management
+
+`fork_session` creates independent branches from a shared analysis baseline — useful for exploring divergent approaches:
+
+- Compare two testing strategies derived from the same codebase analysis.
+- Try an alternative refactor without polluting the main session.
+
+## Anti-patterns
+
+**Assuming the subagent "knows" the context.** If you don't state it in the prompt, the subagent doesn't have it. There is no implicit sharing.
+
+**Step-by-step procedural prompts.** Coordinator prompts to subagents should describe goals and quality criteria, not rigid step-by-step instructions. Goal-oriented prompts let the subagent adapt to what it discovers.
+
+**Mixing content and metadata.** When passing context between agents, separate the content from its metadata (URLs, dates, IDs) using explicit structure. This preserves attribution across multiple layers of delegation.
+
+## Field Notes
+
+- Subagents are spawned with the `Task` tool; the coordinator must list `"Task"` in `allowedTools`.
+- Context is never inherited — pass every needed fact explicitly in the subagent's prompt.
+- An `AgentDefinition` sets each subagent's description, system prompt, and tool restrictions.
+- Spawn subagents in parallel by emitting multiple `Task` calls in one response.
+- Use `fork_session` to branch from a shared baseline for exploring divergent approaches, and keep content separate from metadata to preserve attribution.

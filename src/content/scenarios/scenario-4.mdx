@@ -1,0 +1,25 @@
+---
+title: "Developer Productivity with Claude"
+order: 4
+summary: "An agent that explores unfamiliar codebases, decodes legacy systems, and automates repetitive engineering work."
+---
+
+## The Situation
+
+You are building developer productivity tooling on the Claude Agent SDK. The agent helps engineers navigate unfamiliar codebases, make sense of legacy systems, generate boilerplate, and automate repetitive chores. It leans on the built-in tools — `Read`, `Write`, `Bash`, `Grep`, `Glob` — and extends into external systems through MCP servers. The domains are tool design and MCP, Claude Code configuration and workflows, and agentic architecture.
+
+## Walkthrough
+
+The first thing to get right is knowing which tools are built in versus which require MCP. `Read`, `Write`, `Bash`, `Grep`, and `Glob` cover the local filesystem and shell, and each fits a specific job — `Glob` to find files by pattern, `Grep` to search contents, `Read` to open a known path, `Bash` for commands. When the task reaches beyond the local environment — querying JIRA tickets during code review, posting to Slack, hitting an internal database — that is MCP territory. The right approach for JIRA-during-review is to configure an MCP server that exposes JIRA as a tool. Pasting the ticket into the prompt does not scale, and curling the JIRA API through `Bash` is neither maintainable nor safe.
+
+Tool design quality determines how well the agent selects tools. Schemas should have unambiguous parameters, descriptions that actually guide selection, and — a commonly missed detail — error responses defined in the schema so the agent can react to failures instead of guessing. One more distinction worth internalizing: the Agent SDK is for automating workflows programmatically, and it is not the same thing as the raw messages API.
+
+The reliability theme here is context hygiene during long exploration. As a session stretches on, a degraded agent starts describing "typical patterns" for this kind of codebase instead of the actual findings from the code in front of it — a clear symptom of context degradation. The countermeasure is to externalize memory: write key findings to a scratchpad file and reference it in later steps, so conclusions rest on recorded facts rather than fading recollection. Pairing that with subagents to absorb verbose output keeps the main context clean and focused.
+
+## Field Notes
+
+- Know the built-ins (`Read`, `Write`, `Bash`, `Grep`, `Glob`) and match each to its job; reach for MCP when the task leaves the local environment.
+- For external systems like JIRA or Slack, configure an MCP server — don't paste data into prompts or shell out with `Bash`.
+- Design tool schemas with clear parameters, guiding descriptions, and explicit error responses.
+- Watch for context degradation: an agent citing "typical patterns" instead of real findings has lost the thread.
+- Externalize memory to a scratchpad file in long sessions, and use subagents to keep verbose output out of the main context.

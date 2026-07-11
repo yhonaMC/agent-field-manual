@@ -1,0 +1,452 @@
+[
+  {
+    "id": "d5-p1-q01",
+    "domain": 5,
+    "sources": ["practice-1"],
+    "stem": "A distributed agent workflow runs several reasoning branches in parallel and then merges them into one decision. During the merge, some branches keep relying on stale assumptions even after another branch has already produced corrected state. What change would best reduce state divergence while keeping the advantages of parallel execution?",
+    "options": [
+      "Let every branch finalize its own decision independently with no synchronization so throughput stays high",
+      "Force all reasoning branches to run one after another so shared state is always synchronized",
+      "Enlarge the context window so each branch can hold on to more of its reasoning history",
+      "Add controlled reconciliation checkpoints before the major decision merges happen"
+    ],
+    "correctIndex": 3,
+    "explanation": "Reconciliation checkpoints let branches align on corrected shared state at defined points, cutting divergence without giving up the throughput benefits of running branches in parallel.",
+    "tags": ["parallel-execution", "state-management", "multi-agent"]
+  },
+  {
+    "id": "d5-p1-q02",
+    "domain": 5,
+    "sources": ["practice-1"],
+    "stem": "A subagent runs a search and returns nothing. The coordinator treats the empty result as a failure and retries the query several times before escalating. Later analysis reveals the search actually ran fine and there were simply no matching records. Which change would most directly improve this behavior?",
+    "options": [
+      "Escalate right away whenever no results come back",
+      "Automatically retry the query with broader search terms",
+      "Suppress empty results so they never trigger further processing",
+      "Distinguish between a successful empty result and a genuine failure in the response"
+    ],
+    "correctIndex": 3,
+    "explanation": "A valid empty result is not an error. Clearly separating 'no matches' from an actual failure lets the coordinator respond appropriately instead of retrying needlessly.",
+    "tags": ["error-handling", "tool-use", "multi-agent"]
+  },
+  {
+    "id": "d5-p1-q03",
+    "domain": 5,
+    "sources": ["practice-1", "final-pool"],
+    "stem": "A Claude-based agent pulls documents from an external knowledge source before answering. To maximize accuracy the team initially stuffs every retrieved document into context. Over time answers get worse because unrelated material influences the reasoning. What adjustment best improves answer quality while keeping access to relevant information?",
+    "options": [
+      "Rank retrieved documents by relevance and filter them before placing them in context",
+      "Retrieve even more documents to widen coverage",
+      "Condense all retrieved documents into a single paragraph",
+      "Grow the context window so more retrieval results fit"
+    ],
+    "correctIndex": 0,
+    "explanation": "Ranking and filtering by relevance keeps only the material that actually helps, so irrelevant text stops degrading reasoning while genuinely useful documents remain available.",
+    "tags": ["retrieval", "context-management", "relevance-filtering"]
+  },
+  {
+    "id": "d5-p1-q04",
+    "domain": 5,
+    "sources": ["practice-1"],
+    "stem": "A long-running Claude workflow repeatedly compresses earlier reasoning into shorter summaries. It stays factually consistent but gradually drops subtle edge-case constraints that were originally critical. What change would best preserve these important low-frequency constraints across repeated compression cycles?",
+    "options": [
+      "Tag and store high-salience constraints separately from the general contextual summaries",
+      "Compress all historical reasoning uniformly to keep the summaries balanced",
+      "Increase the context window so compression is needed less often",
+      "Reduce the depth of the workflow to lower the need for summarization"
+    ],
+    "correctIndex": 0,
+    "explanation": "Isolating and explicitly preserving high-salience constraints protects them from being averaged away during summarization, which uniform compression cannot guarantee.",
+    "tags": ["context-compression", "summarization", "constraint-preservation"]
+  },
+  {
+    "id": "d5-p1-q05",
+    "domain": 5,
+    "sources": ["practice-1"],
+    "stem": "A Claude-based agent gathers information from several external sources before making recommendations. During runs the sources sometimes give conflicting but plausible information, and the agent produces unstable conclusions across repeated executions. Which change would best improve the consistency and reliability of its reasoning?",
+    "options": [
+      "Retrieve more documents to broaden coverage",
+      "Drop retrieval entirely and rely only on the model's internal knowledge",
+      "Introduce source ranking and confidence scoring before incorporating retrieved information into reasoning",
+      "Always favor the most recently retrieved source regardless of its quality"
+    ],
+    "correctIndex": 2,
+    "explanation": "Scoring sources for reliability and confidence before they enter reasoning lets the agent weigh conflicting evidence consistently, producing stable conclusions across runs.",
+    "tags": ["retrieval", "source-ranking", "reliability"]
+  },
+  {
+    "id": "d5-p1-q06",
+    "domain": 5,
+    "sources": ["practice-1"],
+    "stem": "An agent accumulates context over time from many inputs, including tool outputs and user messages. Some of this material becomes stale or conflicts with newer data, leading to incorrect reasoning. Which approach would most effectively keep the context consistent?",
+    "options": [
+      "Keep all information regardless of conflicts",
+      "Enlarge the context window so more information can be stored",
+      "Update or replace outdated information with the latest data",
+      "Ignore new information to keep the context stable"
+    ],
+    "correctIndex": 2,
+    "explanation": "Actively replacing stale entries with current data removes the contradictions that cause faulty reasoning, rather than merely storing more or freezing the context.",
+    "tags": ["context-management", "state-consistency"]
+  },
+  {
+    "id": "d5-p1-q07",
+    "domain": 5,
+    "sources": ["practice-1"],
+    "stem": "An agent keeps appending large tool responses to its context. Over time the context fills with redundant, repeated information, which slows responses and degrades reasoning quality. Which approach would most effectively address this?",
+    "options": [
+      "Trim redundant and repeated information out of the context",
+      "Increase the model's context window size",
+      "Keep appending every response to preserve the full history",
+      "Send fewer prompts to the model"
+    ],
+    "correctIndex": 0,
+    "explanation": "Pruning redundant and duplicated content keeps the context lean and focused, restoring speed and reasoning quality that a larger window alone would not fix.",
+    "tags": ["context-management", "tool-use", "pruning"]
+  },
+  {
+    "id": "d5-p1-q08",
+    "domain": 5,
+    "sources": ["practice-1"],
+    "stem": "A multi-agent system analyzes a large codebase, with each agent contributing findings over several steps. When a workflow is interrupted and later resumed, it often yields inconsistent or incomplete conclusions even though earlier steps had already gathered useful information. The agents do not persist their intermediate findings outside the active session. Which change would most directly improve reliability when resuming?",
+    "options": [
+      "Restart the whole workflow from the beginning after any interruption",
+      "Require agents to redo earlier steps to rebuild the lost context",
+      "Increase the context window to retain more prior interaction history",
+      "Persist structured agent state and reload it into context when resuming"
+    ],
+    "correctIndex": 3,
+    "explanation": "Externalizing agent state so it survives session boundaries lets a resumed workflow reload prior findings intact, avoiding wasted rework or lost information.",
+    "tags": ["state-persistence", "multi-agent", "workflow-resumption"]
+  },
+  {
+    "id": "d5-p1-q09",
+    "domain": 5,
+    "sources": ["practice-1"],
+    "stem": "An agent runs a long workflow in which context is continuously updated. Over time, earlier assumptions and decisions become inconsistent with newer data, causing the model to produce conflicting outputs. Which approach would best maintain logical consistency across the workflow?",
+    "options": [
+      "Preserve all context so no information is ever lost",
+      "Periodically reconcile and update the context to reflect the current state",
+      "Increase the context window size to hold more data",
+      "Restart the workflow whenever inconsistencies appear"
+    ],
+    "correctIndex": 1,
+    "explanation": "Regularly reconciling the context so it mirrors the current state removes contradictions between old and new information, keeping the workflow logically consistent.",
+    "tags": ["context-management", "reconciliation", "state-consistency"]
+  },
+  {
+    "id": "d5-p1-q10",
+    "domain": 5,
+    "sources": ["practice-1"],
+    "stem": "An agent summarizes historical context to stay within token limits. Across many iterations, subtle but important constraints get lost, producing incorrect outputs even though the summaries look correct at a high level. Which approach would best preserve reasoning fidelity while still managing context size?",
+    "options": [
+      "Keep summarizing context at every step without any changes",
+      "Increase the context window so summarization is unnecessary",
+      "Reset the context frequently to stop errors from accumulating",
+      "Maintain a structured summary that explicitly tracks key constraints and decisions"
+    ],
+    "correctIndex": 3,
+    "explanation": "A structured summary that deliberately records critical constraints and decisions keeps them from being smoothed away during repeated summarization, preserving reasoning fidelity.",
+    "tags": ["summarization", "constraint-preservation", "context-management"]
+  },
+  {
+    "id": "d5-p1-q11",
+    "domain": 5,
+    "sources": ["practice-1"],
+    "stem": "A system reports 97% overall extraction accuracy, and the team plans to remove human review based on that figure. However, testing shows that certain document types still produce frequent errors. Which conclusion best explains this?",
+    "options": [
+      "The model needs retraining to raise overall accuracy",
+      "The evaluation dataset is too small to draw any conclusions",
+      "The model's confidence scores are unreliable and should be ignored",
+      "The aggregate accuracy is masking uneven performance across document types"
+    ],
+    "correctIndex": 3,
+    "explanation": "A high aggregate score can hide poor performance on specific segments, so removal decisions should rest on per-type or per-field metrics rather than the overall average.",
+    "tags": ["evaluation", "metrics", "aggregate-bias"]
+  },
+  {
+    "id": "d5-p1-q12",
+    "domain": 5,
+    "sources": ["practice-1", "final-pool"],
+    "stem": "A Claude-based agent handles similar tasks across different sessions. The team considers reusing prior context to gain efficiency, but notices that outdated information sometimes contaminates new tasks. Which approach best balances efficiency and accuracy?",
+    "options": [
+      "Increase the context window size",
+      "Always reuse the previous context without any modification",
+      "Always regenerate the context from scratch",
+      "Selectively reuse the relevant context and discard outdated information"
+    ],
+    "correctIndex": 3,
+    "explanation": "Reusing only the still-relevant context and dropping stale material captures the efficiency of reuse while preventing outdated information from corrupting new tasks.",
+    "tags": ["context-reuse", "context-management", "efficiency"]
+  },
+  {
+    "id": "d5-p1-q13",
+    "domain": 5,
+    "sources": ["practice-1"],
+    "stem": "A Claude-based orchestration system spreads subtasks across several execution branches, each maintaining its own evolving context. Later integration stages sometimes fail because important assumptions were never propagated consistently between branches. What adjustment would best improve integration reliability while preserving the scalability of distributed execution?",
+    "options": [
+      "Force every branch to recompute its assumptions independently before integration",
+      "Continuously share each branch's full context history with all other branches",
+      "Define explicit shared-state synchronization policies for critical assumptions and workflow invariants",
+      "Increase the context window so each branch can hold more independent reasoning history"
+    ],
+    "correctIndex": 2,
+    "explanation": "Explicit synchronization policies for the critical shared assumptions and invariants keep branches aligned at integration without the overhead of broadcasting every branch's entire history.",
+    "tags": ["orchestration", "state-synchronization", "distributed-execution"]
+  },
+  {
+    "id": "d5-p1-q14",
+    "domain": 5,
+    "sources": ["practice-1", "final-pool"],
+    "stem": "An agent runs long workflows involving many tool calls and large data responses. Over time the context grows too large, degrading reasoning quality and occasionally hitting context limits. Which approach would most effectively maintain performance while preserving important information?",
+    "options": [
+      "Periodically summarize older context and keep the key insights",
+      "Keep appending all data and increase the context window size",
+      "Reduce tool usage to keep the context smaller",
+      "Remove all prior context and restart the reasoning"
+    ],
+    "correctIndex": 0,
+    "explanation": "Periodically compressing older context into summaries that retain the key insights controls context growth without discarding the important information the workflow depends on.",
+    "tags": ["summarization", "context-management", "tool-use"]
+  },
+  {
+    "id": "d5-p1-q15",
+    "domain": 5,
+    "sources": ["practice-1"],
+    "stem": "An agent aggregates statistics from multiple sources and finds that two credible sources report different values for the same metric. Inspection shows one value comes from a report published two years ago and the other from a recent study. Currently the agent presents both values as conflicting with no explanation. Which change would most improve the output?",
+    "options": [
+      "Include the publication dates and explain that the difference reflects temporal variation",
+      "Choose the most recent value and drop the older one",
+      "Average the two values into a single estimate",
+      "Flag the data as unreliable because of the inconsistency"
+    ],
+    "correctIndex": 0,
+    "explanation": "Temporal context matters: surfacing the publication dates shows the gap is likely a real change over time rather than a contradiction, giving the user an accurate picture.",
+    "tags": ["temporal-reasoning", "data-aggregation", "conflict-resolution"]
+  },
+  {
+    "id": "d5-p2-q01",
+    "domain": 5,
+    "sources": ["practice-2"],
+    "stem": "A Claude-based multi-stage pipeline handles complex analytical tasks that need system instructions, retrieved reference documents, intermediate reasoning, and structured output across several sequential stages. Engineers find that early stages consume a disproportionate share of the context window with retrieved documents, leaving too little room for reasoning and output in later stages, causing truncation and incomplete results. Which approach would best improve reliable completion across all stages?",
+    "options": [
+      "Keep enlarging the total context window until every stage fits without constraints for all expected inputs",
+      "Run all pipeline stages simultaneously in parallel so each gets its own independent context allocation",
+      "Compress all retrieved documents into a single-sentence summary before any stage begins",
+      "Allocate explicit context budgets to each stage based on its functional needs and enforce boundaries so early stages cannot consume space later stages require"
+    ],
+    "correctIndex": 3,
+    "explanation": "Per-stage context budgets with enforced boundaries guarantee later stages retain the space they need, preventing early stages from starving reasoning and output generation.",
+    "tags": ["context-budgeting", "pipeline", "context-management"]
+  },
+  {
+    "id": "d5-p2-q02",
+    "domain": 5,
+    "sources": ["practice-2"],
+    "stem": "An engineer notices that when prompts become large, the model often ignores important instructions placed in the middle of the context, leading to incomplete or incorrect outputs. Which factor BEST explains this behavior?",
+    "options": [
+      "The model prioritizes only numerical data within prompts",
+      "The model is unable to process large inputs at all",
+      "The model pays less attention to tokens located in the middle of long contexts",
+      "The model skips instructions at random"
+    ],
+    "correctIndex": 2,
+    "explanation": "Models attend less strongly to content in the middle of long contexts (the lost-in-the-middle effect), so middle-positioned instructions are more likely to be overlooked.",
+    "tags": ["lost-in-the-middle", "attention", "prompt-design"]
+  },
+  {
+    "id": "d5-p2-q03",
+    "domain": 5,
+    "sources": ["practice-2", "final-pool"],
+    "stem": "A long-running Claude-based workflow continuously appends new information to context. As it evolves, earlier assumptions become partly invalid, but the contradictory historical context stays visible to the model, and outputs grow increasingly inconsistent over time. Which adjustment would best improve long-term reasoning stability?",
+    "options": [
+      "Increase the context window size to retain additional history for comparison",
+      "Explicitly reconcile and replace outdated assumptions when contradictions are detected",
+      "Preserve all historical context to maximize information retention",
+      "Periodically remove random portions of historical context to reduce noise"
+    ],
+    "correctIndex": 1,
+    "explanation": "Detecting contradictions and replacing the outdated assumptions removes the conflicting history that destabilizes reasoning, unlike simply retaining or randomly trimming context.",
+    "tags": ["context-management", "reconciliation", "reasoning-stability"]
+  },
+  {
+    "id": "d5-p2-q04",
+    "domain": 5,
+    "sources": ["practice-2"],
+    "stem": "A customer contacts support about a delayed shipment using strongly frustrated, negative language. The issue itself is simple and the agent has tracking data to resolve it immediately. During testing, the agent escalates to a human whenever strong negative sentiment is detected, even for simple issues. Which change would best improve this behavior?",
+    "options": [
+      "Always escalate when customers express frustration to ensure satisfaction",
+      "Raise the threshold for detecting negative sentiment before escalating",
+      "Base escalation criteria on task complexity and policy limits rather than sentiment",
+      "Add instructions to respond more empathetically before escalating"
+    ],
+    "correctIndex": 2,
+    "explanation": "Sentiment is not a reliable signal for whether escalation is needed; basing the decision on whether the agent can actually resolve the issue prevents unnecessary handoffs.",
+    "tags": ["escalation", "agent-behavior", "customer-support"]
+  },
+  {
+    "id": "d5-p2-q05",
+    "domain": 5,
+    "sources": ["practice-2"],
+    "stem": "A user asks about their order status and the system returns several orders matching the same name. The agent picks the most recent order and proceeds. The user later reports that the response referred to the wrong order. Which approach would have prevented this?",
+    "options": [
+      "Use a heuristic to pick the order with the highest value",
+      "Ask the user for an additional identifier before selecting an order",
+      "Default to the most recent order for consistency",
+      "Return every matching order and let the user interpret the results"
+    ],
+    "correctIndex": 1,
+    "explanation": "When multiple records match, requesting a disambiguating identifier avoids the wrong-assumption risk that any heuristic selection introduces.",
+    "tags": ["disambiguation", "agent-behavior", "clarification"]
+  },
+  {
+    "id": "d5-p2-q06",
+    "domain": 5,
+    "sources": ["practice-2", "final-pool"],
+    "stem": "An agent performs iterative planning over a long session. Each reasoning step looks valid on its own, but small deviations accumulate until the final plan no longer aligns with the original objectives. Which adjustment would best reduce this long-term reasoning drift?",
+    "options": [
+      "Summarize intermediate reasoning more aggressively to cut noise",
+      "Increase the context window size to keep more intermediate reasoning",
+      "Restart planning whenever the workflow exceeds a fixed number of steps",
+      "Periodically re-anchor reasoning against the original task objectives and constraints"
+    ],
+    "correctIndex": 3,
+    "explanation": "Regularly re-anchoring to the original objectives and constraints corrects the small accumulating deviations before they pull the final plan off course.",
+    "tags": ["reasoning-drift", "planning", "goal-alignment"]
+  },
+  {
+    "id": "d5-p2-q07",
+    "domain": 5,
+    "sources": ["practice-2", "final-pool"],
+    "stem": "An AI engineer is designing prompts for a Claude-based agent that processes large contextual inputs including logs, tool outputs, and instructions. The model frequently ignores critical instructions when they sit in the middle of long prompts. The engineer wants to improve instruction adherence without reducing the total amount of context. Which strategy should be implemented?",
+    "options": [
+      "Position the most important instructions at the beginning and end of the prompt",
+      "Strip out the supporting context and include only the instructions",
+      "Put all instructions in the middle of the prompt to balance the context",
+      "Randomize where instructions appear across the prompt"
+    ],
+    "correctIndex": 0,
+    "explanation": "Because attention is strongest at the start and end of long contexts, placing critical instructions there improves adherence without having to cut any context.",
+    "tags": ["prompt-design", "lost-in-the-middle", "instruction-adherence"]
+  },
+  {
+    "id": "d5-p2-q08",
+    "domain": 5,
+    "sources": ["practice-2"],
+    "stem": "An agent handles long conversations involving multiple orders. To manage context size it both summarizes conversation history and trims tool outputs before adding them to context. During testing it occasionally reports incorrect refund details even though the correct values were previously retrieved, and tool execution shows no errors. What is the most likely cause?",
+    "options": [
+      "The context window is too small to retain all the information",
+      "The tool is returning inconsistent data across requests",
+      "Critical transactional details are being lost during summarization and trimming",
+      "The agent needs more retries to produce correct responses"
+    ],
+    "correctIndex": 2,
+    "explanation": "Aggressively combining summarization with trimming can strip out precise facts like amounts or IDs; such transactional details must be preserved separately from general context reduction.",
+    "tags": ["summarization", "context-management", "data-loss"]
+  },
+  {
+    "id": "d5-p2-q09",
+    "domain": 5,
+    "sources": ["practice-2"],
+    "stem": "An agent repeatedly calls an order-lookup tool during a multi-step workflow, and each response is a full record with many fields. Over several steps these results pile up in context. Later the agent starts missing key details and gives inconsistent answers, even though the correct information appeared in earlier tool outputs. What change would best improve reliability?",
+    "options": [
+      "Summarize all tool outputs into a single paragraph after each step",
+      "Repeat the tool calls to refresh the correct information",
+      "Store only the relevant fields from each tool response before adding it to context",
+      "Increase the context window to retain all the tool outputs"
+    ],
+    "correctIndex": 2,
+    "explanation": "Keeping only the relevant fields from each tool response prevents context bloat and helps the model stay focused on the important data across steps.",
+    "tags": ["tool-use", "context-management", "field-filtering"]
+  },
+  {
+    "id": "d5-p2-q10",
+    "domain": 5,
+    "sources": ["practice-2"],
+    "stem": "An agent explores a large codebase over many steps. As the session continues, responses become inconsistent and start referencing 'typical patterns' instead of the actual findings from earlier steps. You want to preserve accuracy across long exploration sessions. Which adjustment would best address this?",
+    "options": [
+      "Add instructions telling the agent to stay consistent with earlier findings",
+      "Maintain a scratchpad file with key findings and reference it in later steps",
+      "Restart the session frequently to avoid context overflow",
+      "Analyze more files per step to improve coverage"
+    ],
+    "correctIndex": 1,
+    "explanation": "Externalizing important findings to a persistent scratchpad prevents context degradation and lets the agent reason from real earlier results across a long session.",
+    "tags": ["scratchpad", "context-management", "state-persistence"]
+  },
+  {
+    "id": "d5-p2-q11",
+    "domain": 5,
+    "sources": ["practice-2"],
+    "stem": "A Claude-based agent processes large inputs containing instructions, tool outputs, and supporting data. The team observes that the agent sometimes ignores critical instructions when too much supporting information is included. Which approach would MOST effectively improve instruction adherence?",
+    "options": [
+      "Remove the instructions and rely on the tool outputs",
+      "Add even more supporting data to provide additional context",
+      "Place the most important instructions at the beginning and end of the context",
+      "Distribute the instructions randomly throughout the context"
+    ],
+    "correctIndex": 2,
+    "explanation": "Positioning critical instructions at the beginning and end of the context takes advantage of stronger attention at those positions, improving adherence even when supporting data is large.",
+    "tags": ["prompt-design", "instruction-adherence", "context-management"]
+  },
+  {
+    "id": "d5-p2-q12",
+    "domain": 5,
+    "sources": ["practice-2"],
+    "stem": "A customer reports a billing issue and says, 'This is ridiculous. I've been charged twice. I might need to speak to someone.' The issue is straightforward and can be resolved with available tools, but the wording is ambiguous: the customer expresses frustration and hints at escalation without explicitly requesting it. Which single approach best handles this situation?",
+    "options": [
+      "Acknowledge the frustration and proceed with resolution while offering escalation as an option",
+      "Immediately escalate because the customer expressed dissatisfaction",
+      "Continue resolving the issue without acknowledging the escalation signal at all",
+      "Escalate only after the customer has waited for a fixed timeout period"
+    ],
+    "correctIndex": 0,
+    "explanation": "Ambiguous signals should not trigger automatic escalation; acknowledging the frustration while resolving the issue and offering escalation balances empathy with efficiency.",
+    "tags": ["escalation", "customer-support", "ambiguity-handling"]
+  },
+  {
+    "id": "d5-p2-q13",
+    "domain": 5,
+    "sources": ["practice-2"],
+    "stem": "An agent retrieves supporting documents multiple times during a long-running workflow. Because retrieval ranking shifts slightly between iterations, the agent gets different supporting evidence for the same query, producing inconsistent conclusions. Which adjustment would best improve reasoning consistency while still allowing retrieval updates when necessary?",
+    "options": [
+      "Cache and reuse validated retrieval results for the workflow's duration unless a refresh is explicitly required",
+      "Retrieve fresh documents for every reasoning step to maximize recency",
+      "Increase the context window size to permanently keep all retrieval history",
+      "Retrieve more documents so that ranking variations matter less"
+    ],
+    "correctIndex": 0,
+    "explanation": "Caching validated retrieval results and only refreshing on demand gives the agent stable evidence across the workflow while still permitting deliberate updates.",
+    "tags": ["retrieval", "caching", "consistency"]
+  },
+  {
+    "id": "d5-p2-q14",
+    "domain": 5,
+    "sources": ["practice-2"],
+    "stem": "A Claude-based agent receives large prompts containing system instructions, retrieved documents, prior reasoning, and user input. During evaluation the model sometimes overemphasizes highly detailed retrieved content while underweighting critical system-level constraints. Which adjustment would best improve prioritization reliability without removing useful contextual detail?",
+    "options": [
+      "Remove all retrieved context and rely solely on system instructions for reasoning",
+      "Reinforce and strategically position high-priority instructions near the critical reasoning stages",
+      "Use post-processing rules to enforce constraint compliance after outputs are generated",
+      "Increase the context window so all information including system instructions gets full visibility"
+    ],
+    "correctIndex": 1,
+    "explanation": "Reinforcing and placing high-priority instructions close to where reasoning happens keeps critical constraints salient without discarding the useful detail from retrieved content.",
+    "tags": ["prompt-design", "instruction-prioritization", "context-management"]
+  },
+  {
+    "id": "d5-p2-q15",
+    "domain": 5,
+    "sources": ["practice-2", "final-pool"],
+    "stem": "An agent includes all retrieved data from external sources in its context, even when much of it is irrelevant to the task. Over time this leads to lower accuracy and slower responses. Which approach would MOST effectively improve performance?",
+    "options": [
+      "Reduce the number of retrieval operations performed",
+      "Filter the context to include only task-relevant information",
+      "Continue including all retrieved data to ensure completeness",
+      "Increase the context window size"
+    ],
+    "correctIndex": 1,
+    "explanation": "Filtering so only task-relevant information enters the context removes the irrelevant material that was harming accuracy and speed, which a bigger window would not solve.",
+    "tags": ["retrieval", "relevance-filtering", "context-management"]
+  }
+]

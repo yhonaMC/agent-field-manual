@@ -1,0 +1,187 @@
+---
+title: "MCP Servers and Built-in Tools"
+domain: 2
+chapter: 7
+section: "2.2"
+summary: "How MCP servers are scoped and configured, when to prefer community servers, and how Claude Code's built-in tools combine into an incremental codebase-understanding workflow."
+---
+
+MCP servers extend an agent with external tools and data. How you scope them, whether you build or reuse them, and how they sit alongside Claude Code's built-in tools all shape how reliably an agent works.
+
+## MCP server scoping
+
+Servers are configured at two levels, each with a different reach.
+
+### Project level: `.mcp.json`
+
+This file lives at the project root and is committed with git, so every team member shares the same configuration:
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+The `${GITHUB_TOKEN}` syntax expands a variable from the developer's own shell environment. That lets the team share one configuration file while each person supplies their own credential — no secrets are committed.
+
+### User level: `~/.claude.json`
+
+This is personal configuration that is not shared through version control. It suits tools only a single user needs:
+
+```json
+{
+  "mcpServers": {
+    "personal-notes": {
+      "command": "node",
+      "args": ["/home/user/tools/notes-server.js"]
+    }
+  }
+}
+```
+
+### Simultaneous availability
+
+When Claude connects, every tool from every configured server becomes available at once. Three servers exposing five tools each mean Claude sees fifteen tools together. That matters for selection reliability — as tool counts climb, accuracy drops, which is why per-agent tool limits become a concern.
+
+## MCP resources
+
+Servers can expose more than tools. **Resources** are read-only data that hand the agent context without requiring a tool call — think of them as reference documents the server publishes:
+
+- **Issue summaries** — open tickets in a project
+- **Database schemas** — the structure of tables and their relationships
+- **API catalogs** — available endpoints and their contracts
+- **Configuration** — current values of feature flags or settings
+
+Exposing this data as resources gives the agent visibility into what exists so it doesn't burn exploratory tool calls just to orient itself.
+
+## Community versus custom servers
+
+For integrations with popular services — Jira, Slack, GitHub, Linear — reach for existing community servers first. They are battle-tested, maintained, and already cover the common cases:
+
+```json
+{
+  "mcpServers": {
+    "jira": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-jira"],
+      "env": { "JIRA_TOKEN": "${JIRA_TOKEN}" }
+    }
+  }
+}
+```
+
+Build a custom server only when there is a real reason:
+
+- Your team runs an internal workflow no community server covers.
+- You must connect to a proprietary internal system.
+- You need specific business logic baked into the operations.
+
+Don't reinvent the wheel for standard integrations.
+
+## Claude Code's built-in tools
+
+Claude Code ships native tools that need no MCP configuration at all.
+
+### Grep — content search
+
+Searches file contents with a regex pattern:
+
+```
+Grep: pattern="handleSubmit", type="ts"
+-> List of files containing "handleSubmit"
+```
+
+Ideal for locating functions, variables, imports, and code patterns.
+
+### Glob — file patterns
+
+Finds files by name pattern:
+
+```
+Glob: pattern="src/**/*.test.ts"
+-> List of test files under src/
+```
+
+Ideal for discovering project structure and finding files by naming convention.
+
+### Read — read files
+
+Reads a file's full contents with line numbers:
+
+```
+Read: path="/src/components/Button.tsx"
+-> File contents with numbered lines
+```
+
+Supports offset and limit for large files, and can read images and PDFs.
+
+### Write — write files
+
+Writes full content to a file, creating or overwriting it:
+
+```
+Write: path="/src/utils/helpers.ts", content="..."
+-> File created or replaced
+```
+
+Use it for new files or full rewrites.
+
+### Edit — targeted modifications
+
+Replaces an exact string inside a file:
+
+```
+Edit: path="/src/config.ts", old="port: 3000", new="port: 8080"
+-> Replacement successful
+```
+
+The requirement: the old string must be **unique** in the file. If it isn't, Edit fails.
+
+### When to use Edit versus Read + Write
+
+| Situation | Tool |
+| --- | --- |
+| Change a specific line or block | Edit |
+| The target text is unique in the file | Edit |
+| The text isn't unique (Edit fails) | Read then Write |
+| Create a new file | Write |
+| Full rewrite of a file | Read then Write |
+
+The rule: try Edit first. If it fails because the anchor text isn't unique, Read the whole file and Write the modified content back.
+
+### Bash — system commands
+
+Runs operating-system commands for compiling, running tests, managing git, installing dependencies, and more:
+
+```
+Bash: command="npm test -- --coverage"
+-> Command output
+```
+
+## Building codebase understanding incrementally
+
+Claude Code doesn't read everything up front. It assembles its picture of a project step by step using the built-in tools in a deliberate sequence.
+
+**Step 1 — Grep to discover where something is.** For "Where is the `createOrder` function used?", it searches `pattern="createOrder"` and finds the files that reference it.
+
+**Step 2 — Read to understand what it does.** It reads the primary file to see the implementation, its dependencies, and its types.
+
+**Step 3 — Trace flows to follow the chain.** It reads the files that import the target, greps for callers, reads each one, and reconstructs the full flow — API to service to repository.
+
+This Grep to Read to trace sequence is the core pattern that lets Claude understand a codebase with no prior documentation.
+
+## Field Notes
+
+- Project-level `.mcp.json` is shared and committed; user-level `~/.claude.json` is personal. Use `${VAR}` expansion to share config without committing secrets.
+- All tools from all configured servers load at connection time, so more servers means more tools competing for selection.
+- MCP resources hand the agent read-only context (schemas, catalogs, ticket summaries) and cut down on exploratory tool calls.
+- Prefer maintained community servers for standard integrations; reserve custom servers for genuinely proprietary workflows.
+- Try Edit first for targeted changes; fall back to Read + Write when the anchor text isn't unique. Grep, Read, then trace is the default codebase-comprehension loop.

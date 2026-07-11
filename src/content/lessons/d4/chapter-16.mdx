@@ -1,0 +1,167 @@
+---
+title: "Batch Processing and Multi-Pass Review"
+domain: 4
+chapter: 16
+section: "4.4"
+summary: "Using the Message Batches API for cheap latency-tolerant work, why independent review beats self-review, and splitting large reviews into specialized passes."
+---
+
+Once your extraction or review prompt is reliable, the next question is how to run it efficiently at scale. The Message Batches API cuts cost for latency-tolerant work, while multi-pass review architectures use independent instances to catch issues a single pass would miss.
+
+## The Message Batches API
+
+The Batches API lets you submit many requests together in exchange for higher latency, at half the cost.
+
+| Aspect | Detail |
+| --- | --- |
+| Savings | 50% off standard pricing |
+| Window | Up to 24 hours to complete |
+| Latency SLA | None; may take minutes or hours |
+| Request limit | Up to 100,000 per batch |
+| Multi-turn | No multi-turn tool calling within a single request |
+
+### custom_id for correlation
+
+Each request carries a `custom_id` that comes back in the response, letting you match responses to their originating requests.
+
+```json
+{
+  "custom_id": "invoice-2024-0742",
+  "params": {
+    "model": "claude-opus-4-8",
+    "messages": [{ "role": "user", "content": "..." }]
+  }
+}
+```
+
+The response echoes `"custom_id": "invoice-2024-0742"`, so you always know which invoice produced which result.
+
+## When to use batch vs. real-time
+
+Batch fits non-blocking, latency-tolerant workloads:
+
+- Overnight reports, such as analyzing an entire repo at night
+- Weekly compliance or security audits
+- Nightly test generation for the day's new code
+- Working through a backlog of accumulated documents
+- Generating synthetic training datasets
+
+Batch is the wrong choice for blocking or interactive work:
+
+- Pre-merge checks, where developers expect feedback in minutes
+- Chat and conversation, which need immediate responses
+- Real-time extraction while a user waits
+- Multi-turn tool calling, which batch does not support
+
+For the exam: if a scenario asks how to cut the cost of a nightly or weekly process, batch is the answer. If it involves pre-merge review, batch is wrong.
+
+## Optimizing batch submissions
+
+### Refine the prompt before the batch
+
+Before launching a batch of ten thousand documents:
+
+1. Pick a sample set of roughly fifty to one hundred representative documents.
+2. Iterate the prompt on that sample in real time.
+3. Measure accuracy on the sample.
+4. Adjust criteria, few-shot examples, and schema.
+5. Launch the full batch only once the sample hits your accuracy target.
+
+Launching without testing first wastes the 50% savings if you have to reprocess everything.
+
+### Compute submission timing from the SLA
+
+```text
+If SLA = "results before 9am":
+  -> Submit the batch at 9pm (12h margin)
+  -> The 24h batch window is enough
+
+If SLA = "results in 2 hours":
+  -> Batch is not appropriate (no latency SLA)
+  -> Use the real-time API
+```
+
+### Handling batch failures
+
+When some requests fail, resubmit only the failed documents, identified by their `custom_id`, with appropriate fixes such as chunking documents that exceeded the context limit.
+
+## Self-review limitations
+
+When you ask Claude to review its own output within the same conversation, the model still holds the reasoning context of its original decisions, which makes it less likely to challenge them. It behaves like human confirmation bias: it already "knows" why it made each choice and tends to justify rather than critically re-evaluate.
+
+An independent review instance, one with no prior reasoning context, is far more objective.
+
+| Approach | Bias | Effectiveness |
+| --- | --- | --- |
+| Self-review (same conversation) | High; retains reasoning | Low |
+| Independent review (new instance) | Low; no prior context | High |
+| Multi-pass (separate instances) | Low per instance | Higher |
+
+For the exam: when a scenario describes an agent failing to catch its own errors, the fix is an independent instance for review, not "ask it to review more carefully."
+
+## Multi-pass review
+
+The multi-pass pattern splits a review into specialized passes handled by independent instances.
+
+### Pass 1: local analysis (per-file)
+
+- Each file reviewed independently
+- Focus on bugs, security, and correctness within the file
+- Parallelizable, since all files can run at once
+- Outputs a list of findings per file with confidence scores
+
+### Pass 2: integration analysis (cross-file)
+
+- Receives Pass 1 findings plus project structure
+- Focus on inconsistencies between files, breaking changes, and API contracts
+- Identifies broken imports, type mismatches across modules, and missing error handling at boundaries
+
+### Pass 3: verification with confidence
+
+- Reviews findings from the earlier passes
+- Gets a confidence self-report for each finding
+- Filters out low-confidence findings
+- Groups related findings together
+
+### When multi-pass fits
+
+- Complex reviews spanning ten or more modified files
+- Security audits combining local vulnerabilities with attack chains
+- Document extraction that extracts, validates, and enriches
+- Not for simple tasks where a single pass suffices
+
+## Verification passes with confidence
+
+Asking Claude to report confidence alongside each finding improves the signal you can route on.
+
+```json
+{
+  "finding": "Potential SQL injection in user_query param",
+  "category": "security",
+  "confidence": "high",
+  "evidence": "User input concatenated directly into SQL string at line 42",
+  "false_positive_risk": "low"
+}
+```
+
+Useful fields for filtering include `confidence` (high/medium/low, filter low in production), `evidence` (specific supporting text), and `false_positive_risk`. Findings with high confidence and low false-positive risk go straight to the developer, while medium-confidence findings can pass through a second review.
+
+## Batch plus multi-pass combined
+
+For large-scale nightly audits, the two patterns compose:
+
+1. Batch Pass 1: local analysis of each file, parallelized as a batch.
+2. Aggregation: collect findings programmatically.
+3. Batch Pass 2: cross-file analysis per module, as another batch.
+4. Filtering: apply a confidence threshold programmatically.
+5. Report: generate a consolidated report for the team.
+
+Each pass is a separate batch, so the 50% savings applies to every one.
+
+## Field Notes
+
+- The Batches API gives 50% savings and a 24-hour window but no latency SLA; use it for nightly and weekly work, never pre-merge checks.
+- `custom_id` correlates requests with responses and identifies which documents to resubmit on failure.
+- Self-review is weak because the model keeps its original reasoning context; independent instances are more objective.
+- Multi-pass splits work into local, cross-file integration, and verification passes to avoid attention dilution.
+- Refine the prompt on a small sample before committing to a large batch, and have findings self-report confidence for calibrated routing.
