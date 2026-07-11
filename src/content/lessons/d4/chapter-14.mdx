@@ -1,0 +1,194 @@
+---
+title: "Structured Output with tool_use and JSON Schemas"
+domain: 4
+chapter: 14
+section: "4.2"
+summary: "Using tool_use with JSON schemas for guaranteed structure, controlling tool_choice, designing nullable and enum fields, and understanding what schemas can't fix."
+---
+
+The most dependable way to get structured data out of Claude is not to ask for JSON in prose. Instead, you define a tool whose input schema is exactly the shape you want, and Claude "calls" it with data that conforms. This is the mechanism Anthropic built for guaranteed structured output, not a workaround.
+
+## tool_use as an output mechanism
+
+When you ask Claude to "respond in JSON," you invite malformed syntax, missing keys, and wrong types. Defining a tool with a JSON input schema removes those failure modes because the API enforces the schema.
+
+| Approach | Syntax errors | Missing fields | Wrong types |
+| --- | --- | --- | --- |
+| "Respond in JSON" | Frequent | Common | Common |
+| `tool_use` + schema | Eliminated | Eliminated | Eliminated |
+
+The key exam point: `tool_use` with JSON schemas removes syntax errors but not semantic ones. Incorrect values, fabricated data, and totals that do not add up all still slip through.
+
+## Controlling tool_choice
+
+The `tool_choice` parameter governs whether and which tool Claude calls.
+
+### tool_choice: "auto" (default)
+
+Claude decides on its own whether to call a tool or reply in text. This fits when:
+
+- Structured output is not always required
+- Claude may need to ask for clarification first
+- The conversation mixes plain text with actions
+
+### tool_choice: "any"
+
+Claude must call one of the available tools but picks which. This is ideal for:
+
+- Multiple schemas where the document type is unknown
+- Routing, where each tool represents a different output type
+- Guaranteeing there is always structured output
+
+### Forced tool_choice
+
+Claude must call one specifically named tool. Use it when:
+
+- You must guarantee extraction runs before any enrichment
+- There is only one possible schema for the task
+- You want to eliminate all selection ambiguity
+
+```json
+{
+  "tool_choice": {
+    "type": "tool",
+    "name": "extract_invoice"
+  }
+}
+```
+
+## Designing effective JSON schemas
+
+### Required vs optional fields
+
+Not every field belongs in the required list. If the source may not contain a piece of information, marking it required pushes Claude to invent a value. The correct pattern is to require fields that always exist in the source and make anything that might be missing nullable.
+
+```json
+{
+  "type": "object",
+  "required": ["vendor_name", "total_amount", "date"],
+  "properties": {
+    "vendor_name": { "type": "string" },
+    "total_amount": { "type": "number" },
+    "date": { "type": "string", "format": "date" },
+    "tax_id": { "type": ["string", "null"] },
+    "purchase_order": { "type": ["string", "null"] }
+  }
+}
+```
+
+### Enum with "other" plus a detail string
+
+For categorical fields where you cannot list every option in advance, add an `other` enum value paired with a nullable detail field.
+
+```json
+{
+  "document_type": {
+    "type": "string",
+    "enum": ["invoice", "receipt", "purchase_order", "other"]
+  },
+  "document_type_detail": {
+    "type": ["string", "null"],
+    "description": "If document_type is 'other', describe the type"
+  }
+}
+```
+
+This keeps Claude from forcing a rare document into the wrong category.
+
+## Format normalization in prompts
+
+A strict schema guarantees structure but not formatting. If you need dates as `YYYY-MM-DD` or amounts with exactly two decimals, state those rules in the prompt.
+
+```text
+Format rules:
+- Dates: YYYY-MM-DD format
+- Amounts: numeric with exactly 2 decimal places
+- Phone numbers: E.164 format (+1234567890)
+- Names: Title Case
+```
+
+These rules belong in the prompt, not the schema. JSON Schema does have a `format` keyword, but Claude does not consistently honor it for normalization.
+
+## Extraction tools as output schemas
+
+For extraction tasks, you define "tools" that are really just output schemas. The tool never runs; it only shapes the response.
+
+```json
+{
+  "name": "extract_invoice_data",
+  "description": "Extract structured data from invoice",
+  "input_schema": {
+    "type": "object",
+    "required": ["vendor", "line_items", "total"],
+    "properties": {
+      "vendor": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "address": { "type": ["string", "null"] }
+        }
+      },
+      "line_items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["description", "amount"],
+          "properties": {
+            "description": { "type": "string" },
+            "quantity": { "type": ["number", "null"] },
+            "amount": { "type": "number" }
+          }
+        }
+      },
+      "total": { "type": "number" }
+    }
+  }
+}
+```
+
+### Multiple schemas with tool_choice: "any"
+
+When the document type is unknown up front, define several extraction tools and let Claude route with `tool_choice: "any"`.
+
+```json
+{
+  "tools": [
+    { "name": "extract_invoice", "input_schema": { "...": "..." } },
+    { "name": "extract_receipt", "input_schema": { "...": "..." } },
+    { "name": "extract_po", "input_schema": { "...": "..." } }
+  ],
+  "tool_choice": { "type": "any" }
+}
+```
+
+Claude inspects the document, determines its type, and selects the fitting schema. This beats one bloated generic schema padded with optional fields.
+
+### Forced tools for sequential pipelines
+
+When extraction must finish before enrichment, force each step:
+
+1. Step 1: force `extract_raw` to guarantee extraction runs.
+2. Step 2: take that output, validate it, and pass it forward.
+3. Step 3: force `enrich_data` with the validated data.
+
+Without forcing, Claude might merge extraction and enrichment into one step, removing the chance to validate in between.
+
+## What schemas do not solve
+
+Strict schemas eliminate malformed JSON, missing fields, and wrong types. They do not eliminate:
+
+- Incorrectly extracted values
+- Fabricated data (hallucinations)
+- Totals that do not add up to the sum of line items
+- Data placed in the wrong field
+
+These are semantic errors, and catching them requires post-extraction validation, covered in the next chapter.
+
+## Field Notes
+
+- `tool_use` with a JSON schema is the most reliable path to structured output and removes all syntax errors.
+- Use `auto` for flexibility, `any` for routing across schemas, and a forced tool for pipeline steps.
+- Mark fields nullable when the source may lack them so Claude does not fabricate values.
+- Enum plus an `other` detail field handles open-ended categories cleanly.
+- Put format normalization rules in the prompt; schemas guarantee structure, not semantics.

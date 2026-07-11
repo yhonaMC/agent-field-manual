@@ -1,0 +1,136 @@
+---
+title: "Explicit Criteria and Few-Shot Prompting"
+domain: 4
+chapter: 13
+section: "4.1"
+summary: "Why categorical criteria beat vague instructions, how false positives erode trust, and how few-shot examples produce consistent, well-calibrated output."
+---
+
+Getting reliable output from Claude starts with telling it precisely what counts as a finding. Vague guidance forces the model to guess at your intent; explicit criteria give it a clear threshold. When even detailed rules produce inconsistent results, few-shot examples take over by showing the desired behavior instead of describing it.
+
+## Why vague criteria fail
+
+Telling Claude to "check that comments are accurate" is open to interpretation. The model reads "accurate" generously and flags any comment that is merely out of date, even when nothing about it would actually mislead a reader.
+
+A categorical criterion fixes this. Rephrasing the instruction as "flag a comment only when its stated behavior directly contradicts what the code does" gives Claude a concrete threshold, which sharply cuts false positives.
+
+| Type | Example | Problem |
+| --- | --- | --- |
+| Vague | "Be conservative when flagging issues" | Claude has no operational meaning for "conservative" |
+| General | "Check that comments are accurate" | Flags every minor discrepancy |
+| Categorical | "Flag only when claimed behavior contradicts the code" | Clear, reproducible threshold |
+
+Instructions like "be conservative" or "only report high-confidence findings" fail because the model cannot translate them into a decision rule. Categorical criteria remove that ambiguity.
+
+## The cost of false positives
+
+False positives are more than an annoyance: they destroy trust in the categories that are actually correct. If a review tool surfaces ten findings and seven are noise from a comment checker, the developer stops reading the output entirely and misses the three real bugs mixed in.
+
+### Restoring trust
+
+When a category floods developers with noise, the recovery path is procedural:
+
+1. Identify the categories with a high false-positive rate.
+2. Disable those categories temporarily.
+3. Refine their criteria with specific examples.
+4. Re-enable them gradually using categorical rules.
+5. Monitor the dismissal rate per category over time.
+
+For the exam: if a scenario describes developers ignoring a review tool's output, the correct move is refining specific criteria or disabling the problem categories, not "using a better model" or "adding more general context."
+
+## Writing specific review criteria
+
+Effective criteria spell out both what to report and what to skip.
+
+Report:
+
+- Bugs where the code produces incorrect results
+- Security vulnerabilities such as SQL injection, XSS, or path traversal
+- Race conditions in concurrent code
+- Unhandled null pointer dereferences
+
+Ignore:
+
+- Minor style preferences like trailing commas or bracket placement
+- Variable names that are readable even if not ideal
+- Stale comments that do not contradict the code
+- TODOs with no deadline attached
+
+This explicit split hands Claude a binary decision framework it can apply to every finding.
+
+## Few-shot prompting
+
+Few-shot prompting is the strongest technique when detailed instructions still yield inconsistent output. Rather than describing what to do, you demonstrate it with concrete examples.
+
+### When to reach for few-shot
+
+- Detailed rules still produce output that varies from run to run
+- The task needs contextual judgment, not just pattern matching
+- You want Claude to generalize to new but similar cases
+- There is real ambiguity in tool selection or categorization
+
+### What each example contains
+
+Every few-shot example should carry three parts:
+
+1. Input: the concrete case
+2. Expected output: the correct decision or action
+3. Reasoning: why that choice was made, which is the key to generalization
+
+### Few-shot for tool selection
+
+When Claude must choose among several tools, worked examples resolve ambiguity better than long descriptions of each tool.
+
+```text
+Example 1:
+User: "What's the weather in Tokyo?"
+Reasoning: The user wants live, real-time data -> call the weather_api tool
+Action: weather_api(city="Tokyo")
+
+Example 2:
+User: "What's the capital of Japan?"
+Reasoning: This is static factual knowledge -> no tool needed, answer directly
+Action: Respond with "Tokyo"
+```
+
+### Few-shot to reduce extraction hallucinations
+
+When pulling data from documents with varied layouts such as invoices, reports, or informal measurements, few-shot examples anchor Claude on which data is actually present rather than what it might infer. Left to its own devices, the model tends to "complete" missing fields with plausible-looking values. Showing two to four examples where absent fields are marked `null` teaches it to leave blank whatever it cannot find.
+
+## Building effective examples
+
+### How many
+
+- One example is not enough to establish a pattern.
+- Two to four examples hit the sweet spot between coverage and token cost.
+- Five or more brings diminishing returns and burns valuable context.
+
+### What to cover
+
+Your set should span:
+
+- The typical case, as a baseline for normal inputs
+- The ambiguous edge case, where the right decision is not obvious
+- The "do nothing" case, where the model should not act or should leave a field empty
+
+### Few-shot for branch coverage gaps
+
+When a review must find untested paths, an example that shows "this if/else has a test for the true branch but not the false branch, so flag the missing coverage" works better than a long paragraph defining adequate coverage.
+
+## Combining criteria with few-shot
+
+The most powerful setup layers the two techniques:
+
+1. Categorical criteria define the scope of what to report or ignore.
+2. Few-shot examples calibrate judgment inside that scope.
+3. Reasoning inside each example lets Claude generalize correctly.
+
+Together they drive false positives down while keeping high coverage of the issues that matter.
+
+## Field Notes
+
+- Categorical criteria ("flag X only when Y") outperform vague instructions like "be conservative."
+- False positives erode trust in accurate categories; temporarily disabling noisy ones is a valid recovery strategy.
+- Few-shot with two to four reasoned examples is the top technique for consistent output.
+- Cover the typical, edge, and "do nothing" cases, and mark absent fields `null` to curb hallucination.
+- Pair explicit criteria with few-shot examples to maximize precision without sacrificing coverage.
