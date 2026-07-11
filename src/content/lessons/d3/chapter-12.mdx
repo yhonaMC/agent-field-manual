@@ -1,0 +1,206 @@
+---
+title: "Claude Code in CI/CD Pipelines"
+domain: 3
+chapter: 12
+section: "3.4"
+summary: "Running Claude Code non-interactively with the -p flag, enforcing structured output, using CLAUDE.md as CI context, and leveraging session isolation for reviews."
+---
+
+Claude Code can run unattended inside a pipeline. The key building blocks are non-interactive mode, structured output, and the context that `CLAUDE.md` supplies to every automated run.
+
+## The -p (--print) flag for pipelines
+
+The `-p` flag (long form `--print`) makes Claude Code run in non-interactive mode:
+
+```bash
+claude -p "Review this file and list security issues" < src/auth.ts
+```
+
+In this mode Claude Code:
+
+- Does not wait for user input — essential for CI/CD.
+- Reads the prompt, runs, and returns the result.
+- Exits automatically when finished.
+- Works with pipes and redirection.
+
+### GitHub Actions example
+
+```yaml
+- name: Code Review
+  run: |
+    claude -p "Review the current PR changes. \
+    Focus on security, performance, and adherence to conventions. \
+    List findings by severity." > review-output.txt
+```
+
+### GitLab CI example
+
+```yaml
+review:
+  script:
+    - claude -p "Analyze the modified files in this MR" > review.txt
+    - cat review.txt
+```
+
+## Structured output with --output-format
+
+To let a pipeline parse Claude's output reliably, request JSON:
+
+```bash
+claude -p "List endpoints without authentication" \
+  --output-format json
+```
+
+### JSON schema for validation
+
+Pair it with `--json-schema` to lock down the shape of the response:
+
+```bash
+claude -p "Analyze test coverage" \
+  --output-format json \
+  --json-schema '{
+    "type": "object",
+    "properties": {
+      "coverage_percentage": { "type": "number" },
+      "uncovered_files": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "recommendation": { "type": "string" }
+    },
+    "required": ["coverage_percentage", "uncovered_files"]
+  }'
+```
+
+This yields machine-readable JSON that downstream tools consume directly, with no need to scrape information out of free-form text — for example, posting findings as inline PR comments.
+
+## CLAUDE.md as context for CI
+
+A project's `CLAUDE.md` is the main mechanism for giving Claude Code context in CI/CD. The instructions Claude follows locally also apply in the pipeline:
+
+```text
+## Testing Standards (CI)
+- Framework: Vitest
+- Minimum coverage: 80%
+- Fixtures in tests/fixtures/
+- Mocks in tests/__mocks__/
+## Review Criteria
+- No console.log in production code
+- Ordered imports: built-in -> external -> internal
+- Async functions must have error handling
+- No hardcoded secrets
+```
+
+When Claude Code runs in CI with `-p`, it reads `CLAUDE.md` and applies these criteria automatically.
+
+### Document testing standards and fixtures
+
+CI benefits especially from explicit sections describing tests, so Claude does not propose fixtures that already exist or patterns that clash with established ones:
+
+```text
+## Test Fixtures
+- User fixtures: tests/fixtures/users.ts
+- API responses: tests/fixtures/api-responses/
+- Database seeds: tests/fixtures/seeds/
+## Existing Test Patterns
+- Unit tests: *.test.ts next to the source file
+- Integration tests: tests/integration/
+- E2E: tests/e2e/ with Playwright
+```
+
+## Session isolation
+
+### The self-review problem
+
+The same Claude Code session that generated code is less effective at reviewing it. The model carries a bias toward its own output and tends not to spot issues in code it just wrote:
+
+```text
+Avoid — Session 1:
+  "Generate the auth module"  -> generates code
+  "Now review the code you generated"  -> superficial findings
+```
+
+### Fix: separate sessions
+
+```text
+Prefer:
+  Session 1: "Generate the auth module"  -> generates code
+  Session 2: "Review src/auth/ for vulnerabilities"  -> objective review
+```
+
+In CI/CD this separation happens naturally: the review pipeline runs in a different session from generation. Because every CI execution is a fresh session, Claude reviews without generation bias — which is an advantage, not a limitation.
+
+## Avoiding duplicate review comments
+
+### Include prior review findings
+
+When you re-run a review after the developer has made fixes, feed in the earlier findings so Claude does not repeat resolved comments:
+
+```bash
+claude -p "Review this PR's changes. \
+Previous findings already addressed (do not repeat): \
+- Added input validation in /api/users \
+- Removed console.log in auth.ts \
+Look for new issues or ones that persist."
+```
+
+### Provide existing test files
+
+To stop Claude from suggesting tests that already exist, tell it what is covered — or better, pass the test file in as context:
+
+```bash
+cat tests/services/order.test.ts | claude -p \
+  "Given this existing test file (stdin), \
+   suggest additional scenarios not covered for \
+   src/services/order.ts"
+```
+
+## Effective CI/CD patterns
+
+An automated PR review job with structured output:
+
+```yaml
+name: AI Code Review
+on: [pull_request]
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Review
+        run: |
+          claude -p "Review the modified files in this PR. \
+          Criteria: security, performance, conventions. \
+          Output: a list of findings with severity and file." \
+          --output-format json > review.json
+```
+
+A test-gap analysis step:
+
+```yaml
+- name: Test Coverage Analysis
+  run: |
+    claude -p "Analyze which functions in src/services/ \
+    have no corresponding tests in tests/services/. \
+    List the files without coverage." \
+    --output-format json > gaps.json
+```
+
+## Prevent interactive hangs
+
+Always pass `-p` in CI. Without it, Claude Code waits for terminal input and the pipeline hangs indefinitely:
+
+```bash
+# Wrong — hangs in CI waiting for input
+claude "Review the code"
+# Right — non-interactive, exits automatically
+claude -p "Review the code"
+```
+
+## Field Notes
+
+- Always run Claude Code with `-p` (`--print`) in CI so it never blocks on interactive input.
+- Use `--output-format json` (optionally with `--json-schema`) to produce machine-parseable findings for automation.
+- `CLAUDE.md` carries testing standards, fixtures, and review criteria into every CI run automatically.
+- A fresh CI session reviews code without the generation bias that plagues same-session self-review.
+- Pass prior findings and existing test files as context to avoid duplicate comments and redundant test suggestions.

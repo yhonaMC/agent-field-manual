@@ -1,0 +1,174 @@
+---
+title: "Commands, Skills, and Path-Specific Rules"
+domain: 3
+chapter: 10
+section: "3.2"
+summary: "Building custom slash commands and skills, using SKILL.md frontmatter, and applying path-scoped rules with glob patterns."
+---
+
+Beyond `CLAUDE.md`, Claude Code offers three ways to package reusable behavior: slash commands, skills, and path-scoped rules. Each fits a different need.
+
+## Commands: reusable workflows
+
+Commands are predefined prompts you trigger with `/` in Claude Code. They standardize the workflows a team runs over and over.
+
+### Project-scoped commands
+
+Files placed in `.claude/commands/` are shared through version control, so the whole team can use them:
+
+```text
+.claude/
+└── commands/
+    ├── review-pr.md       # /review-pr
+    ├── add-test.md        # /add-test
+    └── deploy-check.md    # /deploy-check
+```
+
+A command file simply holds the prompt text. For example, `review-pr.md` might contain:
+
+```text
+Review the current PR and check:
+1. Adherence to project conventions
+2. Test coverage for the new changes
+3. Potential security concerns
+4. Performance implications
+Produce a summary grouping findings by severity.
+```
+
+You invoke it in the conversation by typing `/review-pr`.
+
+### User-scoped commands
+
+Commands under `~/.claude/commands/` are personal and never shared — good for your own individual workflows such as `/daily-standup` or `/my-review`.
+
+### When to create a command
+
+- The team repeats the same workflow frequently.
+- The prompt needs specific instructions that people tend to forget.
+- You want to standardize how the team uses Claude for a particular task.
+
+## Skills: on-demand capabilities
+
+Skills go further than commands. They live in `.claude/skills/`, each in its own folder with a `SKILL.md` file that defines behavior, restrictions, and metadata:
+
+```text
+.claude/
+└── skills/
+    ├── explore-module/
+    │   └── SKILL.md
+    ├── create-api-endpoint/
+    │   └── SKILL.md
+    └── migrate-database/
+        └── SKILL.md
+```
+
+A `SKILL.md` combines YAML frontmatter with instructions:
+
+```markdown
+---
+context: fork
+allowed-tools: ["Read", "Grep", "Glob"]
+argument-hint: "name of the module to explore"
+---
+# Explore module
+Analyze the structure of the given module:
+1. Identify the main files with Glob
+2. Read the entry points
+3. Trace dependencies with Grep
+4. Produce an architecture summary
+```
+
+### Frontmatter: context
+
+`context: fork` runs the skill in an isolated fork of the conversation. Verbose exploration output stays out of the main thread — only the final result comes back. The default (no `context`) runs the skill inline, which suits short skills that do not generate much intermediate output. Choose `fork` for skills that read many files, produce long intermediate output, or where you only want the summary to land in the conversation.
+
+### Frontmatter: allowed-tools
+
+`allowed-tools` restricts which tools the skill may use during execution — a safety and focus control. A read-only skill has no reason to touch `Write` or `Edit`; an analysis skill does not need `Bash`. Limiting tools prevents unwanted side effects. If omitted, the skill can use every available tool.
+
+### Frontmatter: argument-hint
+
+When someone invokes a skill without supplying arguments, `argument-hint` tells Claude what to ask for, improving the experience:
+
+```text
+> /explore-module
+Claude: What is the path to the file or module to analyze?
+> src/services/auth
+```
+
+### Personal skill customization
+
+A developer can keep a personal variant of a project skill in `~/.claude/skills/` using the same folder name. The personal version overrides the project's for that user — useful when someone has extra responsibilities, such as an accessibility lead adding WCAG checks on top of the shared code-review skill.
+
+## Skills versus CLAUDE.md
+
+The distinction is fundamental:
+
+- **`CLAUDE.md` is always loaded** at the start of every conversation. It is for standards that always apply — naming conventions, architecture decisions, testing requirements. Keep it concise, since everything here permanently consumes context.
+- **Skills are on-demand.** They load only when invoked, so they can be extensive without paying a context cost until needed — think database migration, PR review, or API scaffolding.
+
+The practical rule: if it applies in roughly 80% or more of conversations, put it in `CLAUDE.md`; if it only matters when you explicitly ask, make it a skill.
+
+## Commands versus skills
+
+| Aspect | Commands | Skills |
+| --- | --- | --- |
+| Location | `.claude/commands/` | `.claude/skills/` |
+| Metadata | No | Frontmatter (`context`, `allowed-tools`, `argument-hint`) |
+| Isolation | No | Yes (`context: fork`) |
+| Tool restrictions | No | Yes (`allowed-tools`) |
+| Typical complexity | Simple prompt | Multi-step workflow |
+
+Use commands for simple reusable prompts; use skills when you need isolation, tool restrictions, or a multi-step workflow.
+
+## Path-specific rules in .claude/rules/
+
+Rules in `.claude/rules/` activate conventions only when you edit files matching a glob pattern, which cuts down on irrelevant context and token usage. A rule file pairs YAML frontmatter with the convention text:
+
+```markdown
+---
+paths:
+  - "terraform/**/*"
+---
+# Terraform conventions
+- Run `terraform fmt` before every commit
+- Modules must document their outputs
+- Never hardcode ARNs; use environment variables or data sources
+```
+
+Claude loads these rules only while editing files under `terraform/**/*`. If you are working on TypeScript, they consume no context at all.
+
+### Glob patterns by file type
+
+Path scoping shines when a convention applies to a file *type* regardless of location:
+
+```markdown
+---
+# For all test files, wherever they live
+paths:
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/*.spec.ts"
+---
+```
+
+The advantage over a subdirectory `CLAUDE.md` is reach: a single rule file covers test files in `src/`, `lib/`, `packages/*/src/`, and everywhere else at once.
+
+### Rules versus subdirectory CLAUDE.md
+
+| Situation | Recommendation |
+| --- | --- |
+| Conventions for one specific directory | Subdirectory `CLAUDE.md` |
+| Conventions for a file type across directories | `.claude/rules/` with a glob |
+| Testing standards across the whole repo | `.claude/rules/` with `**/*.test.ts` |
+| Rules specific to `src/api/` | `src/api/CLAUDE.md` |
+
+Exam cue: when a scenario mentions conventions that apply to test files spread across multiple directories, the answer is `.claude/rules/` with glob patterns, not a `CLAUDE.md` in each subdirectory.
+
+## Field Notes
+
+- Commands (`.claude/commands/`) are plain reusable prompts; skills (`.claude/skills/`) add frontmatter, isolation, and tool limits.
+- `context: fork` keeps verbose skill output out of the main conversation; `allowed-tools` restricts what a skill can touch; `argument-hint` prompts for missing parameters.
+- Put always-on standards in `CLAUDE.md`; put occasional, task-specific workflows in skills.
+- Path-scoped rules in `.claude/rules/` load only when editing files that match their glob `paths`, saving context.
+- For conventions spanning a file type across many directories, prefer a glob rule over per-directory `CLAUDE.md` files.
