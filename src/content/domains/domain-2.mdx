@@ -1,0 +1,22 @@
+---
+title: "Tool Design, MCP Integration & Error Handling"
+domain: 2
+summary: "Designing tool interfaces Claude can select reliably: clear descriptions, structured error responses, tool distribution and tool_choice, MCP server integration, and the built-in Claude Code tools."
+objectives:
+  - "Design effective tool interfaces with clear descriptions, defined I/O contracts, and boundaries that prevent misrouting."
+  - "Diagnose ambiguous tool overlap and split generic tools into purpose-specific ones."
+  - "Implement structured error responses for MCP tools using the isError flag and error metadata."
+  - "Classify errors as transient, validation, business, or permission and drive the right recovery decision for each."
+  - "Distribute tools across agents by role and use tool_choice (auto, any, forced) to control selection."
+  - "Integrate MCP servers at project and user scope, with environment-variable expansion for credentials."
+  - "Choose community versus custom MCP servers and expose content catalogs as MCP resources."
+  - "Select and combine the built-in tools — Grep, Glob, Read, Write, Edit, Bash — for incremental codebase work."
+---
+
+Domain 2 is about the surface an agent acts through: its tools. A tool's `description` is the primary signal Claude uses to choose which one to call, so the domain opens with how to write descriptions that differentiate purpose, inputs, outputs, and boundaries — and how to fix the misrouting that ambiguous or overlapping tools cause. Splitting a generic do-everything tool into focused tools with defined contracts is a recurring theme.
+
+Failures are treated as first-class design work. Rather than a uniform "operation failed," MCP tools should return the `isError` flag plus structured metadata — an error category, a retryable flag, a machine-readable code, and a human-readable explanation — so the agent can decide whether to retry, fix its input, escalate, or simply relay the message. The domain draws sharp lines between transient, validation, business, and permission errors, and between a genuine access failure and a valid empty result.
+
+The domain also covers how tools are distributed and selected. Selection accuracy degrades as an agent's tool count grows, so tools are scoped by role — roughly four or five per agent, with limited cross-role access for high-frequency needs — and the `tool_choice` parameter (`auto`, `any`, or a forced specific tool) controls when the model must act. On the integration side, MCP servers are configured at project scope (`.mcp.json`, shared and committed) or user scope (`~/.claude.json`, personal), with `${VAR}` expansion keeping credentials out of version control, and resources exposing read-only context to cut exploratory calls.
+
+Finally, the domain grounds all of this in Claude Code's built-in tools — Grep, Glob, Read, Write, Edit, and Bash — and the incremental Grep-then-Read-then-trace workflow that lets an agent understand an unfamiliar codebase without prior documentation. Work through the three lessons, then use the objectives above as a checklist: if you can explain why the description drives selection, what each error category demands, and when to force a tool versus letting the model choose, you have the core of Domain 2.
