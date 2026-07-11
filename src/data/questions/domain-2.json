@@ -1,0 +1,452 @@
+[
+  {
+    "id": "d2-p1-q01",
+    "domain": 2,
+    "sources": ["practice-1"],
+    "stem": "An agent needs to change one configuration value that recurs across many files. Its current routine reads each file fully, edits the value in memory, then overwrites the whole file. This works but is slow and heavy on large repositories. What is the best efficiency improvement while keeping reliability?",
+    "options": [
+      "Rely on a targeted edit tool whenever the change can be pinpointed uniquely inside each file",
+      "Group several file rewrites into one bulk overwrite operation",
+      "Search for the affected files first, then keep rewriting each one in full",
+      "Keep the read-then-overwrite flow but run more of them in parallel"
+    ],
+    "correctIndex": 0,
+    "explanation": "A scoped edit avoids loading and rewriting entire files, so it is far cheaper for a precise, uniquely identifiable change while remaining safe.",
+    "tags": ["tool-design", "file-operations"]
+  },
+  {
+    "id": "d2-p1-q02",
+    "domain": 2,
+    "sources": ["practice-1"],
+    "stem": "Two tools are well documented with formats and examples: one returns structured data fields and another produces narrative summaries. In isolation each is used correctly, but on queries needing both extraction and explanation the agent leans toward summarizing when structured output is actually required. What best improves selection reliability?",
+    "options": [
+      "Add a prompt rule that forces extraction to run before any summarization",
+      "Merge the two tools into one flexible tool that handles mixed queries",
+      "Provide additional examples illustrating when each tool applies",
+      "Sharpen each description to stress structured versus unstructured output so the difference is unmistakable"
+    ],
+    "correctIndex": 3,
+    "explanation": "Ambiguity about output shape drives misselection, so emphasizing structured versus unstructured results in the descriptions lets the model tell overlapping tools apart.",
+    "tags": ["tool-design", "tool-selection"]
+  },
+  {
+    "id": "d2-p1-q03",
+    "domain": 2,
+    "sources": ["practice-1"],
+    "stem": "You have a tool that extracts structured values from documents and another that produces high-level summaries. Both are documented with examples, yet the agent occasionally reaches for the summarizer when the task actually requires pulling specific fields. Which single change most improves tool selection reliability?",
+    "options": [
+      "Fold both tools into one flexible tool to cut down on decision complexity",
+      "Spell out negative boundaries in each description stating what that tool does not handle",
+      "Add several more usage examples to the system prompt",
+      "Lower the model temperature so choices become more deterministic"
+    ],
+    "correctIndex": 1,
+    "explanation": "Stating explicitly what each tool does not do clarifies when it should be avoided, which removes ambiguity between two similar tools better than extra examples.",
+    "tags": ["tool-design", "tool-selection"]
+  },
+  {
+    "id": "d2-p1-q04",
+    "domain": 2,
+    "sources": ["practice-1"],
+    "stem": "Your tools are well defined with clear descriptions and boundaries, yet the agent always picks one particular tool whenever certain keywords appear in a query, even when a different tool fits better. Investigation shows the system prompt contains rules like \"if the user says 'summary', use summarize_content.\" What is the most effective fix?",
+    "options": [
+      "Add more examples in the system prompt reinforcing correct tool choice",
+      "Strip out or rewrite the keyword-triggered instructions that override the tool descriptions",
+      "Expose additional tools so the agent has a wider set to choose from",
+      "Rename the tools so their names line up with the keywords users type"
+    ],
+    "correctIndex": 1,
+    "explanation": "Keyword-based prompt rules bias selection and can override otherwise solid descriptions, so removing or revising them lets the model choose on the actual descriptions.",
+    "tags": ["tool-selection", "prompt-design"]
+  },
+  {
+    "id": "d2-p1-q05",
+    "domain": 2,
+    "sources": ["practice-1"],
+    "stem": "Your team adds a GitHub MCP server for issue tracking and repo insights. One developer configures it in their personal ~/.claude.json and it works locally, but after cloning the repository other teammates cannot access the same MCP tools. Which change best ensures consistent access for the whole team?",
+    "options": [
+      "Document the local MCP setup steps in the repository README",
+      "Add more MCP servers so the tools become more broadly available",
+      "Move the MCP server configuration into a project-level .mcp.json committed to the repo",
+      "Have every developer configure the MCP server manually in their own ~/.claude.json"
+    ],
+    "correctIndex": 2,
+    "explanation": "A project-scoped .mcp.json travels with the repository, so everyone who clones it automatically gets the same MCP tools without manual per-user setup.",
+    "tags": ["mcp", "configuration"]
+  },
+  {
+    "id": "d2-p1-q06",
+    "domain": 2,
+    "sources": ["practice-1"],
+    "stem": "A workflow must extract metadata first, then optionally enrich it based on results. A developer sets forced tool selection so the metadata extraction tool is always invoked. In testing the agent keeps calling the extraction tool even after metadata is already retrieved, blocking progress to later steps. Which change best resolves this?",
+    "options": [
+      "Combine extraction and enrichment into one tool to sidestep the sequencing problem",
+      "Keep forced selection but add prompt text telling the agent when to stop calling the tool",
+      "Switch to tool_choice \"any\" so the agent always uses some tool",
+      "Force the tool only for the first step, then permit normal selection on later turns"
+    ],
+    "correctIndex": 3,
+    "explanation": "Forcing a tool is right for guaranteeing the required first step, but leaving it forced traps the agent in a loop, so normal selection should resume afterward.",
+    "tags": ["tool-choice", "agent-loops"]
+  },
+  {
+    "id": "d2-p1-q07",
+    "domain": 2,
+    "sources": ["practice-1"],
+    "stem": "Your MCP tool sometimes fails when fetching order details, whether from bad input or a service outage, and currently returns only the generic string \"Operation failed.\" As a result the agent keeps retrying failed requests or gives users unclear replies. What is the most effective improvement?",
+    "options": [
+      "Return structured error metadata including an error category, whether it is retryable, and a clear description",
+      "Add examples demonstrating how to handle failed tool responses",
+      "Add prompt instructions telling the agent how to react when a tool fails",
+      "Log the errors internally but keep returning the same generic message to the agent"
+    ],
+    "correctIndex": 0,
+    "explanation": "Structured errors let the agent tell failure types apart and decide whether to retry, escalate, or explain to the user, which a generic string cannot support.",
+    "tags": ["error-handling", "tool-design"]
+  },
+  {
+    "id": "d2-p1-q08",
+    "domain": 2,
+    "sources": ["practice-1"],
+    "stem": "An agent has two tools with overlapping purposes: one described as \"analyzes content for insights\" and another as \"processes documents for information.\" During testing it switches between them inconsistently for similar inputs, producing redundant or conflicting output. What most effectively resolves this?",
+    "options": [
+      "Redesign the tools with clearly distinct purposes and update descriptions to reflect separate responsibilities",
+      "Keep both tools and let a later synthesis step reconcile the differences",
+      "Add prompt instructions specifying which tool to use for each input type",
+      "Add more examples demonstrating correct tool selection"
+    ],
+    "correctIndex": 0,
+    "explanation": "Overlapping functionality is the root cause of inconsistent selection, so giving the tools cleanly separated responsibilities makes their use predictable.",
+    "tags": ["tool-design", "tool-selection"]
+  },
+  {
+    "id": "d2-p1-q09",
+    "domain": 2,
+    "sources": ["practice-1"],
+    "stem": "Your team adds an MCP server offering advanced cross-repository code search. The server is configured correctly, yet the agent often falls back to built-in tools like a plain grep even when the MCP tool would return more accurate and complete results. What is the most appropriate improvement?",
+    "options": [
+      "Add more MCP tools so the agent has more options to choose from",
+      "Enhance the MCP tool descriptions to clearly explain its capabilities, outputs, and advantages over built-in tools",
+      "Add prompt instructions telling the agent to always prefer MCP tools",
+      "Remove the built-in tools like grep to force the agent onto the MCP tool"
+    ],
+    "correctIndex": 1,
+    "explanation": "Descriptions drive selection, so strong ones that spell out capabilities and advantages help the model pick the MCP tool over familiar built-in alternatives.",
+    "tags": ["mcp", "tool-selection"]
+  },
+  {
+    "id": "d2-p1-q10",
+    "domain": 2,
+    "sources": ["practice-1"],
+    "stem": "Your system has three well-described tools: one extracts data points, one verifies claims, and one summarizes documents. In evaluation the agent sometimes uses the summarizer to answer verification-style questions, giving plausible but incorrect results. Which change most effectively addresses this?",
+    "options": [
+      "Add explicit boundaries in each description, including what each tool should not be used for",
+      "Rename the verification tool to better match common query phrasing",
+      "Add instructions telling the agent to avoid summarization for factual validation",
+      "Add more examples showing correct tool usage for verification tasks"
+    ],
+    "correctIndex": 0,
+    "explanation": "Negative boundaries prevent misuse when tools have partially overlapping capabilities by making clear when a tool should not be chosen.",
+    "tags": ["tool-design", "tool-selection"]
+  },
+  {
+    "id": "d2-p1-q11",
+    "domain": 2,
+    "sources": ["practice-1"],
+    "stem": "An agent has a specialized tool that accepts validated document URLs and returns structured content, plus a general tool that fetches raw content from any URL. Both are documented, but given document URLs the agent sometimes uses the general fetcher, producing inconsistent output. Which single change most improves tool selection?",
+    "options": [
+      "Remove the general-purpose tool entirely to eliminate the ambiguity",
+      "Strengthen the specialized tool's description to emphasize its intended use cases",
+      "Add prompt instructions directing the agent to prefer the specialized tool",
+      "Lower the temperature so the agent chooses more deterministically"
+    ],
+    "correctIndex": 1,
+    "explanation": "Emphasizing the specialized tool's intended use in its description reduces competition with the broad tool without removing the general capability that other tasks may need.",
+    "tags": ["tool-design", "tool-selection"]
+  },
+  {
+    "id": "d2-p1-q12",
+    "domain": 2,
+    "sources": ["practice-1"],
+    "stem": "A subagent fetches several documents from an external service. When some fail to load due to timeouts, the tool returns a success response containing only the documents that came back, with no indication of failures. The coordinator then proceeds as if the data is complete, yielding incomplete analysis. Which change most effectively improves system behavior?",
+    "options": [
+      "Return a failure signal whenever critical portions of the request are incomplete",
+      "Let the synthesis agent infer that missing data may indicate a partial failure",
+      "Add more retries inside the subagent before it returns results",
+      "Silently drop the failed items and return whatever was retrieved as success"
+    ],
+    "correctIndex": 0,
+    "explanation": "When missing data affects correctness, the tool must signal failure rather than report success, so the coordinator can act on the fact that the result is incomplete.",
+    "tags": ["error-handling", "multi-agent"]
+  },
+  {
+    "id": "d2-p1-q13",
+    "domain": 2,
+    "sources": ["practice-1"],
+    "stem": "Your synthesis agent is restricted to summarization and formatting tools. In evaluation it often needs to do simple fact checks (like confirming a date or statistic) but must escalate back to the coordinator each time, adding latency. You want more efficiency without breaking role boundaries. Which approach is best?",
+    "options": [
+      "Remove verification duties entirely and rely on upstream agents",
+      "Add prompt instructions encouraging the agent to avoid unnecessary escalation",
+      "Give the agent access to all search and analysis tools to cut coordination overhead",
+      "Provide the synthesis agent with a narrowly scoped verification tool for simple checks"
+    ],
+    "correctIndex": 3,
+    "explanation": "A narrowly scoped verification tool keeps role boundaries intact while letting the agent handle common low-complexity checks without over-exposing it to unrelated tools.",
+    "tags": ["multi-agent", "tool-design"]
+  },
+  {
+    "id": "d2-p1-q14",
+    "domain": 2,
+    "sources": ["practice-1"],
+    "stem": "An agent uses an MCP tool to retrieve customer records. When a request fails on invalid input such as a malformed ID, the agent retries several times before finally giving up. The tool already returns structured errors, but every failure is filed under a single category. Which change best improves the agent's retry behavior?",
+    "options": [
+      "Differentiate error categories so validation failures are clearly marked as non-retryable",
+      "Let the agent infer retryability from the text of the error message",
+      "Add system prompt instructions explaining when retries should occur",
+      "Increase the delay between retries so the agent waits longer between attempts"
+    ],
+    "correctIndex": 0,
+    "explanation": "Distinct error categories let the agent tell retryable failures from non-retryable ones, so a validation error is recognized as pointless to retry.",
+    "tags": ["error-handling", "retry-logic"]
+  },
+  {
+    "id": "d2-p1-q15",
+    "domain": 2,
+    "sources": ["practice-1"],
+    "stem": "Production logs show the agent often calls fetch_profile when users ask about shipment updates like \"where is my package #78910,\" instead of calling track_shipment. Both tools currently have minimal descriptions (\"retrieves user profile data\" and \"retrieves shipment status\") and accept similar identifier inputs. What is the most effective first step to improve selection reliability?",
+    "options": [
+      "Expand each tool's description with supported input formats, example queries, edge cases, and clear boundaries for when it applies",
+      "Merge both tools into one lookup_record tool that internally decides whether to return profile or shipment data",
+      "Add few-shot examples in the system prompt showing correct routing of shipment queries",
+      "Build a preprocessing classifier that inspects queries and routes them by keywords and patterns"
+    ],
+    "correctIndex": 0,
+    "explanation": "Descriptions are the primary signal for tool choice, so enriching them with formats, examples, and boundaries addresses the root cause directly and simply.",
+    "tags": ["tool-design", "tool-selection"]
+  },
+  {
+    "id": "d2-p2-q01",
+    "domain": 2,
+    "sources": ["practice-2"],
+    "stem": "A Claude-based agent runs across environments with differing permission levels. Mid-execution, some MCP tools become partially unavailable because the current session lacks the required permissions, causing intermittent workflow failures. Which adjustment best improves reliability without needlessly limiting the agent's capabilities?",
+    "options": [
+      "Pre-configure a fixed permission profile at session start and apply it uniformly throughout",
+      "Evaluate tool permissions dynamically and adjust orchestration decisions at runtime",
+      "Restrict the agent to only tools guaranteed to work in every environment",
+      "Log all permission failures and hand them to the operations team to resolve manually"
+    ],
+    "correctIndex": 1,
+    "explanation": "Checking permissions at runtime lets the agent route around temporarily unavailable tools while still using them where allowed, avoiding both hard failures and blanket restriction.",
+    "tags": ["mcp", "orchestration"]
+  },
+  {
+    "id": "d2-p2-q02",
+    "domain": 2,
+    "sources": ["practice-2"],
+    "stem": "An agent connected to several MCP tools must combine data from different sources, but it sometimes picks the wrong tools or uses them in the wrong order, giving incomplete results. Which approach most effectively improves tool coordination?",
+    "options": [
+      "Raise the temperature to allow more flexible decision-making",
+      "Reduce the number of tools available to the agent",
+      "Let the agent explore the tools freely without guidance",
+      "Provide clear tool descriptions and usage guidelines in a structured form"
+    ],
+    "correctIndex": 3,
+    "explanation": "Clear, structured descriptions and usage guidance give the agent the information it needs to select and sequence tools correctly across multiple sources.",
+    "tags": ["tool-design", "orchestration"]
+  },
+  {
+    "id": "d2-p2-q03",
+    "domain": 2,
+    "sources": ["practice-2"],
+    "stem": "Your system relies on a single tool described as \"processes documents and returns relevant insights.\" In testing its output is inconsistent: sometimes it summarizes, sometimes extracts data, sometimes attempts verification, and results swing based on phrasing. What is the most appropriate improvement?",
+    "options": [
+      "Add more examples showing how the tool should behave in different scenarios",
+      "Split the tool into purpose-specific tools with clearly defined responsibilities",
+      "Expand the tool's description to cover all possible use cases and outputs",
+      "Keep the tool as-is but add instructions guiding its behavior for each task type"
+    ],
+    "correctIndex": 1,
+    "explanation": "A single generic tool invites ambiguous, phrasing-dependent behavior, so breaking it into specialized tools gives each a clear, predictable intent.",
+    "tags": ["tool-design", "tool-selection"]
+  },
+  {
+    "id": "d2-p2-q04",
+    "domain": 2,
+    "sources": ["practice-2"],
+    "stem": "A Claude-based agent interacts with a tool that keeps session state between requests. During retries and parallel execution the tool sometimes yields inconsistent results because separate requests unintentionally affect shared internal state. Which adjustment best improves reliability and predictability of the interaction model?",
+    "options": [
+      "Raise the temperature so the model adapts to state changes",
+      "Add detailed logging of all tool state changes for later debugging",
+      "Convert the tool to stateless request handling wherever possible",
+      "Add a request queue so concurrent calls are serialized before reaching the tool"
+    ],
+    "correctIndex": 2,
+    "explanation": "Shared mutable state is the source of the inconsistency, so making request handling stateless removes the cross-request interference at its root rather than masking it.",
+    "tags": ["tool-design", "state-management"]
+  },
+  {
+    "id": "d2-p2-q05",
+    "domain": 2,
+    "sources": ["practice-2"],
+    "stem": "A Claude agent works in an environment where tools are frequently added, updated, or removed. It occasionally fails to adapt, sometimes trying to use deprecated tools or ignoring newly available ones. Which approach best ensures reliable adaptation to this dynamic environment?",
+    "options": [
+      "Hardcode tool usage logic directly in the prompts",
+      "Dynamically refresh tool metadata and expose updated capabilities at runtime",
+      "Restrict tool usage to a fixed, predefined static set",
+      "Use a tool registry that caches capabilities at session start and refreshes them only periodically"
+    ],
+    "correctIndex": 1,
+    "explanation": "Refreshing tool metadata at runtime keeps the agent's view current, so it stops calling removed tools and starts using newly added ones as changes happen.",
+    "tags": ["mcp", "orchestration"]
+  },
+  {
+    "id": "d2-p2-q06",
+    "domain": 2,
+    "sources": ["practice-2"],
+    "stem": "A Claude agent chains several tools in sequence. Occasionally an upstream tool emits slightly unexpected but technically valid output formats, causing downstream tools with strict input expectations to fail. Which change best improves the robustness of the system?",
+    "options": [
+      "Enforce strict validation on upstream tool outputs and normalize them before passing downstream",
+      "Remove the strict input requirements from the downstream tools",
+      "Retry the downstream tools until they eventually succeed",
+      "Raise the temperature so the model adapts to format variation"
+    ],
+    "correctIndex": 0,
+    "explanation": "Validating and normalizing upstream output before it flows downstream guarantees a consistent contract, which is more robust than loosening requirements or blind retries.",
+    "tags": ["error-handling", "orchestration"]
+  },
+  {
+    "id": "d2-p2-q07",
+    "domain": 2,
+    "sources": ["practice-2"],
+    "stem": "A Claude-based orchestration platform integrates MCP tools from many providers. Some support advanced features like streaming, partial-result recovery, and async execution, while others expose only basic synchronous request-response. Failures occur because downstream logic assumes advanced capabilities are universally supported. Which architectural adjustment best improves reliability while still using advanced features where available?",
+    "options": [
+      "Introduce runtime capability negotiation with capability-aware fallback paths during execution planning",
+      "Restrict all workflows to the smallest common feature set supported by every MCP tool",
+      "Require every MCP provider to implement identical execution capabilities before integration is allowed",
+      "Raise the temperature so the model adapts to unsupported MCP features on the fly"
+    ],
+    "correctIndex": 0,
+    "explanation": "Negotiating capabilities at runtime and falling back gracefully lets the platform exploit advanced features where present without breaking on tools that lack them.",
+    "tags": ["mcp", "orchestration"]
+  },
+  {
+    "id": "d2-p2-q08",
+    "domain": 2,
+    "sources": ["practice-2"],
+    "stem": "A Claude-based agent receives structured responses from external tools. The responses are syntactically valid, yet some contain logically inconsistent values that cause subtle downstream reasoning errors. Which adjustment best improves robustness against these failures?",
+    "options": [
+      "Add post-processing that normalizes inconsistent field values before passing outputs downstream",
+      "Validate both structural correctness and semantic consistency of tool outputs before use",
+      "Trust structured outputs as long as they conform to the expected JSON schema",
+      "Increase retry frequency and compare outputs across attempts to pick the most consistent one"
+    ],
+    "correctIndex": 1,
+    "explanation": "Schema validation alone misses logically inconsistent values, so checking semantic consistency in addition to structure catches the errors before they propagate.",
+    "tags": ["error-handling", "validation"]
+  },
+  {
+    "id": "d2-p2-q09",
+    "domain": 2,
+    "sources": ["practice-2"],
+    "stem": "A team defines a tool for a Claude agent that accepts loosely specified parameters such as \"user data\" and \"details.\" During execution the agent frequently passes incorrect or incomplete arguments, causing failed tool calls and inconsistent results. Which design improvement most effectively resolves this?",
+    "options": [
+      "Retry the tool call whenever the parameters turn out to be incorrect",
+      "Raise the temperature so the model explores better parameter values",
+      "Add more examples of tool usage to the prompt",
+      "Define clear, specific parameter schemas with explicit field names and types"
+    ],
+    "correctIndex": 3,
+    "explanation": "Vague parameters are the root cause, so precise schemas with explicit field names and types tell the agent exactly what to supply, preventing malformed calls.",
+    "tags": ["tool-design", "schema-design"]
+  },
+  {
+    "id": "d2-p2-q10",
+    "domain": 2,
+    "sources": ["practice-2"],
+    "stem": "A Claude-based orchestration platform integrates MCP tools from internal teams and third-party vendors. Some provide highly reliable infrastructure data while others expose probabilistic or partially validated insights. During incidents, remediation workflows sometimes treat all tool outputs as equally authoritative, driving risky decisions from lower-trust sources. Which architectural adjustment best improves reliability without needlessly limiting interoperability?",
+    "options": [
+      "Attach provenance, confidence, and trust metadata to tool outputs and apply trust-aware execution policies during orchestration",
+      "Restrict orchestration exclusively to internally developed MCP tools so all data sources stay fully controlled",
+      "Treat all MCP tool outputs as equally trustworthy once schema validation succeeds",
+      "Raise the temperature so the model decides at runtime which outputs look most trustworthy"
+    ],
+    "correctIndex": 0,
+    "explanation": "Tagging outputs with provenance and confidence and enforcing trust-aware policies lets the platform weigh sources appropriately while still integrating with all of them.",
+    "tags": ["mcp", "orchestration", "trust"]
+  },
+  {
+    "id": "d2-p2-q11",
+    "domain": 2,
+    "sources": ["practice-2"],
+    "stem": "A subagent performs web searches through an MCP tool. On a timeout it retries several times internally, and when all retries fail it returns only a generic failure message to the coordinator with no extra context. The coordinator then cannot tell whether to retry, switch strategy, or proceed with partial results. Which change most effectively improves system behavior?",
+    "options": [
+      "Return structured error details including the failure type, retryability, and the actions already attempted",
+      "Suppress the errors and return an empty result set marked as successful",
+      "Increase the number of internal retries before returning control to the coordinator",
+      "Have the coordinator guess the failure cause from the timing of the response"
+    ],
+    "correctIndex": 0,
+    "explanation": "Structured error details about failure type, retryability, and attempted actions give the coordinator the information it needs to make an informed recovery decision.",
+    "tags": ["error-handling", "multi-agent"]
+  },
+  {
+    "id": "d2-p2-q12",
+    "domain": 2,
+    "sources": ["practice-2"],
+    "stem": "A production multi-agent system depends on several MCP servers for data retrieval, computation, and external integration. Under peak load, individual server connections occasionally drop due to network instability, and currently any connection failure terminates the whole workflow even when the affected server supplies only non-critical supplementary capabilities. Which architectural adjustment best improves resilience against transient unavailability?",
+    "options": [
+      "Consolidate all MCP capabilities into a single server instance to remove multi-server complexity",
+      "Classify MCP server dependencies by criticality and add graceful degradation paths so workflows continue when non-critical servers are temporarily down",
+      "Terminate all active workflows immediately whenever any MCP connection fails to avoid partial execution",
+      "Retry the failed MCP connection indefinitely until availability is restored before letting execution proceed"
+    ],
+    "correctIndex": 1,
+    "explanation": "Classifying dependencies by criticality and degrading gracefully lets workflows survive the loss of non-critical servers instead of failing entirely on any transient drop.",
+    "tags": ["mcp", "resilience"]
+  },
+  {
+    "id": "d2-p2-q13",
+    "domain": 2,
+    "sources": ["practice-2"],
+    "stem": "A Claude-based agent connects to MCP servers from different teams. Some expose advanced capabilities like streaming responses and batch execution, while others support only basic synchronous operations. During orchestration the agent sometimes assumes advanced capabilities are always present, causing failures in lower-capability environments. Which adjustment gives the most reliable cross-environment behavior while still benefiting from advanced features when available?",
+    "options": [
+      "Restrict the agent to only the smallest common feature set across all MCP servers",
+      "Require all MCP providers to support identical capabilities before integration is allowed",
+      "Negotiate capabilities dynamically at runtime and implement fallback execution paths for unsupported features",
+      "Raise the temperature so the model adapts more flexibly when advanced capabilities are missing"
+    ],
+    "correctIndex": 2,
+    "explanation": "Dynamic capability negotiation with fallbacks lets the agent use advanced features where servers support them and degrade safely where they do not, unlike a rigid lowest-common-denominator approach.",
+    "tags": ["mcp", "orchestration"]
+  },
+  {
+    "id": "d2-p2-q14",
+    "domain": 2,
+    "sources": ["practice-2"],
+    "stem": "Your agent enriches product data using an MCP tool, but for some inputs it returns a natural-language answer instead of calling the enrichment tool, even though enrichment is always required. The agent is configured with tool_choice \"auto.\" What is the most appropriate change?",
+    "options": [
+      "Increase the number of available tools so the agent has more options",
+      "Set tool_choice to \"any\" so the model always invokes a tool",
+      "Provide examples showing that the tool must always be used",
+      "Add system prompt instructions requiring the agent to call the enrichment tool"
+    ],
+    "correctIndex": 1,
+    "explanation": "The \"any\" setting guarantees the model selects a tool rather than replying conversationally, which directly enforces that enrichment always runs.",
+    "tags": ["tool-choice", "tool-design"]
+  },
+  {
+    "id": "d2-p2-q15",
+    "domain": 2,
+    "sources": ["practice-2"],
+    "stem": "Your synthesis agent has access to 18 tools spanning search, parsing, summarization, and data extraction. In testing its behavior is inconsistent: it frequently selects the wrong tools or uses tools outside its intended purpose. What is the most effective improvement?",
+    "options": [
+      "Limit the synthesis agent's tool set to only those required for its role",
+      "Increase the number of tools so the agent has more options to choose from",
+      "Provide examples showing correct tool usage patterns",
+      "Add prompt instructions clarifying which tools to use in different situations"
+    ],
+    "correctIndex": 0,
+    "explanation": "Trimming the tool set to only what the role needs lowers decision complexity, which improves selection reliability more than adding examples or instructions on top of a bloated set.",
+    "tags": ["tool-design", "multi-agent"]
+  }
+]
