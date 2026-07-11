@@ -78,15 +78,15 @@
     "id": "d1-p1-q06",
     "domain": 1,
     "sources": ["practice-1"],
-    "stem": "A coordinator delegates to search, analysis, and synthesis subagents. The synthesis agent produces incomplete reports, missing key findings that earlier agents already retrieved. Investigation shows the coordinator invokes subagents correctly but passes only minimal instructions without including prior results. Which two changes would most effectively resolve this? (Select TWO)",
+    "stem": "A coordinator delegates to search, analysis, and synthesis subagents. The synthesis agent produces incomplete reports, missing key findings that earlier agents already retrieved. Investigation shows the coordinator invokes subagents correctly but passes only minimal instructions without including prior results. Which change most directly resolves this?",
     "options": [
-      "Structure the context passed between agents so content is separated from metadata such as sources and timestamps",
       "Include the full outputs of prior subagents directly in the prompt when invoking the next subagent",
       "Add instructions telling subagents to request missing information from other agents when needed",
-      "Rely on the model to recall prior steps automatically across subagent invocations"
+      "Rely on the model to recall prior steps automatically across subagent invocations",
+      "Increase the synthesis agent's maximum output length so its reports can cover more findings"
     ],
     "correctIndex": 0,
-    "explanation": "Structured formats preserve attribution and clarity for downstream reasoning, and passing complete prior outputs ensures each subagent has everything it needs. The two correct actions are separating content from metadata and forwarding complete prior outputs.",
+    "explanation": "Subagents only see what is passed into their invocation. Forwarding the complete outputs of earlier agents gives the synthesis step all the information it needs; it cannot recall or request context it was never given.",
     "tags": ["context-management", "multi-agent"]
   },
   {
@@ -318,31 +318,31 @@
     "id": "d1-p2-q09",
     "domain": 1,
     "sources": ["practice-2"],
-    "stem": "You are building an agent to add comprehensive test coverage to a large legacy codebase. The structure is unclear, dependencies are poorly documented, and the agent must decide where to focus first. Which two approaches would most effectively improve task decomposition? (Select TWO)",
+    "stem": "You are building an agent to add comprehensive test coverage to a large legacy codebase. The structure is unclear, dependencies are poorly documented, and the agent must decide where to focus first. Which approach most effectively begins the task decomposition?",
     "options": [
-      "Let the agent dynamically adapt its plan as new dependencies and patterns are discovered during execution",
+      "Begin with the files that have the fewest dependencies so the agent shows early progress quickly",
       "Generate tests for all files in parallel without analyzing dependencies or relationships first",
       "Start by mapping the codebase structure and identifying high-impact areas before generating a prioritized plan",
       "Define a fixed sequence of steps upfront and require the agent to follow them regardless of findings"
     ],
-    "correctIndex": 0,
-    "explanation": "Dynamic decomposition lets the agent refine its approach as new information appears, and mapping the structure first focuses effort on the most important areas. The two correct actions are adapting the plan dynamically and mapping structure before planning.",
+    "correctIndex": 2,
+    "explanation": "When structure is unclear, mapping the codebase first grounds the plan in real dependencies and focuses effort on the highest-impact areas, rather than guessing, starting with easy files, or committing to a rigid sequence upfront.",
     "tags": ["task-decomposition", "workflow-design"]
   },
   {
     "id": "d1-p2-q10",
     "domain": 1,
     "sources": ["practice-2"],
-    "stem": "A customer reports a complex issue involving billing, refund, and account closure. Your agent tries to handle everything in a single pass but produces incomplete, unclear responses, and when it escalates to a human the handoff lacks enough context, forcing manual re-investigation. Which two changes would most effectively improve both resolution quality and escalation handoffs? (Select TWO)",
+    "stem": "A customer reports a complex issue involving billing, refund, and account closure. When your agent escalates the case to a human, it forwards little context, forcing the human to manually re-investigate from scratch. Which change would most effectively improve the escalation handoff?",
     "options": [
-      "Break the request into distinct concerns, investigate each independently, then combine results into a unified response",
       "Instruct the agent to resolve the most urgent issue first and ignore secondary concerns",
       "Let the human agent access the full conversation transcript instead of providing a summary",
-      "Include a structured handoff summary with key details such as customer ID, issue type, root cause, and recommended actions"
+      "Include a structured handoff summary with key details such as customer ID, issue type, root cause, and recommended actions",
+      "Have the agent retry the full investigation once more before escalating, to reduce how often handoffs occur"
     ],
-    "correctIndex": 0,
-    "explanation": "Decomposing multi-concern requests ensures each issue is handled thoroughly, and structured handoff summaries enable efficient escalation. The two correct actions are decomposing the request and including a structured handoff summary.",
-    "tags": ["task-decomposition", "escalation"]
+    "correctIndex": 2,
+    "explanation": "A structured handoff summary gives the human reviewer the essential context at a glance, enabling efficient escalation without re-investigation. Raw transcripts force the human to reconstruct the case, and retries or ignoring concerns do not transfer context at all.",
+    "tags": ["escalation", "context-management"]
   },
   {
     "id": "d1-p2-q11",
@@ -393,15 +393,15 @@
     "id": "d1-p2-q14",
     "domain": 1,
     "sources": ["practice-2"],
-    "stem": "Your coordinator always invokes the full pipeline of subagents (search, analysis, synthesis) for every request. In evaluation you find that even simple queries, like retrieving a known fact, trigger all subagents, adding unnecessary latency and cost. Which two approaches would most effectively improve system efficiency? (Select TWO)",
+    "stem": "Your coordinator always invokes the full pipeline of subagents (search, analysis, synthesis) for every request. In evaluation you find that even simple queries, like retrieving a known fact, trigger all subagents, adding unnecessary latency and cost. Which approach would most effectively handle simple queries efficiently?",
     "options": [
       "Optimize each subagent to run faster so the full pipeline becomes less expensive",
-      "Let the coordinator skip unnecessary subagents by determining which ones each query requires",
+      "Lower each subagent's output token limits so simple queries complete more quickly",
       "Add caching to reuse outputs from previous queries whenever possible",
       "Define lightweight execution paths for simple queries that bypass the full pipeline"
     ],
-    "correctIndex": 1,
-    "explanation": "The coordinator should dynamically decide which agents to invoke, and lightweight paths should handle simple queries. These two complementary changes reduce unnecessary work.",
+    "correctIndex": 3,
+    "explanation": "Lightweight execution paths let simple queries skip the full pipeline entirely, eliminating the unnecessary work. Speeding up or truncating subagents that should not run at all still pays the cost of invoking them.",
     "tags": ["orchestration", "efficiency"]
   },
   {
@@ -438,30 +438,30 @@
     "id": "d1-p3-q04",
     "domain": 1,
     "sources": ["practice-3"],
-    "stem": "You are analyzing a codebase with Claude Code. You previously completed a detailed architecture investigation and identified several improvement areas. Since then, some files have minor changes, you want to explore two alternative refactoring strategies in parallel, and most of your previous analysis remains valid. Which two actions are most appropriate for continuing this work? (Select TWO)",
+    "stem": "You are analyzing a codebase with Claude Code. You previously completed a detailed architecture investigation, some files have since received minor changes, and most of your previous analysis remains valid. Before branching into any new explorations, which action is most appropriate for bringing the session up to date?",
     "options": [
       "Start a completely new session and discard previous analysis to avoid stale context",
-      "Use fork_session to create separate branches for each refactoring strategy",
+      "Immediately use fork_session to create new branches without telling the agent about the file changes",
       "Use --resume and inform the agent about the specific file changes before continuing",
-      "Continue in the same session and switch between both strategies during execution"
+      "Continue in the same session and assume the agent will notice the modified files on its own"
     ],
-    "correctIndex": 1,
-    "explanation": "Since most context remains valid, resuming with targeted updates avoids repeating prior analysis, while forking lets you explore multiple approaches independently from a shared baseline. The two correct actions are forking for each strategy and resuming with the file-change details.",
+    "correctIndex": 2,
+    "explanation": "Since most context remains valid, resuming and pointing the agent at the specific file changes corrects the stale state without repeating prior analysis. Discarding everything wastes valid context, and forking or continuing without an update propagates outdated file states into all future work.",
     "tags": ["sessions", "context-management"]
   },
   {
     "id": "d1-p3-q05",
     "domain": 1,
     "sources": ["practice-3"],
-    "stem": "Your agent handles billing issues. For a request it successfully retrieves account details and identifies a charge discrepancy, but resolving it requires a policy exception the agent is not authorized to apply. Currently, when escalating to a human, the system only forwards the original user request, causing repeated investigation and longer resolution times. Which two changes would most effectively improve escalation handling? (Select TWO)",
+    "stem": "Your agent handles billing issues. For a request it successfully retrieves account details and identifies a charge discrepancy, but resolving it requires a policy exception the agent is not authorized to apply. When escalating to a human, the system forwards only the original user request, so the human repeats the entire investigation the agent already performed. Which change would most effectively prevent this duplicated investigation?",
     "options": [
       "Pass the results of completed tool calls so the human agent can see what has already been investigated",
       "Instruct the human agent to re-run the same checks to ensure consistency before taking action",
       "Delay escalation until the agent attempts all possible actions, even if they may violate policy",
-      "Include a structured handoff summary with customer ID, identified issues, actions already taken, and recommended next steps"
+      "Attach the agent's entire raw conversation log and let the human reconstruct the investigation from it"
     ],
     "correctIndex": 0,
-    "explanation": "Providing prior investigation results and a structured handoff summary preserves context and prevents duplicated effort. The two correct actions are forwarding completed tool-call results and including a structured handoff summary.",
+    "explanation": "Forwarding the completed tool-call results preserves the investigation context so the human can pick up exactly where the agent stopped. Re-running checks or digging through raw logs duplicates the effort, and delaying escalation to attempt unauthorized actions violates policy.",
     "tags": ["escalation", "context-management"]
   },
   {
