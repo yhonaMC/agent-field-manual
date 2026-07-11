@@ -1,0 +1,12 @@
+[
+  {
+    "id": "d1-p1-q01",
+    "domain": 1,
+    "sources": ["practice-1"],
+    "stem": "PLACEHOLDER SEED — replaced during Domain 1 extraction. This stem is long enough to validate.",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "correctIndex": 0,
+    "explanation": "Placeholder explanation, long enough to satisfy schema validation rules.",
+    "tags": ["seed"]
+  }
+]
