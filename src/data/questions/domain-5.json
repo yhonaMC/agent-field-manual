@@ -212,7 +212,7 @@
   {
     "id": "d5-p1-q15",
     "domain": 5,
-    "sources": ["practice-1", "final-pool"],
+    "sources": ["practice-1"],
     "stem": "An agent aggregates statistics from multiple sources and finds that two credible sources report different values for the same metric. Inspection shows one value comes from a report published two years ago and the other from a recent study. Currently the agent presents both values as conflicting with no explanation. Which change would most improve the output?",
     "options": [
       "Include the publication dates and explain that the difference reflects temporal variation",

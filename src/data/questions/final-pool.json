@@ -313,5 +313,20 @@
     "correctIndex": 0,
     "explanation": "Keeping critical transactional facts in a dedicated structured block that is re-passed each turn protects them from being degraded or dropped during ongoing summarization.",
     "tags": ["context-management", "fact-preservation", "summarization"]
+  },
+  {
+    "id": "final-q022",
+    "domain": 5,
+    "sources": ["final-pool"],
+    "stem": "An agent merges information gathered from several trustworthy sources, and some of those sources report differing figures for the same metric. As it stands, the agent silently picks one figure and reports it with no justification. Which approach would most improve the reliability of its output?",
+    "options": [
+      "Report every figure alongside its originating source and the surrounding context",
+      "Keep only the newest figure and treat it as the definitive answer",
+      "Combine the differing figures into one averaged estimate",
+      "Remove the divergent figures as outliers to keep the results consistent"
+    ],
+    "correctIndex": 0,
+    "explanation": "Surfacing each value together with its source and context lets the user see where the numbers diverge and judge the relative credibility of each, rather than hiding the disagreement behind a single unexplained pick.",
+    "tags": ["data-aggregation", "source-attribution", "reliability"]
   }
 ]
