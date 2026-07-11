@@ -1,0 +1,17 @@
+---
+import ManualLayout from "../layouts/ManualLayout.astro";
+import ProgressPanel from "../components/islands/ProgressPanel";
+import { getCollection } from "astro:content";
+import { allQuestions } from "../lib/question-bank";
+
+const lessons = await getCollection("lessons");
+const lessonMeta = lessons.map((l) => ({ id: l.id, domain: l.data.domain, title: l.data.title, section: l.data.section }));
+const questionMeta = allQuestions.map((q) => ({ id: q.id, domain: q.domain }));
+---
+<ManualLayout title="Progress" description="Your study log: domain mastery gauges, exam history, and review queue.">
+  <section>
+    <span class="section-no">FLIGHT LOG</span>
+    <h1>Progress</h1>
+    <ProgressPanel client:load lessonMeta={lessonMeta} questionMeta={questionMeta} />
+  </section>
+</ManualLayout>
