@@ -1,0 +1,12 @@
+---
+import ManualLayout from "../layouts/ManualLayout.astro";
+import ReviewDeck from "../components/islands/ReviewDeck";
+---
+<ManualLayout title="Review Deck" description="Spaced-repetition review of every question you have missed.">
+  <section>
+    <span class="section-no">MAINTENANCE SCHEDULE</span>
+    <h1>Review Deck</h1>
+    <p class="prose">Every question you miss anywhere in the manual is scheduled here: 1, 3, 7, 16, then 35 days out. Clear the queue daily.</p>
+    <ReviewDeck client:load />
+  </section>
+</ManualLayout>
