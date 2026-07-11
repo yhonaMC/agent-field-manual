@@ -1,0 +1,452 @@
+[
+  {
+    "id": "d4-p1-q01",
+    "domain": 4,
+    "sources": ["practice-1"],
+    "stem": "A Claude-powered service emits structured deployment recommendations that feed several downstream automation systems. Ongoing prompt tuning keeps improving quality, but minor shifts in the output format occasionally break integrations that rely on stable field names and structures. The team wants to keep improving prompts without disrupting consumers. What is the best approach?",
+    "options": [
+      "Switch every structured output to free-form prose so schema compatibility stops mattering",
+      "Let output structures change freely and expect downstream systems to adapt after each prompt update",
+      "Adopt versioned output contracts and preserve backward compatibility for consumers as the schema evolves",
+      "Tighten the schema constraints so each consumer can validate correctness on its own without coordination"
+    ],
+    "correctIndex": 2,
+    "explanation": "Versioning the output contract and keeping older versions working lets prompts keep improving while downstream integrations stay stable during schema evolution.",
+    "tags": ["structured-output", "schema-evolution", "versioning"]
+  },
+  {
+    "id": "d4-p1-q02",
+    "domain": 4,
+    "sources": ["practice-1"],
+    "stem": "You are building an agent that extracts structured invoice data, and the output must always be valid JSON for downstream systems. Today the agent usually returns correct JSON but sometimes emits malformed output or mixes prose with the JSON. What is the most effective fix?",
+    "options": [
+      "Supply several examples of correctly formatted JSON in the prompt",
+      "Add instructions telling the model to always return valid JSON",
+      "Use tool calling with a defined JSON schema to enforce structured output",
+      "Post-process the responses to repair formatting mistakes"
+    ],
+    "correctIndex": 2,
+    "explanation": "Tool use with a declared JSON schema guarantees schema-compliant results and removes JSON syntax errors, which instructions or examples alone cannot ensure.",
+    "tags": ["structured-output", "tool-use", "json-schema"]
+  },
+  {
+    "id": "d4-p1-q03",
+    "domain": 4,
+    "sources": ["practice-1"],
+    "stem": "Your agent retries failed outputs using validation feedback, but you notice the retries sometimes reinforce the wrong pattern, repeatedly misformatting one particular field across multiple attempts. Which adjustment would best improve reliability?",
+    "options": [
+      "Reduce how many fields the schema marks as required",
+      "Rewrite the retry prompt to clearly restate the expected format for the failing fields",
+      "Keep retrying until the output finally passes validation",
+      "Drop validation entirely to avoid the repeated failures"
+    ],
+    "correctIndex": 1,
+    "explanation": "Restating the correct structure alongside the error feedback breaks the repeated failure loop, whereas plain retries tend to reinforce the same mistake.",
+    "tags": ["retry-logic", "validation", "prompt-design"]
+  },
+  {
+    "id": "d4-p1-q04",
+    "domain": 4,
+    "sources": ["practice-1"],
+    "stem": "A team notices their Claude-based agent sometimes ignores critical constraints in generated outputs. The constraints are present in the prompt but sit after a large block of supporting context. Which approach would MOST improve adherence to those constraints?",
+    "options": [
+      "Raise the temperature to encourage stronger reasoning",
+      "Remove the constraints and rely on examples instead",
+      "Add even more supporting context ahead of the constraints",
+      "Move the critical constraints to both the start and the end of the prompt"
+    ],
+    "correctIndex": 3,
+    "explanation": "Placing key constraints at the beginning and end of the prompt takes advantage of the positions the model attends to most, so they are far less likely to be overlooked.",
+    "tags": ["prompt-design", "constraints"]
+  },
+  {
+    "id": "d4-p1-q05",
+    "domain": 4,
+    "sources": ["practice-1"],
+    "stem": "Your agent labels issues under two categories, \"security risks\" and \"improper input handling.\" During evaluation, conceptually identical issues sometimes land in different categories, producing inconsistent classification and confusing reports. What is the most appropriate improvement?",
+    "options": [
+      "Add instructions telling the model to stay consistent when categorizing",
+      "Collapse everything into a single generic \"issue\" label",
+      "Provide more examples of each category",
+      "Refine the criteria so overlapping categories are clearly separated or merged"
+    ],
+    "correctIndex": 3,
+    "explanation": "The inconsistency stems from overlapping category definitions; sharpening the boundaries or consolidating them removes the ambiguity that drives misclassification.",
+    "tags": ["classification", "criteria-design"]
+  },
+  {
+    "id": "d4-p1-q06",
+    "domain": 4,
+    "sources": ["practice-1"],
+    "stem": "Your agent reviews large pull requests spanning many files. When it analyzes everything in one pass, results are uneven: some files get detailed feedback while others are barely examined. You want to improve both consistency and coverage without changing the model. Which design adjustment works best?",
+    "options": [
+      "Run several full-repository reviews and merge the results together",
+      "Split the review into a per-file analysis pass followed by a separate cross-file integration pass",
+      "Enlarge the prompt to pack more context into a single pass",
+      "Cap the number of files reviewed in each request"
+    ],
+    "correctIndex": 1,
+    "explanation": "A multi-pass design reduces attention dilution: analyzing files individually first ensures each is reviewed thoroughly before a dedicated pass reasons across them.",
+    "tags": ["multi-pass", "agent-design", "code-review"]
+  },
+  {
+    "id": "d4-p1-q07",
+    "domain": 4,
+    "sources": ["practice-1"],
+    "stem": "Your agent retries failed outputs using validation messages such as \"field X must be a string\" or \"field Y must follow ISO 8601.\" During testing, retries sometimes over-correct, changing unrelated fields or altering parts that were already valid. You want more stability across retries. Which change would best address this?",
+    "options": [
+      "Restrict the feedback to only the fields that actually failed validation",
+      "Add instructions telling the model not to modify correct fields",
+      "Simplify the schema to reduce validation complexity",
+      "Increase the retry count to allow the output to converge"
+    ],
+    "correctIndex": 0,
+    "explanation": "Scoping the feedback to just the failing fields keeps the model from touching parts that were already valid, reducing unnecessary changes and improving stability.",
+    "tags": ["retry-logic", "validation", "stability"]
+  },
+  {
+    "id": "d4-p1-q08",
+    "domain": 4,
+    "sources": ["practice-1"],
+    "stem": "A Claude workflow generates deeply nested structured outputs for deployment plans, dependency maps, rollback procedures, and environment checks. The outputs pass schema validation, yet engineers find that some nested relationships are logically inconsistent, such as rollback steps referencing infrastructure states incompatible with the deployment order defined earlier in the same output. Which architectural adjustment would best improve reliability?",
+    "options": [
+      "Add semantic validation layers that check cross-field dependencies and operational consistency after generation finishes",
+      "Flatten every deployment workflow into single-level structures so nested relationships no longer exist",
+      "Raise the temperature so the model explores more diverse workflow structures before finalizing",
+      "Make the JSON schema validation rules stricter so logical inconsistencies are blocked during generation"
+    ],
+    "correctIndex": 0,
+    "explanation": "Schema validation only checks shape, not meaning. A semantic validation layer that inspects cross-field relationships after generation catches the logical inconsistencies that pass structural checks.",
+    "tags": ["semantic-validation", "structured-output", "consistency"]
+  },
+  {
+    "id": "d4-p1-q09",
+    "domain": 4,
+    "sources": ["practice-1"],
+    "stem": "A prompt uses system-level constraints requiring strict JSON output, but the few-shot examples included in the prompt occasionally show slight formatting deviations. At runtime the model sometimes follows the examples rather than the constraints. Which change would best ensure consistent adherence to the required format?",
+    "options": [
+      "Switch to a model with stronger instruction-following ability",
+      "Align the examples exactly with the constraints so no conflicting patterns remain",
+      "Add more examples to reinforce the desired format",
+      "Remove all examples and rely solely on the system-level constraints"
+    ],
+    "correctIndex": 1,
+    "explanation": "The model follows patterns it sees demonstrated, so examples that conflict with the constraints cause drift. Making the examples match the constraints removes the contradiction.",
+    "tags": ["few-shot", "prompt-design", "consistency"]
+  },
+  {
+    "id": "d4-p1-q10",
+    "domain": 4,
+    "sources": ["practice-1"],
+    "stem": "Your agent extracts structured data against a defined schema. Most responses are valid, but some fail because of missing fields or wrong formats. Currently, when validation fails the system just retries the same prompt, which sometimes works but leaves failures occurring inconsistently. Which change best addresses the root cause?",
+    "options": [
+      "Increase the number of retries to raise the odds of success",
+      "Use a different model configuration for the retries",
+      "Include the specific validation error details in the retry prompt so the model can fix the exact issues",
+      "Strengthen the instructions to emphasize strict schema compliance"
+    ],
+    "correctIndex": 2,
+    "explanation": "Repeating the identical prompt gives the model no new information. Feeding the concrete validation errors back in enables targeted corrections and addresses the real cause of the failures.",
+    "tags": ["retry-logic", "validation", "error-feedback"]
+  },
+  {
+    "id": "d4-p1-q11",
+    "domain": 4,
+    "sources": ["practice-1"],
+    "stem": "An engineering team is building an automation pipeline where Claude extracts key data from API responses and passes it to downstream services. Right now the model returns free-form text, causing frequent parsing failures and inconsistent extraction. Which approach would MOST improve reliability in this pipeline?",
+    "options": [
+      "Post-process the responses with regex parsing",
+      "Use structured JSON output with predefined fields",
+      "Add more descriptive plain-text instructions",
+      "Increase temperature to make outputs more diverse"
+    ],
+    "correctIndex": 1,
+    "explanation": "Requiring structured JSON with predefined fields gives downstream services a stable, parseable contract, eliminating the parsing failures caused by free-form text.",
+    "tags": ["structured-output", "json-schema", "pipeline"]
+  },
+  {
+    "id": "d4-p1-q12",
+    "domain": 4,
+    "sources": ["practice-1"],
+    "stem": "Your system validates structured outputs against a schema and, when validation fails, retries using the same prompt. Some requests keep failing repeatedly with the identical error. What change would best resolve this pattern?",
+    "options": [
+      "Strengthen the instructions to enforce schema compliance",
+      "Include the validation errors in the retry prompt so the model can correct them",
+      "Increase the number of retries to raise the success rate",
+      "Switch to a larger model for the retry attempts"
+    ],
+    "correctIndex": 1,
+    "explanation": "Without feedback, an unchanged retry reproduces the same mistake. Passing the validation errors into the retry prompt enables the targeted correction needed to break the loop.",
+    "tags": ["retry-logic", "validation", "error-feedback"]
+  },
+  {
+    "id": "d4-p1-q13",
+    "domain": 4,
+    "sources": ["practice-1"],
+    "stem": "Your agent must decide whether to extract structured data or summarize content. Some inputs contain both structured fields and descriptive text, leading to inconsistent behavior across similar inputs. Even with detailed instructions, the agent sometimes summarizes when extraction would be more appropriate. Which adjustment would most directly improve its decision-making?",
+    "options": [
+      "Add stricter instructions defining when extraction should be used",
+      "Split the input into separate preprocessing steps before the agent runs",
+      "Restrict the agent to a single tool to eliminate ambiguity",
+      "Provide examples showing how to handle mixed-content inputs"
+    ],
+    "correctIndex": 3,
+    "explanation": "Few-shot examples that demonstrate the desired behavior on mixed inputs clarify how to resolve the conflicting signals, which abstract instructions alone fail to do.",
+    "tags": ["few-shot", "task-routing", "decision-making"]
+  },
+  {
+    "id": "d4-p1-q14",
+    "domain": 4,
+    "sources": ["practice-1"],
+    "stem": "Your agent uses a two-pass approach: the first pass analyzes files individually and the second performs cross-file reasoning. In testing, the second pass produces inconsistent conclusions and often misses relationships the first pass already found. The first pass results are not explicitly included in the second pass input. Which change would most directly fix the issue?",
+    "options": [
+      "Combine both passes into a single prompt",
+      "Feed the first pass outputs into the second pass as structured context",
+      "Increase the number of files analyzed in the first pass",
+      "Repeat the second pass multiple times to improve consistency"
+    ],
+    "correctIndex": 1,
+    "explanation": "Multi-pass workflows depend on information flowing between stages. Passing the first pass results into the second pass gives it the context it currently lacks.",
+    "tags": ["multi-pass", "context-passing", "agent-design"]
+  },
+  {
+    "id": "d4-p1-q15",
+    "domain": 4,
+    "sources": ["practice-1"],
+    "stem": "Your system validates outputs and retries with detailed error messages when validation fails. Early outputs are close to correct, but after several retries the results grow less coherent and new errors appear in fields that were previously fine. Each retry carries forward all prior validation errors plus additional instructions. What is the most likely cause of this degradation?",
+    "options": [
+      "The retry prompt is becoming overloaded, causing the model to lose focus on the core requirements",
+      "The validation rules are too strict and should be relaxed",
+      "The model simply needs more retries to converge on a correct solution",
+      "The schema is missing required fields needed for proper generation"
+    ],
+    "correctIndex": 0,
+    "explanation": "Accumulating every prior error and instruction on each retry inflates the prompt and raises cognitive load, diluting the core requirements and degrading later outputs.",
+    "tags": ["retry-logic", "prompt-overload", "context-management"]
+  },
+  {
+    "id": "d4-p2-q01",
+    "domain": 4,
+    "sources": ["practice-2"],
+    "stem": "A Claude-based pipeline handles incoming tasks that vary widely in complexity, format requirements, and domain. The team currently uses one static system prompt for everything, but outputs drift from requirements because the prompt is tuned toward a narrow set of tasks. Which adjustment would best improve performance across the full range of task types?",
+    "options": [
+      "Let the model rewrite its own instructions based on its self-assessed confidence",
+      "Generate task-specific instructions dynamically from each incoming task's characteristics before invoking the model",
+      "Lengthen the static system prompt to cover as many task variations as possible",
+      "Add few-shot examples for every known task type into the static prompt"
+    ],
+    "correctIndex": 1,
+    "explanation": "Dynamically generating instructions tailored to each task's characteristics adapts the prompt to the full range of inputs, which a single static prompt cannot do well.",
+    "tags": ["dynamic-prompting", "prompt-design", "task-routing"]
+  },
+  {
+    "id": "d4-p2-q02",
+    "domain": 4,
+    "sources": ["practice-2"],
+    "stem": "Your agent decides whether a change should be flagged as a \"performance issue.\" You provide a few examples where obvious inefficiencies are correctly flagged. During testing, however, the agent starts flagging minor inefficiencies with negligible impact, even though your criteria say only meaningful performance issues should be reported. What is the most likely cause?",
+    "options": [
+      "The model needs more examples to understand the performance rules",
+      "The criteria for performance issues are too detailed",
+      "The agent should use structured output instead of natural language",
+      "The examples emphasize detection without showing when NOT to flag an issue"
+    ],
+    "correctIndex": 3,
+    "explanation": "When examples only show positive cases, the model over-applies the rule. Including negative or acceptable cases teaches it the boundary of when not to flag.",
+    "tags": ["few-shot", "classification", "negative-examples"]
+  },
+  {
+    "id": "d4-p2-q03",
+    "domain": 4,
+    "sources": ["practice-2"],
+    "stem": "Your agent extracts structured data via tool calls using a schema with both critical fields and supplementary metadata. In testing, some outputs succeed but omit metadata fields, while others fail validation entirely. The metadata fields are marked required in the schema even though they are not always present in the source data. Which adjustment best resolves this inconsistency?",
+    "options": [
+      "Mark the non-essential metadata fields as optional in the schema",
+      "Remove the metadata fields from the schema entirely",
+      "Add retry logic to regenerate outputs whenever metadata is missing",
+      "Instruct the model to infer missing metadata values when they are unavailable"
+    ],
+    "correctIndex": 0,
+    "explanation": "Requiring fields that are not always present in the source forces unnecessary failures. Making non-critical metadata optional lets valid outputs succeed consistently without fabricating data.",
+    "tags": ["json-schema", "validation", "optional-fields"]
+  },
+  {
+    "id": "d4-p2-q04",
+    "domain": 4,
+    "sources": ["practice-2"],
+    "stem": "A prompt uses system instructions that enforce strict formatting rules, but user-provided input occasionally contains conflicting formatting requests. The model sometimes follows the user input instead of the system constraints, producing inconsistent outputs. Which change would best ensure consistent adherence to the system-level rules?",
+    "options": [
+      "Remove the system instructions and rely only on the user input",
+      "Reinforce the system instructions and explicitly prioritize them over user input",
+      "Add more examples that match the user input patterns",
+      "Use a post-processing step to reformat outputs that violate the system rules"
+    ],
+    "correctIndex": 1,
+    "explanation": "Explicitly establishing that system constraints take precedence over conflicting user requests resolves the ambiguity so the model consistently follows the intended rules.",
+    "tags": ["prompt-hierarchy", "system-prompt", "constraints"]
+  },
+  {
+    "id": "d4-p2-q05",
+    "domain": 4,
+    "sources": ["practice-2"],
+    "stem": "A team builds a Claude system that generates structured outputs for downstream automation. They enforce strict formatting constraints in the prompt, but the model occasionally produces slightly invalid outputs on edge cases. Which approach would best ensure reliability without overly constraining the model's reasoning ability?",
+    "options": [
+      "Add stricter prompt instructions and forbid any deviation from the format",
+      "Reduce task complexity to avoid edge cases",
+      "Combine schema constraints with post-generation validation and correction",
+      "Use a fine-tuned model trained specifically on the required output schema"
+    ],
+    "correctIndex": 2,
+    "explanation": "Pairing schema constraints with a validation-and-correction step after generation catches the rare invalid edge cases while leaving the model free to reason, giving reliability without over-constraining it.",
+    "tags": ["structured-output", "validation", "reliability"]
+  },
+  {
+    "id": "d4-p2-q06",
+    "domain": 4,
+    "sources": ["practice-2"],
+    "stem": "A team uses Claude to generate reports from input data. The outputs vary widely in style and structure because the prompt instructions are broad and open-ended. Which approach would most effectively improve consistency of the outputs?",
+    "options": [
+      "Fine-tune Claude on a set of consistent report examples to learn the expected format",
+      "Use post-processing rules to normalize outputs into a consistent structure after generation",
+      "Define a general output style in the system prompt and let the model adapt to each input",
+      "Provide specific instructions with a clear format and explicit constraints"
+    ],
+    "correctIndex": 3,
+    "explanation": "Broad, open-ended prompts produce variable outputs. Giving specific instructions with a clearly defined format and constraints is the most direct way to make results consistent.",
+    "tags": ["prompt-design", "consistency", "output-format"]
+  },
+  {
+    "id": "d4-p2-q07",
+    "domain": 4,
+    "sources": ["practice-2"],
+    "stem": "Your team wants to cut API costs for automated workflows. Two processes currently use real-time Claude calls: a blocking validation step that must finish before code can deploy, and a nightly analytics report reviewed the next morning. A proposal suggests moving both to a batch processing API to save money. How should you evaluate this proposal?",
+    "options": [
+      "Migrate both workflows to batch processing with a fallback to real-time execution if results are delayed",
+      "Migrate both to batch processing and poll for completion status before proceeding",
+      "Use batch processing only for the nightly analytics report and keep real-time calls for the blocking validation step",
+      "Keep both workflows on real-time calls to guarantee consistent execution timing"
+    ],
+    "correctIndex": 2,
+    "explanation": "Batch processing suits non-blocking, latency-tolerant workloads like overnight reports, but the blocking validation step needs immediate results, so it should stay on real-time calls.",
+    "tags": ["batch-processing", "cost-optimization", "latency"]
+  },
+  {
+    "id": "d4-p2-q08",
+    "domain": 4,
+    "sources": ["practice-2"],
+    "stem": "A Claude workflow generates structured security assessment reports consumed by several internal compliance systems. A new compliance platform requires additional metadata fields, while older systems still depend on the existing schema version. The organization wants to support both during a migration period without disrupting existing integrations. Which approach would effectively support reliable schema evolution?",
+    "options": [
+      "Convert the structured reports into free-form text so schema compatibility no longer matters",
+      "Replace the old schema immediately and require all downstream systems to upgrade at once before deployment",
+      "Version all output schemas with semantic versioning and require consumers to declare compatibility ranges in their configuration",
+      "Introduce schema versioning and produce outputs that explicitly identify their contract version while maintaining compatibility during migration"
+    ],
+    "correctIndex": 3,
+    "explanation": "Tagging each output with its contract version and preserving backward compatibility lets old and new consumers coexist throughout the migration without breaking existing integrations.",
+    "tags": ["schema-evolution", "versioning", "structured-output"]
+  },
+  {
+    "id": "d4-p2-q09",
+    "domain": 4,
+    "sources": ["practice-2"],
+    "stem": "A team uses Claude to transform raw customer data into a standardized internal format. Despite clear instructions, outputs vary slightly in structure across different inputs, causing inconsistencies in downstream processing. Which approach would MOST effectively improve output consistency?",
+    "options": [
+      "Provide multiple input-output examples demonstrating the expected transformation",
+      "Add more descriptive instructions in natural language",
+      "Reduce the amount of input data provided to the model",
+      "Increase temperature to allow more flexible responses"
+    ],
+    "correctIndex": 0,
+    "explanation": "Concrete input-output examples show the exact transformation pattern, which anchors the structure far more reliably than additional natural-language instructions.",
+    "tags": ["few-shot", "consistency", "data-transformation"]
+  },
+  {
+    "id": "d4-p2-q10",
+    "domain": 4,
+    "sources": ["practice-2"],
+    "stem": "A Claude deployment assistant generates rollout plans that must satisfy three competing objectives: minimizing deployment duration, reducing operational risk, and limiting infrastructure cost. Engineers observe that when prompts emphasize speed, rollback safeguards weaken; when prompts emphasize risk reduction, duration grows. Outputs vary depending on which objective appears most prominent. Which prompt-engineering adjustment would best improve consistency across all objectives?",
+    "options": [
+      "Assign priority weights to all objectives at workflow initialization and apply them uniformly regardless of execution context",
+      "Prioritize deployment speed because it is the easiest objective to measure consistently across environments",
+      "Generate separate deployment plans for each objective and let operators manually combine them afterward",
+      "Explicitly define the objective hierarchy, acceptable tradeoffs, and success criteria for each competing requirement within the prompt"
+    ],
+    "correctIndex": 3,
+    "explanation": "The inconsistency comes from the prompt leaving tradeoffs implicit. Stating the objective hierarchy, acceptable tradeoffs, and success criteria explicitly gives the model a stable basis for balancing competing goals.",
+    "tags": ["prompt-design", "competing-objectives", "consistency"]
+  },
+  {
+    "id": "d4-p2-q11",
+    "domain": 4,
+    "sources": ["practice-2"],
+    "stem": "Your agent flags \"incorrect comments\" whenever a function description does not exactly match implementation details. However, many flagged cases are acceptable approximations, such as simplified summaries or intentionally high-level descriptions. You want to reduce these false positives without weakening detection of genuinely misleading comments. Which change would most directly improve precision?",
+    "options": [
+      "Update the criteria to flag comments only when they contradict actual behavior",
+      "Add instructions telling the model to be less strict when evaluating comments",
+      "Reduce the severity assigned to comment-related findings",
+      "Provide more examples of acceptable comments"
+    ],
+    "correctIndex": 0,
+    "explanation": "Redefining the criterion so a comment is flagged only when it contradicts actual behavior draws a precise boundary, cutting false positives while still catching genuinely misleading comments.",
+    "tags": ["criteria-design", "precision", "classification"]
+  },
+  {
+    "id": "d4-p2-q12",
+    "domain": 4,
+    "sources": ["practice-2"],
+    "stem": "A prompt requires Claude to perform several reasoning steps before producing a final structured response. In testing, the model occasionally skips intermediate reasoning steps and produces incomplete outputs. Which adjustment would best improve the reliability of the reasoning chain?",
+    "options": [
+      "Explicitly define the intermediate reasoning stages and the expected output for each stage",
+      "Reduce the amount of context provided to limit the model's reasoning surface area",
+      "Use a smaller model for the intermediate steps to reduce reasoning overhead",
+      "Add chain-of-thought instructions and let the model determine its own reasoning structure"
+    ],
+    "correctIndex": 0,
+    "explanation": "Explicitly laying out each reasoning stage and its expected output prevents the model from skipping steps, whereas leaving the structure open lets it collapse the chain.",
+    "tags": ["chain-of-thought", "reasoning", "prompt-design"]
+  },
+  {
+    "id": "d4-p2-q13",
+    "domain": 4,
+    "sources": ["practice-2"],
+    "stem": "You are extracting structured findings from code reviews. Despite detailed instructions specifying the output format, results vary across runs: some outputs include all required fields while others omit or reorder them. What change would most effectively improve consistency?",
+    "options": [
+      "Add stricter instructions emphasizing that all fields must be present",
+      "Validate outputs after generation and retry when fields are missing",
+      "Increase the prompt length to fully describe the required structure",
+      "Include 2-3 examples demonstrating the exact expected output format"
+    ],
+    "correctIndex": 3,
+    "explanation": "Few-shot examples that show the exact target format are the most reliable way to enforce consistent structure, outperforming longer or stricter instructions.",
+    "tags": ["few-shot", "consistency", "output-format"]
+  },
+  {
+    "id": "d4-p2-q14",
+    "domain": 4,
+    "sources": ["practice-2"],
+    "stem": "Your agent flags multiple categories of issues: bugs, security risks, performance concerns, and style inconsistencies. During evaluation, developers start ignoring the tool because style-related findings are frequently wrong, even though bug and security findings are accurate. You want to restore trust without degrading detection of critical issues. Which adjustment would best address this?",
+    "options": [
+      "Temporarily disable the style-related category while its detection criteria are refined",
+      "Merge style issues into a general \"low severity\" category",
+      "Reduce the number of findings returned per file",
+      "Add instructions telling the model to be more careful when flagging style issues"
+    ],
+    "correctIndex": 0,
+    "explanation": "A high false-positive category erodes trust in the whole tool. Temporarily disabling it while improving its criteria lets the accurate categories keep their credibility.",
+    "tags": ["false-positives", "trust", "evaluation"]
+  },
+  {
+    "id": "d4-p2-q15",
+    "domain": 4,
+    "sources": ["practice-2"],
+    "stem": "A team uses few-shot prompting to guide Claude in generating structured outputs, but the provided examples contain slight inconsistencies in format, which leads to inconsistent outputs from the model. Which approach would effectively resolve this issue?",
+    "options": [
+      "Replace the inconsistent examples with a detailed schema description in the system prompt",
+      "Use examples from different domains to improve cross-task generalization",
+      "Use a single high-quality example and rely on the model to generalize the pattern",
+      "Ensure all examples strictly follow the desired format"
+    ],
+    "correctIndex": 3,
+    "explanation": "The model mimics the patterns in its examples, so inconsistent examples yield inconsistent outputs. Making every example strictly follow the target format removes the source of the variation.",
+    "tags": ["few-shot", "consistency", "example-quality"]
+  }
+]
