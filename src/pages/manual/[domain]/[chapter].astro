@@ -1,0 +1,24 @@
+---
+import { getCollection, render } from "astro:content";
+import ManualLayout from "../../../layouts/ManualLayout.astro";
+import LessonFooter from "../../../components/islands/LessonFooter";
+
+export async function getStaticPaths() {
+  const lessons = await getCollection("lessons");
+  return lessons.map((l) => ({
+    params: { domain: String(l.data.domain), chapter: l.id.split("/")[1] },
+    props: { entry: l },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<ManualLayout title={entry.data.title} description={entry.data.summary}>
+  <article class="prose">
+    <span class="section-no">§ {entry.data.section}</span>
+    <h1>{entry.data.title}</h1>
+    <Content />
+  </article>
+  <LessonFooter client:visible lessonId={entry.id} domain={entry.data.domain} />
+</ManualLayout>
