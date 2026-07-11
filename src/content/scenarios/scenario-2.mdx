@@ -1,0 +1,27 @@
+---
+title: "Code Generation with Claude Code"
+order: 2
+summary: "Wiring Claude Code into a team's development workflow with configuration, custom commands, and the right execution mode."
+---
+
+## The Situation
+
+Your team has adopted Claude Code to speed up generation, refactoring, debugging, and documentation. The task is to embed it properly into your workflow: define custom slash commands, set up `CLAUDE.md` configuration, and know when to reach for plan mode versus direct execution. The domains in play are Claude Code configuration and workflows, plus context management and reliability.
+
+## Walkthrough
+
+Start with `CLAUDE.md`, which functions as durable project memory: conventions, common commands, and constraints that Claude should always respect. It is layered, and precedence matters. When settings conflict, the more local wins — project overrides user, which overrides global. If a global `CLAUDE.md` says "use tabs" and the project's says "use spaces," the project's instruction applies. This is a favorite exam trap; the answer is never "the most recent" or "it depends on the file."
+
+A related misconception is that `.claude/settings.json` and `CLAUDE.md` are interchangeable. They are not. Settings files carry configuration and permissions; `CLAUDE.md` carries instructions and context in prose. Another common mistake is assuming Claude Code ingests your entire repository into context — it does not. It reads what it needs on demand, which is why externalizing conventions into `CLAUDE.md` matters rather than hoping the model discovers them.
+
+Repeatable workflows should be captured, not retyped. Custom slash commands and subagents let you encapsulate a routine once and invoke it cleanly, which also keeps verbose intermediate output out of your main context. That is the antidote to the biggest anti-pattern here: cramming everything into one giant prompt instead of leaning on configuration and commands.
+
+The execution-mode decision is the other axis. Plan mode is for complex or ambiguous work — you want Claude to propose an approach before it touches files, so a large refactor is a textbook plan-mode case. Direct execution fits well-scoped, low-risk changes. Do not confuse plan mode with ask mode: ask mode is for answering questions, not for producing an implementation plan, and writing the plan into `CLAUDE.md` or telling Claude "don't touch files" are both misreadings of what plan mode is for. In long sessions, keep context clean with `/compact` and by pushing noisy exploration into subagents.
+
+## Field Notes
+
+- `CLAUDE.md` is project memory; precedence is local-wins — project over user over global.
+- `.claude/settings.json` (config and permissions) is not the same as `CLAUDE.md` (instructions and context).
+- Claude Code does not load the whole repo — put conventions in `CLAUDE.md` deliberately.
+- Use plan mode for complex or ambiguous tasks; direct execution for small, low-risk changes; ask mode is for questions, not plans.
+- Encapsulate repeatable work in slash commands and subagents; use `/compact` to protect context in long sessions.

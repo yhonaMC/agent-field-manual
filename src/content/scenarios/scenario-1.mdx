@@ -1,0 +1,29 @@
+---
+title: "Customer Support Resolution Agent"
+order: 1
+summary: "An autonomous support agent that resolves returns, billing, and account issues while knowing exactly when to escalate."
+---
+
+## The Situation
+
+You are building a customer support resolution agent on the Claude Agent SDK. It fields messy, high-ambiguity requests — returns, billing disputes, account problems — and reaches your backend through a small set of custom MCP tools: `get_customer`, `lookup_order`, `process_refund`, and `escalate_to_human`. The business goal is aggressive: resolve more than 80% of tickets on first contact, while reliably handing off the cases it should not touch.
+
+This scenario sits at the intersection of three domains: agentic architecture, tool design with MCP, and context reliability. The hard part is not the happy path; it is the judgment calls about when to act, when to ask, and when to escalate.
+
+## Walkthrough
+
+The core control question is how the agent decides it is done. The answer is the agentic loop: keep iterating while `stop_reason` is `tool_use`, and stop when it becomes `end_turn`. Tool results get appended back into the message history so the next turn reasons with full context. A tempting but wrong approach is parsing the model's natural-language output for phrases that sound like completion — that is fragile and unreliable. The loop is driven by the structured signal, not by reading the prose.
+
+Escalation is the most-tested judgment call, and the trap is emotional. A frustrated customer is not, by itself, a reason to escalate; sentiment is not complexity. The agent should escalate on two grounds: the task genuinely exceeds what policy authorizes, or the customer explicitly asks for a human — which should be honored immediately. Consider an `800` refund against a `500` policy limit. Processing it anyway violates policy. Splitting it into two `400` refunds is worse, because it is deliberate policy evasion. Talking the customer down to `500` is not something the agent is authorized to do. The correct move is to escalate with a structured case summary and a recommendation — not a raw dump of the conversation transcript. Escalation is a clean handoff, not a forwarded chat log.
+
+Guardrails belong inside the tools themselves. `process_refund` should validate the amount against the policy limit before executing, so an over-limit refund cannot slip through no matter how the model reasons. This is distinct from hooks. A `PreToolUse` hook is the right place to log the *intent* of a sensitive action before it runs — logging refund attempts, for instance. A `PostToolUse` hook runs after the fact and cannot prevent anything; a stop hook halts the loop rather than recording; and a system-prompt instruction is guidance, not an enforced control. Do not confuse the logging concern (hooks) with the enforcement concern (in-tool validation and guardrails).
+
+Two more reliability points. When identity is ambiguous — several customers match a lookup — the agent must ask for an additional identifier rather than guess, because acting on the wrong account is a serious error. And in long, multi-order conversations, key facts degrade as the window fills. The fix is to maintain a structured "case facts" block that is re-stated in every prompt, so order numbers, amounts, and decisions never drift. Finally, retrying a policy violation is the wrong instinct: policy failures are fail-fast conditions, not transient errors to retry.
+
+## Field Notes
+
+- Drive the loop on `stop_reason` (`tool_use` continues, `end_turn` stops); never infer completion from the model's wording.
+- Escalate on task complexity, policy limits, or an explicit request for a human — never on customer frustration alone.
+- Escalation carries a structured case summary and recommendation, not a raw transcript.
+- Enforce policy inside the tool (guardrails/validation); use a `PreToolUse` hook to log the intent of sensitive actions like refunds.
+- On ambiguous identity, ask for another identifier; on missing policy coverage, escalate — don't invent a rule or retry a violation.

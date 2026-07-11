@@ -1,0 +1,27 @@
+---
+title: "Structured Data Extraction"
+order: 6
+summary: "Extracting validated structured data from unstructured documents while handling edge cases and protecting accuracy."
+---
+
+## The Situation
+
+You are building a structured data extraction system on Claude. It pulls information out of unstructured documents — invoices, contracts, reports — validates the output against JSON schemas, and must sustain high accuracy while handling edge cases gracefully and integrating with downstream systems. The domains are prompt engineering and structured output, plus context management and reliability.
+
+## Walkthrough
+
+The output mechanism is `tool_use` as a structured-output channel: you define a JSON schema and let the model fill it, which gives downstream systems something reliable to consume. Schema design is where the subtle mistakes live. Marking every field as required is a trap — when a field is genuinely absent from the document, a "required" constraint pressures the model to hallucinate a value. Model required versus nullable fields honestly so missing data can be represented as missing.
+
+The most important conceptual point: a schema validates structure, not meaning. Imagine an extraction that produces perfectly valid JSON, but the `total` field does not equal the sum of the line items. The schema is not wrong, and forced `tool_choice` is unrelated — this is a semantic error that structural validation simply cannot catch. Believing strict schemas prevent semantic errors is a false comfort. To catch these, include self-correction fields (for example, comparing a calculated total against the stated one) and run validation loops that feed validation errors back to the model for a retry. Few-shot examples further reduce hallucination by showing the model exactly what good extraction looks like.
+
+Confidence and human review deserve care. Calibrate confidence against a labeled set and route low-confidence extractions to human review. The dangerous move is dropping human review because aggregate accuracy looks high — a headline 97% can mask a document type or a specific field that performs badly. Aggregate numbers hide uneven performance, so validate per document type and per field, not just overall.
+
+On scale: to process a large volume — say 10,000 invoices overnight — the right pattern is to test the prompt on a representative sample first, then run the Batches API. Going straight to batch without prior testing risks reprocessing the whole set after discovering a prompt flaw; the real-time API with parallelism is more expensive for non-urgent bulk work; and driving Claude Code with `-p` in a loop is the wrong tool for high-volume extraction.
+
+## Field Notes
+
+- Use `tool_use` with a JSON schema for structured output, and model required vs nullable fields honestly to avoid hallucinating missing data.
+- Schemas validate structure, not semantics — a valid JSON `total` can still be arithmetically wrong.
+- Add self-correction fields and validation loops that retry on validation-error feedback; use few-shot examples to cut hallucination.
+- Calibrate confidence on a labeled set and route low-confidence cases to humans; don't retire review based on a high aggregate that hides per-type errors.
+- For large volumes, test the prompt on a sample, then use the Batches API rather than batching blind or over-paying for real-time.

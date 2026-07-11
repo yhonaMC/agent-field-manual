@@ -1,0 +1,27 @@
+---
+title: "Claude Code for Continuous Integration"
+order: 5
+summary: "Running Claude Code inside a CI/CD pipeline for automated review, test generation, and quality gates."
+---
+
+## The Situation
+
+You are integrating Claude Code into your CI/CD pipeline. It runs automated code reviews, generates test cases, and comments on pull requests. The engineering challenge is prompt design: feedback has to be actionable and specific, and false positives have to be kept low, because noisy output erodes developer trust fast. This scenario spans Claude Code configuration and workflows plus prompt engineering and structured output.
+
+## Walkthrough
+
+The first requirement is running Claude Code non-interactively. CI runners are not interactive sessions, so you invoke it in headless mode with the `-p` flag — for example, `claude -p "review the PR changes"` with the output parsed downstream. Starting an interactive session on the runner does not work in CI, and there is no valid `claude code review.ts`-style command; the web interface is irrelevant to a pipeline. Forgetting the `-p` flag is a classic mistake here.
+
+Output has to be structured. If the results are not parseable, the pipeline cannot feed them into quality gates or turn them into PR comments — so design prompts that emit clean, machine-readable output and wire that into your CI tooling. This is the difference between a review that gates merges and a blob of prose nobody can act on.
+
+The false-positive problem is really a prompt-criteria problem. Suppose developers start ignoring the review because the "naming conventions" category is flagging noise. Increasing the CI timeout is unrelated. Switching to a larger model does not fix false positives. Adding "be more careful" to the prompt is too vague to change anything. The right move is to temporarily disable that category and refine its criteria — define explicitly what to flag and what to ignore. Vague prompts produce noisy feedback; specific criteria produce trust.
+
+There is also a batch-versus-real-time decision. Pre-merge checks need a latency guarantee, so using the asynchronous Batches API for gating checks is wrong — batch has no latency SLA and belongs to high-volume, non-urgent work, not to blocking a merge. Keep interactive-latency review paths for the pre-merge gate.
+
+## Field Notes
+
+- Run Claude Code headless with the `-p` flag; interactive sessions and the web UI don't belong in CI.
+- Emit structured, parseable output so results flow into quality gates and PR comments.
+- Fix false positives by refining explicit review criteria — not by enlarging the model or adding vague instructions.
+- Define clearly what to flag and what to ignore; vague prompts create noise that erodes trust.
+- Don't use the Batches API for pre-merge checks — batch has no latency SLA and suits high-volume, non-urgent runs.
