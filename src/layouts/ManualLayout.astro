@@ -17,6 +17,10 @@ const { title, description, examRoom = false } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <title>{title} · The Agent Field Manual</title>
+    <meta property="og:title" content={`${title} · The Agent Field Manual`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body>
     <div class="sheet">
