@@ -1,0 +1,24 @@
+:root {
+  /* paper & ink */
+  --paper: #f2ecdd;
+  --paper-deep: #e9e1cd;
+  --ink: #1c2a3a;          /* navy ink */
+  --ink-soft: #44506050;
+  --ink-faint: #1c2a3a22;
+  --accent: #c2531d;       /* burnt orange */
+  --accent-soft: #c2531d22;
+  --stamp-red: #b3382c;
+  --ok: #3f6b4f;
+
+  /* exam-room (dark) mode */
+  --panel: #10151c;
+  --panel-ink: #d8e0e8;
+  --panel-glow: #e8a13c;
+
+  /* type */
+  --font-prose: "Crimson Pro Variable", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --measure: 68ch;
+  --rule: 1px solid var(--ink-faint);
+}

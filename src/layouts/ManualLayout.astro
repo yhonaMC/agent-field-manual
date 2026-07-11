@@ -1,0 +1,40 @@
+---
+import "@fontsource-variable/crimson-pro";
+import "@fontsource/ibm-plex-mono/400.css";
+import "@fontsource/ibm-plex-mono/600.css";
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+  examRoom?: boolean;
+}
+const { title, description, examRoom = false } = Astro.props;
+---
+<html lang="en" class={examRoom ? "exam-room" : ""}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title} · The Agent Field Manual</title>
+  </head>
+  <body>
+    <div class="sheet">
+      <header class="doc-header">
+        <a href="/" style="text-decoration:none">AFM · THE AGENT FIELD MANUAL</a>
+        <nav>
+          <a href="/#contents">Contents</a>
+          <a href="/exam">Exam</a>
+          <a href="/review">Review</a>
+          <a href="/progress">Progress</a>
+        </nav>
+      </header>
+      <slot />
+      <footer class="doc-footer">
+        <span>DOC. AFM-CCAF-2026 · REV A</span>
+        <span>UNCONTROLLED WHEN PRINTED</span>
+        <span>© {new Date().getFullYear()} YHONAIKER MONCADA</span>
+      </footer>
+    </div>
+  </body>
+</html>
