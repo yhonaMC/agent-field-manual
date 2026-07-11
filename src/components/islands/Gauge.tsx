@@ -10,7 +10,7 @@ export default function Gauge({ value, label }: GaugeProps) {
   const ticks = Array.from({ length: 11 }, (_, i) => -120 + i * 24);
   return (
     <figure style={{ margin: 0, textAlign: "center", fontFamily: "var(--font-mono)" }}>
-      <svg viewBox="0 0 100 78" width="130" role="img" aria-label={`${label}: ${Math.round(clamped)}%`}>
+      <svg viewBox="0 0 100 98" width="130" role="img" aria-label={`${label}: ${Math.round(clamped)}%`}>
         <circle cx="50" cy="50" r="44" fill="var(--paper-deep)" stroke="var(--ink)" strokeWidth="1.5" />
         {ticks.map((t) => (
           <line key={t} x1="50" y1="10" x2="50" y2={t % 120 === 0 ? 17 : 14}

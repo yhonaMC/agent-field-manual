@@ -37,7 +37,7 @@ pre { background: var(--paper-deep); border: var(--rule); padding: 1rem; overflo
 /* print registration marks in the corners */
 .sheet::before, .sheet::after {
   content: "";
-  position: fixed;
+  position: absolute;
   width: 18px; height: 18px;
   border: 1px solid var(--ink-soft);
   pointer-events: none;
@@ -47,6 +47,7 @@ pre { background: var(--paper-deep); border: var(--rule); padding: 1rem; overflo
 
 .doc-header {
   display: flex; justify-content: space-between; align-items: baseline;
+  flex-wrap: wrap; gap: .4rem .8rem;
   border-bottom: 2px solid var(--ink);
   padding-bottom: .6rem; margin-bottom: 2.5rem;
   font-family: var(--font-mono); font-size: .72rem;
@@ -94,3 +95,4 @@ html.exam-room body { background-image: none; }
 html.exam-room .sheet::before, html.exam-room .sheet::after { border-color: var(--panel-glow); }
 html.exam-room .doc-header, html.exam-room .doc-footer { border-color: var(--panel-glow); color: var(--panel-ink); }
 html.exam-room a { color: var(--panel-ink); }
+html.exam-room .btn.ghost { color: var(--panel-ink); }
