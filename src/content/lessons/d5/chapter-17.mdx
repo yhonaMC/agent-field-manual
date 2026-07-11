@@ -1,0 +1,89 @@
+---
+title: "Context Management and Long Documents"
+domain: 5
+chapter: 17
+section: "5.1"
+summary: "How the context window degrades as it fills, and the chunking, summarization, selective-loading, and cross-agent handoff patterns that keep long work coherent."
+---
+
+Claude works with a context window of roughly 200k tokens (about 150,000 words), but the practical limit is much lower than the hard limit. Response quality does not fall off a cliff — it erodes gradually as the window fills. The skill in this lesson is recognizing that erosion early and structuring work so critical information survives long interactions.
+
+## The context window degrades before it fills
+
+A useful rule of thumb: noticeable degradation begins near 40% of the window (~80k tokens). Past that point you start to see:
+
+- More hallucinations.
+- Instructions from the start of the context being "forgotten."
+- Lower extraction precision on large documents.
+- System-prompt guidance losing its grip on behavior.
+
+The exam framing matters here. When context fills up, the correct answer is not "Claude fails" — it is "quality degrades gradually." The model keeps producing output; it just does so with less precision and less reliable recall.
+
+Practically, that argues against loading an entire codebase into one conversation. Prefer several focused sessions over one sprawling one, watch token usage so you can anticipate the slide in quality, and put the most important information near the front of the context.
+
+## Strategies for long documents
+
+### Chunking
+
+Break a large document into segments the model can process cleanly. There are two broad approaches.
+
+Fixed-size chunking splits every N tokens with some overlap. It is simple to implement, but it risks cutting through the middle of a logical section. Overlap between adjacent chunks softens that loss at the boundaries.
+
+Semantic chunking splits along real structure — sections, chapters, or logical units. It preserves the meaning inside each chunk and yields better results, at the cost of being more complex to build. As a heuristic, semantic chunking beats fixed-size chunking.
+
+When you do use overlap, 10–20% between neighboring chunks is enough to keep information at the seam from being lost.
+
+Chunking is not always required. If a document fits within ~40% of the window (~80k tokens, ~60,000 words), processing it whole usually wins, because Claude then has the full context in one pass.
+
+### Summarization
+
+For documents or conversations that outgrow useful context, summarize.
+
+Progressive summarization keeps a long conversation manageable: every N messages, generate a progress summary, replace the older messages with that summary, and continue with the summary plus the most recent messages.
+
+Summarization for handoffs applies when one agent (or session) passes work to another. Handing over the full raw conversation is the wrong move — it burns the receiving agent's context and drags along failed attempts, tangents, and noise. Instead, pass a structured summary that captures the decisions made and why, the current state of the work, the next pending steps, and which files were changed and for what reason.
+
+## Selective context loading
+
+Rather than loading the whole project, load only what the current task needs. If you are fixing a bug in `auth.ts`, load `auth.ts`, its direct imports, and its test file — not `README.md`, `package.json`, or unrelated config. Every loaded file should be directly related to the task at hand.
+
+When ordering context, a sensible priority is:
+
+1. System prompt — permanent instructions, always first.
+2. Current task — what has to happen right now.
+3. Directly relevant files — the code being modified.
+4. Supporting context — types, interfaces, related tests.
+5. Background — docs and specs, only if there's room.
+
+Claude Code applies selective loading automatically: it reads files on demand instead of ingesting the whole repo, always keeps `CLAUDE.md` loaded as persistent instructions, and prioritizes files referenced in the conversation.
+
+## Multi-turn conversation management
+
+Watch for signals that a conversation needs compression: more than 20–30 turns, Claude contradicting decisions it made earlier, initial instructions no longer being followed consistently, or token count crossing 40% of the window.
+
+Sometimes the better move is not to compress but to start fresh. Begin a new session when the task itself changes (say, from debugging to feature work), after finishing a milestone, when compression would drop context you can't afford to lose, or when you move to a different module.
+
+A clean cross-session handoff follows a simple pattern:
+
+1. Ask Claude to summarize the work done.
+2. Save that summary to a file (for example `session-notes.md`).
+3. In the new session, load only the summary plus the relevant files.
+4. Resume from where you left off with a fresh context.
+
+## Passing context between agents
+
+When a coordinator spawns subagents, pass information through persisted files, not shared memory. With the file-based approach, each subagent writes its results to disk, the coordinator reads those result files, every subagent gets its own clean context window, and there is no cross-contamination between agents.
+
+Sharing one agent's full history with another is the pattern to avoid: it consumes the receiving agent's context, drags the first agent's noise into the second, leaves less room for the second agent's actual job, and makes it more error-prone due to irrelevant context. For the exam: the correct way to move information between agents is via persisted files, not shared in-memory context — a fundamental Agent SDK pattern.
+
+## Caching strategies
+
+For long system prompts or repeated few-shot examples, prompt caching cuts latency and cost. The system prompt is cached automatically, static few-shot examples benefit from the cache, and repeated invocations reuse it. Caching pays off most when system prompts exceed ~1000 tokens, when static few-shot examples are reused across many requests, and when a common conversation prefix is loaded repeatedly.
+
+## Field Notes
+
+- The window is ~200k tokens, but quality degrades noticeably around 40% usage — the model keeps working with lower precision, it does not simply fail.
+- Prefer semantic chunking over fixed-size; skip chunking entirely for documents under ~80k tokens.
+- Hand off between sessions and agents with structured summaries and persisted files, never raw transcripts or shared in-memory context.
+- Load only files directly relevant to the task, ordered by priority with the system prompt first.
+- Compress or start a new session when turns pile up, decisions start contradicting, or you cross 40% of the window.
