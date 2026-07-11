@@ -1,9 +1,135 @@
 ---
-title: "Agent Fundamentals"
+title: "Agentic Loops and the tool_use Cycle"
 domain: 1
 chapter: 1
 section: "1.1"
-summary: "Skeleton lesson — replaced with real paraphrased content during Domain 1 extraction."
+summary: "How the agentic loop drives autonomous work, why stop_reason is the only reliable control signal, and the anti-patterns to avoid."
 ---
 
-Content arrives in the Domain 1 extraction task.
+An agentic loop is the base pattern for building agents with Claude. The model does more than emit text: it inspects results, decides which tools to call, and keeps going until the work is done. The developer builds the harness around that reasoning — but the model, not the code, decides when to stop.
+
+## The lifecycle of the loop
+
+Each pass through the loop has four repeating phases:
+
+1. Send a request to the API with the current messages plus the available tools.
+2. Read the response's `stop_reason`.
+3. If `stop_reason` is `tool_use`, run the requested tools, append their results, and loop back to step 1.
+4. If `stop_reason` is `end_turn`, the model considers itself finished — return the response.
+
+The critical idea: the model owns the exit condition. You do not program when the task is complete; Claude evaluates that on its own and signals it through `stop_reason`.
+
+## stop_reason is the control signal
+
+`stop_reason` is the one dependable flag for controlling flow. Trying to infer termination any other way is an anti-pattern.
+
+| `stop_reason` | Meaning | What to do |
+| --- | --- | --- |
+| `tool_use` | Claude wants to run one or more tools | Execute them, append results, continue the loop |
+| `end_turn` | Claude judges the task complete | Exit the loop and deliver the response |
+| `max_tokens` | The output token limit was hit | Handle as a truncation special case |
+
+## Tool results in the conversation history
+
+When Claude asks for a tool, the response carries a `tool_use` content block containing:
+
+- `id` — a unique identifier for that call
+- `name` — the tool being invoked
+- `input` — the parameters the model chose
+
+Your harness runs the tool and returns the outcome as a message with role `user` whose content is a `tool_result` block:
+
+```json
+{
+  "role": "user",
+  "content": [
+    {
+      "type": "tool_result",
+      "tool_use_id": "toolu_abc123",
+      "content": "The file has 42 lines"
+    }
+  ]
+}
+```
+
+That result is appended to the full `messages` array and sent back on the next request. Claude sees the entire history — its earlier calls and their results — so it can reason about the next step with complete information.
+
+## A minimal loop in TypeScript
+
+```typescript
+import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic();
+
+async function agenticLoop(tools: Anthropic.Tool[], messages: Anthropic.MessageParam[]) {
+  let response = await client.messages.create({
+    model: "claude-opus-4-8",
+    max_tokens: 4096,
+    tools,
+    messages,
+  });
+
+  while (response.stop_reason === "tool_use") {
+    const toolBlocks = response.content.filter((b) => b.type === "tool_use");
+
+    const results = await Promise.all(
+      toolBlocks.map((block) => executeTool(block.name, block.input)),
+    );
+
+    messages.push({ role: "assistant", content: response.content });
+    messages.push({
+      role: "user",
+      content: toolBlocks.map((block, i) => ({
+        type: "tool_result",
+        tool_use_id: block.id,
+        content: JSON.stringify(results[i]),
+      })),
+    });
+
+    response = await client.messages.create({
+      model: "claude-opus-4-8",
+      max_tokens: 4096,
+      tools,
+      messages,
+    });
+  }
+
+  return response;
+}
+```
+
+What this example illustrates:
+
+- The loop condition checks only `stop_reason === "tool_use"`.
+- Multiple tool calls in one turn are executed in parallel with `Promise.all`.
+- Every iteration resends the complete message history.
+- There is no artificial iteration cap and no parsing of assistant text.
+
+## Model-driven decisions
+
+In a well-designed agent, Claude decides:
+
+- which tools to call, and in what order
+- when it needs more information
+- when the task is finished
+- how to react to tool errors
+
+That contrasts with a pre-configured decision tree, where the developer hardcodes the sequence of steps. The model is more adaptable: it can respond to surprises, retry differently, and reason about the current state instead of following a fixed script.
+
+## Anti-patterns to avoid
+
+**Parsing assistant text to decide when to stop.** Matching on strings like `"task complete"` is fragile — the model's phrasing varies. `stop_reason` is deterministic; use it.
+
+**Arbitrary iteration caps.** Hardcoding `MAX_ITERATIONS = 3` cuts reasoning short. If a task genuinely needs five iterations, capping at three yields incomplete results. If you want a safety net against runaway loops, set it high (for example 50) and log any hit as an anomaly, not as normal termination.
+
+**Treating assistant text as a completion signal.** A single response can contain both text blocks and `tool_use` blocks at the same time. Returning early because you saw text can drop pending tool calls. Only `stop_reason` reflects the model's true intent.
+
+**Ignoring multiple `tool_use` blocks.** Claude can request several tools in one turn. Executing only the first and dropping the rest starves the next reasoning step of information.
+
+## Field Notes
+
+- `stop_reason` is the single reliable signal for loop control — never infer termination from model text.
+- Continue while `stop_reason` is `tool_use`; stop on `end_turn`.
+- Append tool outputs as `user` messages containing `tool_result` blocks, and resend the full history each iteration.
+- Execute *every* `tool_use` block in a turn, in parallel where possible — don't drop the extras.
+- Let the model decide completion; reserve iteration caps as a high, logged safety net, not the primary stop mechanism.

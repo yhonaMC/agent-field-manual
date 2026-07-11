@@ -1,0 +1,138 @@
+---
+title: "Coordinator-Subagent Patterns"
+domain: 1
+chapter: 2
+section: "1.2"
+summary: "Hub-and-spoke orchestration: the coordinator's responsibilities, subagent isolation, refinement loops, and dynamic vs. fixed routing."
+---
+
+The coordinator-subagent pattern is the primary architecture for multi-agent systems with Claude. A coordinator agent breaks a complex task apart and delegates the pieces to specialized agents.
+
+## Hub-and-spoke
+
+In this pattern all communication runs through the coordinator. Subagents never talk to each other directly — the coordinator is the hub, and each subagent is a spoke.
+
+```
+Coordinator --> Agent A
+Coordinator --> Agent B
+Coordinator --> Agent C
+```
+
+The advantages of centralizing communication:
+
+- The coordinator keeps full visibility into overall progress.
+- There are no hidden dependencies between subagents.
+- Subagents are easy to add, remove, or swap out.
+- The coordinator can reprioritize, cancel, or re-delegate work.
+
+## What the coordinator does
+
+The coordinator has four core responsibilities.
+
+**1. Task decomposition.** It analyzes the user's request and splits it into manageable subtasks. Each subtask must be specific enough that a subagent can complete it without ambiguity.
+
+```
+Task: "Refactor the authentication module"
+  Subtask 1: Analyze the current code and its dependencies
+  Subtask 2: Design the new structure
+  Subtask 3: Implement the changes
+  Subtask 4: Verify that tests still pass
+```
+
+**2. Delegation.** It assigns each subtask to the best-suited subagent based on that agent's specialization and available tools.
+
+**3. Result aggregation.** It collects the subagents' outputs, resolves conflicts between them, and composes a coherent final response.
+
+**4. Routing by complexity.** Not every task needs subagents. The coordinator decides dynamically:
+
+| Complexity | Action |
+| --- | --- |
+| Simple (single operation) | The coordinator handles it directly |
+| Medium (2–3 known steps) | Delegate to one subagent |
+| High (many steps, uncertainty) | Delegate across several subagents |
+
+## Subagents run with isolated context
+
+This is the most important rule of the pattern: **a subagent does not inherit the coordinator's conversation history.** Each subagent begins with a clean context that contains only:
+
+- its own system prompt,
+- the task prompt the coordinator assigned, and
+- the tools available to it.
+
+The isolation is deliberate:
+
+- **Less contamination** — the subagent isn't distracted by irrelevant history.
+- **Fewer tokens** — its context window isn't consumed by foreign conversation.
+- **Sharper focus** — it sees only what its task requires.
+
+If a subagent needs information from the coordinator's context, the coordinator must include it explicitly in the task prompt.
+
+## The risk of over-narrow decomposition
+
+Splitting a task into tiny subtasks creates incomplete coverage. When each subagent sees only a sliver, none can catch problems that span across subtasks.
+
+```
+// Too narrow — risky
+Subtask 1: Rename getUserById -> findUserById
+Subtask 2: Update imports in auth.ts
+Subtask 3: Update imports in profile.ts
+// What about tests? Other files that use it? Coverage is lost.
+
+// Appropriately scoped
+Subtask 1: Rename getUserById -> findUserById AND update every reference
+Subtask 2: Verify that tests still pass
+// Subtask 1 has enough scope to find every reference.
+```
+
+The general rule: give each subagent enough scope to make its work coherent. Do not fragment down to the level of individual instructions.
+
+## Iterative refinement loops
+
+The coordinator does not fire-and-forget. After a subagent returns a result, the coordinator evaluates it against the quality criteria. If the result meets the bar, it moves to the next subtask; if not, it re-delegates with concrete feedback.
+
+Re-delegation feedback must be specific:
+
+```
+// Vague — unhelpful
+"The result is unsatisfactory, try again"
+
+// Specific — actionable
+"The analysis covers auth.ts and profile.ts but is missing user.ts,
+which also imports getUserById. Repeat, including every file that
+references that function."
+```
+
+Stop iterating when one of these holds:
+
+- The result meets the defined quality criteria.
+- A retry cap is reached (2–3 for most tasks).
+- The subagent reports it cannot improve with the information available.
+
+## Dynamic routing vs. fixed pipeline
+
+A **fixed pipeline** sends every task through every subagent in sequence:
+
+```
+Analysis -> Design -> Implementation -> Testing
+```
+
+This is fine when the process is always the same, but it wastes resources when a task only needs one or two steps.
+
+**Dynamic routing** lets the coordinator evaluate each task and choose which subagents to invoke:
+
+```
+"Fix the typo in the README"
+  -> only invoke the editor (no analysis or tests needed)
+"Add a new endpoint with validation"
+  -> Analysis + Implementation + Testing
+```
+
+Dynamic routing is more efficient but demands good judgment from the coordinator. To get that, its system prompt should include clear routing criteria rather than leaving the decision entirely open.
+
+## Field Notes
+
+- All inter-agent communication flows through the coordinator; subagents never communicate directly.
+- Subagents start with isolated context — pass any needed information explicitly in the task prompt.
+- Avoid over-narrow decomposition; give each subagent enough scope to catch cross-cutting problems.
+- Refine with concrete, specific feedback, and cap retries at 2–3 for most tasks.
+- Prefer dynamic routing by complexity over a fixed pipeline, and encode routing criteria in the coordinator's prompt.

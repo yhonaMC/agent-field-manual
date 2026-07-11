@@ -1,0 +1,21 @@
+---
+title: "Agentic Architecture & Orchestration"
+domain: 1
+summary: "Designing and operating agentic systems: the agentic loop, coordinator-subagent orchestration, workflow enforcement, hooks, and session management."
+objectives:
+  - "Design and build agentic loops that drive autonomous, multi-step task execution."
+  - "Orchestrate multi-agent systems using coordinator-subagent (hub-and-spoke) patterns."
+  - "Configure subagent invocation, explicit context passing, and parallel spawning."
+  - "Implement multi-step workflows with programmatic enforcement and structured handoffs."
+  - "Apply Agent SDK hooks to intercept tool calls and normalize heterogeneous data."
+  - "Choose task-decomposition strategies — fixed prompt chaining vs. dynamic decomposition — for complex work."
+  - "Manage session state through resumption and forking."
+---
+
+Domain 1 is the largest slice of the exam, carrying roughly 27% of the total weight. It concentrates on how agentic systems are designed and run with the Claude Agent SDK: the agentic loop itself, orchestration across multiple agents, subagent invocation, enforced multi-step workflows, hooks, task decomposition, and session lifecycle management.
+
+The through-line of this domain is that a well-built agent lets **the model** drive control flow. Instead of hardcoding a fixed decision tree, you feed Claude tools and context and let it decide which action to take next, when it needs more information, and when the task is finished. The developer's job is to build a reliable harness around that reasoning — running requested tools, appending results, enforcing hard business rules, and managing where context comes from and goes.
+
+These skills compound. The agentic loop is the foundation; coordinator-subagent orchestration builds on it to fan work out across specialists; hooks and prerequisite gates add deterministic guarantees where prompting alone is not enough; and session management (resume and fork) lets you continue, branch, and parallelize long-running work. Expect scenario-based questions that put these pieces together in realistic production contexts — for example, a research pipeline, a customer-support escalation flow, or a large code review split across passes.
+
+Use the objectives above as a self-check after working through the five lessons. If you can explain *why* `stop_reason` is the only reliable termination signal, *why* subagents never inherit context automatically, and *when* to reach for a hook instead of a prompt instruction, you have the core of Domain 1.
