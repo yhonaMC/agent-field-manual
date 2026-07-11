@@ -32,7 +32,7 @@
   {
     "id": "d5-p1-q03",
     "domain": 5,
-    "sources": ["practice-1"],
+    "sources": ["practice-1", "final-pool"],
     "stem": "A Claude-based agent pulls documents from an external knowledge source before answering. To maximize accuracy the team initially stuffs every retrieved document into context. Over time answers get worse because unrelated material influences the reasoning. What adjustment best improves answer quality while keeping access to relevant information?",
     "options": [
       "Rank retrieved documents by relevance and filter them before placing them in context",
@@ -167,7 +167,7 @@
   {
     "id": "d5-p1-q12",
     "domain": 5,
-    "sources": ["practice-1"],
+    "sources": ["practice-1", "final-pool"],
     "stem": "A Claude-based agent handles similar tasks across different sessions. The team considers reusing prior context to gain efficiency, but notices that outdated information sometimes contaminates new tasks. Which approach best balances efficiency and accuracy?",
     "options": [
       "Increase the context window size",
@@ -197,7 +197,7 @@
   {
     "id": "d5-p1-q14",
     "domain": 5,
-    "sources": ["practice-1"],
+    "sources": ["practice-1", "final-pool"],
     "stem": "An agent runs long workflows involving many tool calls and large data responses. Over time the context grows too large, degrading reasoning quality and occasionally hitting context limits. Which approach would most effectively maintain performance while preserving important information?",
     "options": [
       "Periodically summarize older context and keep the key insights",
@@ -212,7 +212,7 @@
   {
     "id": "d5-p1-q15",
     "domain": 5,
-    "sources": ["practice-1"],
+    "sources": ["practice-1", "final-pool"],
     "stem": "An agent aggregates statistics from multiple sources and finds that two credible sources report different values for the same metric. Inspection shows one value comes from a report published two years ago and the other from a recent study. Currently the agent presents both values as conflicting with no explanation. Which change would most improve the output?",
     "options": [
       "Include the publication dates and explain that the difference reflects temporal variation",
@@ -257,7 +257,7 @@
   {
     "id": "d5-p2-q03",
     "domain": 5,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "A long-running Claude-based workflow continuously appends new information to context. As it evolves, earlier assumptions become partly invalid, but the contradictory historical context stays visible to the model, and outputs grow increasingly inconsistent over time. Which adjustment would best improve long-term reasoning stability?",
     "options": [
       "Increase the context window size to retain additional history for comparison",
@@ -302,7 +302,7 @@
   {
     "id": "d5-p2-q06",
     "domain": 5,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "An agent performs iterative planning over a long session. Each reasoning step looks valid on its own, but small deviations accumulate until the final plan no longer aligns with the original objectives. Which adjustment would best reduce this long-term reasoning drift?",
     "options": [
       "Summarize intermediate reasoning more aggressively to cut noise",
@@ -317,7 +317,7 @@
   {
     "id": "d5-p2-q07",
     "domain": 5,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "An AI engineer is designing prompts for a Claude-based agent that processes large contextual inputs including logs, tool outputs, and instructions. The model frequently ignores critical instructions when they sit in the middle of long prompts. The engineer wants to improve instruction adherence without reducing the total amount of context. Which strategy should be implemented?",
     "options": [
       "Position the most important instructions at the beginning and end of the prompt",
@@ -437,7 +437,7 @@
   {
     "id": "d5-p2-q15",
     "domain": 5,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "An agent includes all retrieved data from external sources in its context, even when much of it is irrelevant to the task. Over time this leads to lower accuracy and slower responses. Which approach would MOST effectively improve performance?",
     "options": [
       "Reduce the number of retrieval operations performed",

@@ -1,0 +1,317 @@
+[
+  {
+    "id": "final-q001",
+    "domain": 1,
+    "sources": ["final-pool"],
+    "stem": "A multi-agent workflow runs several specialized agents concurrently on related tasks. Occasionally one agent writes to shared state while another keeps reasoning from a stale copy, producing conflicting outputs. Which adjustment best improves consistency without significantly sacrificing concurrency?",
+    "options": [
+      "Introduce controlled synchronization points where shared state updates are applied",
+      "Force every agent to run one after another so conflicts cannot arise",
+      "Enlarge the context window so each agent can retain more history",
+      "Let every agent keep its own permanent independent copy of the state"
+    ],
+    "correctIndex": 0,
+    "explanation": "Controlled synchronization points let agents converge on updated shared state at defined moments, resolving conflicts while preserving most of the parallel throughput.",
+    "tags": ["multi-agent", "state-management", "concurrency"]
+  },
+  {
+    "id": "final-q002",
+    "domain": 1,
+    "sources": ["final-pool"],
+    "stem": "A distributed multi-agent system grants worker agents broad autonomy in deciding when to coordinate with the central orchestrator. Over time some workers wait too long to synchronize, causing conflicting assumptions and duplicated work. Which change best balances autonomy with coordination reliability?",
+    "options": [
+      "Centralize every decision in the orchestrator and limit workers to pure execution",
+      "Require each worker to synchronize after every single reasoning step",
+      "Define explicit synchronization checkpoints tied to dependency boundaries and state changes",
+      "Allow stale state to persist and rely on eventual consistency to reconcile conflicts"
+    ],
+    "correctIndex": 2,
+    "explanation": "Checkpoints keyed to dependency boundaries and state changes keep workers coordinated only where it matters, preserving autonomy while preventing divergent assumptions.",
+    "tags": ["multi-agent", "coordination", "orchestration"]
+  },
+  {
+    "id": "final-q003",
+    "domain": 1,
+    "sources": ["final-pool"],
+    "stem": "You are continuing a Claude Code codebase analysis. A few files changed since your last session, most of your prior analysis is still valid, and you now want to explore two alternative refactoring strategies from the same baseline without them interfering. Which single action best supports the parallel exploration?",
+    "options": [
+      "Continue in the same session and switch back and forth between both strategies",
+      "Start a brand-new session and discard the prior analysis to avoid stale context",
+      "Use fork_session to create an independent branch for each refactoring strategy from the shared baseline",
+      "Re-run every earlier prompt so the agent rebuilds its understanding from scratch"
+    ],
+    "correctIndex": 2,
+    "explanation": "Forking branches from a shared baseline lets each strategy evolve independently without cross-contamination, while preserving the still-valid prior analysis.",
+    "tags": ["sessions", "fork-session", "context-management"]
+  },
+  {
+    "id": "final-q004",
+    "domain": 1,
+    "sources": ["final-pool"],
+    "stem": "A distributed orchestration system lets specialized agents independently plan and execute subtasks across provisioning, configuration, and deployment. After planning, agents sometimes begin actions that conflict with another agent's plan (for example restarting a service another agent assumed was available), and the conflicts surface only after partial execution, forcing costly rollbacks. Which architectural change best prevents inter-agent execution conflicts without removing planning-phase autonomy?",
+    "options": [
+      "Add a pre-execution conflict-detection phase where agents submit planned actions to a coordination layer that flags resource or sequencing conflicts before anyone executes",
+      "Require all agents to execute simultaneously so conflicts surface immediately and can be rolled back together",
+      "Let agents execute independently and rely on post-execution reconciliation to fix conflicts afterward",
+      "Give each agent exclusive ownership of disjoint infrastructure regions regardless of workflow needs"
+    ],
+    "correctIndex": 0,
+    "explanation": "Submitting plans to a coordination layer that detects resource and ordering conflicts before execution stops conflicts prospectively while leaving each agent free to plan autonomously.",
+    "tags": ["multi-agent", "conflict-detection", "orchestration"]
+  },
+  {
+    "id": "final-q005",
+    "domain": 1,
+    "sources": ["final-pool"],
+    "stem": "A system uses a planning agent to generate tasks and separate execution agents to carry them out. The execution agents frequently fail or produce inconsistent results because they lack enough context from the planning phase. Which approach most effectively resolves this?",
+    "options": [
+      "Pass structured outputs from the planning agent into the execution agents",
+      "Forward the entire raw conversation history to every agent",
+      "Let each execution agent independently reinterpret the task instructions",
+      "Reduce the number of agents to simplify the workflow"
+    ],
+    "correctIndex": 0,
+    "explanation": "Execution agents only act on what they are given; passing the planning agent's structured outputs supplies the exact context they need without the noise of a full transcript.",
+    "tags": ["multi-agent", "context-passing", "structured-output"]
+  },
+  {
+    "id": "final-q006",
+    "domain": 1,
+    "sources": ["final-pool"],
+    "stem": "A Claude-based agent executes multi-step workflows involving many tool calls. Occasionally it proceeds with actions that violate business rules because nothing sits between the model's reasoning and the actual execution. Which approach would most effectively prevent these violations?",
+    "options": [
+      "Fine-tune the model on examples that follow the business rules",
+      "Log every agent action and review the logs periodically for violations",
+      "Implement guardrails or validation checks that run before actions execute",
+      "Encode the business rules in the system prompt and trust the model to apply them"
+    ],
+    "correctIndex": 2,
+    "explanation": "A validation or guardrail layer between reasoning and execution deterministically blocks rule-violating actions, which prompt instructions and after-the-fact review cannot guarantee.",
+    "tags": ["guardrails", "workflow-enforcement", "validation"]
+  },
+  {
+    "id": "final-q007",
+    "domain": 2,
+    "sources": ["final-pool"],
+    "stem": "A team updates a tool integrated with a Claude agent by changing its input parameters and response format. After deployment the agent breaks because it still relies on the old schema. Which approach would best prevent this class of failure going forward?",
+    "options": [
+      "Implement versioning for tools and preserve backward compatibility across changes",
+      "Update the agent's system prompt to describe the new tool schema after each change",
+      "Deploy migration scripts that automatically rewrite tool definitions inside the agent",
+      "Notify the development team of tool changes through documentation and release notes"
+    ],
+    "correctIndex": 0,
+    "explanation": "Versioning tools and keeping older contracts working lets the schema evolve without breaking existing agents, unlike relying on prompt edits or out-of-band notifications.",
+    "tags": ["tool-design", "versioning", "backward-compatibility"]
+  },
+  {
+    "id": "final-q008",
+    "domain": 2,
+    "sources": ["final-pool"],
+    "stem": "A Claude agent uses several tools that were built independently, each with its own input and output conventions, which causes frequent mismatches when the output of one tool feeds another. Which change would best improve interoperability without tightly coupling the tools' implementations?",
+    "options": [
+      "Standardize a shared schema layer for inputs and outputs across the tools",
+      "Have the agent perform runtime format translation between every pair of tools",
+      "Modify each tool to directly handle the output format of every other tool",
+      "Retry the tool chain repeatedly until compatible outputs happen to appear"
+    ],
+    "correctIndex": 0,
+    "explanation": "A shared input/output schema layer gives all tools a common contract so their outputs chain cleanly, without each tool needing to know the internals of the others.",
+    "tags": ["tool-design", "schema-design", "interoperability"]
+  },
+  {
+    "id": "final-q009",
+    "domain": 2,
+    "sources": ["final-pool"],
+    "stem": "During evaluation, your report-generation agent frequently pauses to validate simple details such as dates, names, and statistics. It currently delegates each check back to the coordinator, which invokes a retrieval agent and then resumes report generation, adding round trips and raising latency by 35%. Analysis shows about 80% of these validations are simple lookups while the rest need deeper multi-source investigation. What is the most effective way to cut latency while keeping reliability?",
+    "options": [
+      "Give the report-generation agent a limited quick_lookup tool for simple validations while routing complex checks through the coordinator and retrieval agent",
+      "Give the report-generation agent full access to all retrieval tools so it can handle every validation itself",
+      "Expand the retrieval agent's initial output to preemptively include extra surrounding context",
+      "Have the report-generation agent batch all validation requests and send them to the coordinator after finishing its draft"
+    ],
+    "correctIndex": 0,
+    "explanation": "A narrowly scoped quick_lookup tool lets the agent handle the common simple case directly while preserving the existing architecture for the rare complex validations, following least privilege.",
+    "tags": ["tool-design", "least-privilege", "multi-agent"]
+  },
+  {
+    "id": "final-q010",
+    "domain": 3,
+    "sources": ["final-pool"],
+    "stem": "A DevOps team uses Claude Code during production incidents for repetitive recovery workflows involving service inspection, dependency validation, rollout verification, and rollback recommendations. Different engineers run these steps inconsistently, causing variable investigation quality and escalation decisions. The team wants to standardize operational behavior while letting workflows evolve as infrastructure changes. Which approach best achieves this?",
+    "options": [
+      "Create reusable custom commands or skills that encapsulate the investigation logic, operational checks, and expected output structures",
+      "Require engineers to manually document every investigation step before starting remediation",
+      "Increase the context window so Claude can infer operational standards from earlier incident sessions",
+      "Keep all prior incident transcripts permanently in active context during every workflow"
+    ],
+    "correctIndex": 0,
+    "explanation": "Encapsulating the operational logic in reusable commands or skills standardizes behavior across engineers while remaining editable as infrastructure evolves, unlike ad hoc documentation or context stuffing.",
+    "tags": ["skills", "custom-commands", "standardization"]
+  },
+  {
+    "id": "final-q011",
+    "domain": 3,
+    "sources": ["final-pool"],
+    "stem": "You are running a multi-phase task: evaluate several approaches for integrating a new logging system, choose the best one, then implement it. Doing all of it in direct execution mode produces inconsistent implementations and repeated rework whenever new constraints surface midway. Which change would most effectively improve this workflow?",
+    "options": [
+      "Use plan mode to evaluate the approaches before starting implementation",
+      "Continue in direct execution but increase how often you iterate",
+      "Add more detailed instructions to guide implementation decisions during execution",
+      "Break the task into smaller steps and execute them one after another"
+    ],
+    "correctIndex": 0,
+    "explanation": "Plan mode is designed for weighing multiple approaches and surfacing constraints before any code is written, which prevents the rework that immediate direct execution causes.",
+    "tags": ["plan-mode", "workflow", "planning"]
+  },
+  {
+    "id": "final-q012",
+    "domain": 3,
+    "sources": ["final-pool"],
+    "stem": "An organization integrates Claude Code into automated pull-request reviews across many microservices. Initially it processes all pull requests inside one shared long-running session to preserve architectural awareness. Over time, comments generated for one service start referencing patterns and naming conventions from unrelated repositories processed earlier. Which architectural change best improves review accuracy while preserving org-wide standards?",
+    "options": [
+      "Isolate each pull-request review into a repository-scoped session while injecting shared organizational standards separately",
+      "Keep all previous pull-request analyses permanently in active review sessions for stronger long-term awareness",
+      "Merge every repository into a single centralized review context to maximize consistency",
+      "Increase the context window so all repository conventions stay visible during every review"
+    ],
+    "correctIndex": 0,
+    "explanation": "Repository-scoped sessions stop conventions from one repo bleeding into another, while injecting shared standards separately keeps org-wide policy applied without cross-contamination.",
+    "tags": ["sessions", "context-isolation", "code-review"]
+  },
+  {
+    "id": "final-q013",
+    "domain": 3,
+    "sources": ["final-pool"],
+    "stem": "A platform-engineering org maintains reusable Claude Code operational skills for deployment validation, dependency tracing, rollback coordination, and incident response. Over time teams independently modify local copies of shared skills, and months later remediation behavior is inconsistent across environments because skill logic has diverged. Which governance approach best preserves workflow consistency while still allowing repository-level specialization?",
+    "options": [
+      "Maintain centrally versioned shared operational skills while exposing controlled extension points for repository-specific customization",
+      "Allow unrestricted repository-level modification of operational skills so teams optimize independently",
+      "Duplicate every operational workflow per repository so local teams fully control their own lifecycle",
+      "Increase the context window so Claude can reconcile behavioral differences between divergent skills at runtime"
+    ],
+    "correctIndex": 0,
+    "explanation": "Centrally versioned skills with defined extension points keep core behavior consistent everywhere while still permitting bounded, intentional customization, unlike uncontrolled forking or duplication.",
+    "tags": ["skills", "governance", "versioning"]
+  },
+  {
+    "id": "final-q014",
+    "domain": 3,
+    "sources": ["final-pool"],
+    "stem": "Your CI pipeline uses Claude Code to both generate code changes and review them within the same workflow. The review step frequently misses issues that should be obvious, especially in areas the generation step just modified. You want to improve the reliability and objectivity of the review without changing the core workflow. What is the most effective adjustment?",
+    "options": [
+      "Run the review step in a separate, independent session from the generation step",
+      "Increase the verbosity of the review prompt to encourage deeper analysis",
+      "Add detailed instructions telling Claude to critically review its own output",
+      "Re-run the review several times and aggregate the results"
+    ],
+    "correctIndex": 0,
+    "explanation": "Reviewing in an independent session removes the bias carried over from having just generated the code, producing a more objective evaluation than self-review in the same context.",
+    "tags": ["code-review", "sessions", "objectivity"]
+  },
+  {
+    "id": "final-q015",
+    "domain": 3,
+    "sources": ["final-pool"],
+    "stem": "A platform team uses Claude Code in CI pipelines to analyze pull requests across hundreds of repositories for security anti-patterns and policy violations. Initially it processes them sequentially inside a single long-running session, but reliability gradually declines as context accumulates across unrelated analyses. Which architectural change best improves scalability and reasoning quality?",
+    "options": [
+      "Process repositories in isolated batch-oriented sessions with scoped context and independent summaries",
+      "Merge all repository analyses into one global reasoning workflow for consistency across CI runs",
+      "Store every repository analysis result permanently inside the active session for historical awareness",
+      "Increase the context window so all repository analyses stay available throughout pipeline execution"
+    ],
+    "correctIndex": 0,
+    "explanation": "Isolated, batch-oriented sessions with scoped context prevent accumulation of unrelated analysis from degrading reasoning, and independent summaries keep each repository's result clean and scalable.",
+    "tags": ["sessions", "context-isolation", "ci-cd"]
+  },
+  {
+    "id": "final-q016",
+    "domain": 4,
+    "sources": ["final-pool"],
+    "stem": "A Claude-based agent performs a workflow where each step depends on outputs from previous tool calls. In some cases it advances to the next step even though the previous tool call returned incomplete or invalid data, producing incorrect final results. Which approach would most effectively prevent this?",
+    "options": [
+      "Validate tool outputs before proceeding to the next step",
+      "Use a larger model with stronger reasoning to handle incomplete data",
+      "Cache tool outputs and reuse them across workflow steps",
+      "Add detailed system-prompt instructions for handling incomplete data gracefully"
+    ],
+    "correctIndex": 0,
+    "explanation": "Validating each tool output before the next step catches incomplete or invalid data at the point it occurs, stopping errors from propagating through dependent steps.",
+    "tags": ["validation", "tool-use", "reliability"]
+  },
+  {
+    "id": "final-q017",
+    "domain": 4,
+    "sources": ["final-pool"],
+    "stem": "Your agent uses two criteria at once: flag performance inefficiencies, and avoid flagging minor issues that do not affect production behavior. Both are clearly defined in the prompt, yet the agent flags a minor inefficiency in a rarely used function that has no measurable impact. Which change would best improve consistency?",
+    "options": [
+      "Explicitly define the priority between the performance rule and the impact-based filter",
+      "Add more examples showing acceptable inefficiencies",
+      "Instruct the model to focus only on critical issues",
+      "Remove the performance rule to avoid over-reporting"
+    ],
+    "correctIndex": 0,
+    "explanation": "When two criteria overlap and can conflict, the model needs an explicit precedence rule; stating which criterion wins resolves the ambiguity that produces inconsistent flagging.",
+    "tags": ["criteria-design", "precedence", "classification"]
+  },
+  {
+    "id": "final-q018",
+    "domain": 4,
+    "sources": ["final-pool"],
+    "stem": "A Claude-based multi-stage content editing workflow applies successive refinements across drafting, structural reorganization, and compliance review stages. Some intermediate revisions introduce subtle errors or remove information that was valid in earlier drafts. Which design change best lets the workflow recover from intermediate regressions without discarding overall progress?",
+    "options": [
+      "Maintain versioned snapshots of each stage's output and add stage-level rollback triggered by regression detection",
+      "Increase the context window so all prior drafts stay visible and the model self-corrects regressions",
+      "Merge all editing stages into a single consolidated prompt so regressions cannot occur between stages",
+      "Reduce the number of editing stages to minimize the chance of inter-stage regression"
+    ],
+    "correctIndex": 0,
+    "explanation": "Versioned per-stage snapshots plus rollback on detected regression let the workflow revert a bad intermediate result without losing the good work from other stages.",
+    "tags": ["multi-pass", "versioning", "rollback"]
+  },
+  {
+    "id": "final-q019",
+    "domain": 4,
+    "sources": ["final-pool"],
+    "stem": "A Claude-based deployment platform generates structured rollback plans for many infrastructure environments. Some environments need region-specific compliance fields while others need extra dependency-validation metadata. Using one universal output schema for all environments leads to workflows that are either bloated with unused fields or failing because environment-specific requirements are missing. Which architectural change best improves reliability and maintainability?",
+    "options": [
+      "Dynamically select or compose the output schema based on the runtime environment while preserving shared core operational contracts",
+      "Remove all environment-specific validation so every rollback workflow uses identical structures",
+      "Keep the single universal schema so downstream orchestration stays globally standardized",
+      "Increase temperature so Claude generates more flexible structured outputs that adapt to each environment"
+    ],
+    "correctIndex": 0,
+    "explanation": "Selecting or composing the schema per environment around a shared core contract gives each environment exactly the fields it needs without forcing a bloated or under-specified universal schema.",
+    "tags": ["json-schema", "schema-selection", "structured-output"]
+  },
+  {
+    "id": "final-q020",
+    "domain": 5,
+    "sources": ["final-pool"],
+    "stem": "A Claude-based agent is designed to use tools only when external data is required. During execution it frequently calls tools even when sufficient information is already available in context, adding latency and cost without improving accuracy. Which design adjustment would best correct this without restricting valid tool usage?",
+    "options": [
+      "Explicitly instruct the model to prefer reasoning over tool calls when sufficient context is already available",
+      "Reduce the number of tools available to the agent",
+      "Disable tool usage whenever the context exceeds a certain size",
+      "Enforce a fixed limit on the number of tool calls per session"
+    ],
+    "correctIndex": 0,
+    "explanation": "Guiding the model to reason from existing context and only reach for tools when data is actually missing curbs unnecessary calls while leaving legitimate tool use fully available.",
+    "tags": ["tool-use", "efficiency", "context-management"]
+  },
+  {
+    "id": "final-q021",
+    "domain": 5,
+    "sources": ["final-pool"],
+    "stem": "Your agent handles long-running customer conversations spanning multiple orders. Over time, precise details like order IDs and refund amounts become inconsistent in later responses because earlier facts are compressed into shorter summaries as the conversation grows. Which change would best preserve accuracy?",
+    "options": [
+      "Maintain a structured \"case facts\" block of key details and pass it in every prompt",
+      "Add instructions reminding the agent to remember important details",
+      "Summarize the conversation more frequently to reduce context size",
+      "Increase the maximum context window to retain more conversation history"
+    ],
+    "correctIndex": 0,
+    "explanation": "Keeping critical transactional facts in a dedicated structured block that is re-passed each turn protects them from being degraded or dropped during ongoing summarization.",
+    "tags": ["context-management", "fact-preservation", "summarization"]
+  }
+]

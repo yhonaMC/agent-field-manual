@@ -62,7 +62,7 @@
   {
     "id": "d2-p1-q05",
     "domain": 2,
-    "sources": ["practice-1"],
+    "sources": ["practice-1", "final-pool"],
     "stem": "Your team adds a GitHub MCP server for issue tracking and repo insights. One developer configures it in their personal ~/.claude.json and it works locally, but after cloning the repository other teammates cannot access the same MCP tools. Which change best ensures consistent access for the whole team?",
     "options": [
       "Document the local MCP setup steps in the repository README",
@@ -107,7 +107,7 @@
   {
     "id": "d2-p1-q08",
     "domain": 2,
-    "sources": ["practice-1"],
+    "sources": ["practice-1", "final-pool"],
     "stem": "An agent has two tools with overlapping purposes: one described as \"analyzes content for insights\" and another as \"processes documents for information.\" During testing it switches between them inconsistently for similar inputs, producing redundant or conflicting output. What most effectively resolves this?",
     "options": [
       "Redesign the tools with clearly distinct purposes and update descriptions to reflect separate responsibilities",
@@ -152,7 +152,7 @@
   {
     "id": "d2-p1-q11",
     "domain": 2,
-    "sources": ["practice-1"],
+    "sources": ["practice-1", "final-pool"],
     "stem": "An agent has a specialized tool that accepts validated document URLs and returns structured content, plus a general tool that fetches raw content from any URL. Both are documented, but given document URLs the agent sometimes uses the general fetcher, producing inconsistent output. Which single change most improves tool selection?",
     "options": [
       "Remove the general-purpose tool entirely to eliminate the ambiguity",
@@ -182,7 +182,7 @@
   {
     "id": "d2-p1-q13",
     "domain": 2,
-    "sources": ["practice-1"],
+    "sources": ["practice-1", "final-pool"],
     "stem": "Your synthesis agent is restricted to summarization and formatting tools. In evaluation it often needs to do simple fact checks (like confirming a date or statistic) but must escalate back to the coordinator each time, adding latency. You want more efficiency without breaking role boundaries. Which approach is best?",
     "options": [
       "Remove verification duties entirely and rely on upstream agents",
@@ -227,7 +227,7 @@
   {
     "id": "d2-p2-q01",
     "domain": 2,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "A Claude-based agent runs across environments with differing permission levels. Mid-execution, some MCP tools become partially unavailable because the current session lacks the required permissions, causing intermittent workflow failures. Which adjustment best improves reliability without needlessly limiting the agent's capabilities?",
     "options": [
       "Pre-configure a fixed permission profile at session start and apply it uniformly throughout",
@@ -257,7 +257,7 @@
   {
     "id": "d2-p2-q03",
     "domain": 2,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "Your system relies on a single tool described as \"processes documents and returns relevant insights.\" In testing its output is inconsistent: sometimes it summarizes, sometimes extracts data, sometimes attempts verification, and results swing based on phrasing. What is the most appropriate improvement?",
     "options": [
       "Add more examples showing how the tool should behave in different scenarios",
@@ -347,7 +347,7 @@
   {
     "id": "d2-p2-q09",
     "domain": 2,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "A team defines a tool for a Claude agent that accepts loosely specified parameters such as \"user data\" and \"details.\" During execution the agent frequently passes incorrect or incomplete arguments, causing failed tool calls and inconsistent results. Which design improvement most effectively resolves this?",
     "options": [
       "Retry the tool call whenever the parameters turn out to be incorrect",
@@ -377,7 +377,7 @@
   {
     "id": "d2-p2-q11",
     "domain": 2,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "A subagent performs web searches through an MCP tool. On a timeout it retries several times internally, and when all retries fail it returns only a generic failure message to the coordinator with no extra context. The coordinator then cannot tell whether to retry, switch strategy, or proceed with partial results. Which change most effectively improves system behavior?",
     "options": [
       "Return structured error details including the failure type, retryability, and the actions already attempted",

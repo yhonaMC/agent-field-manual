@@ -47,7 +47,7 @@
   {
     "id": "d3-p1-q04",
     "domain": 3,
-    "sources": ["practice-1"],
+    "sources": ["practice-1", "final-pool"],
     "stem": "You must migrate a legacy monolith into a modular service-based architecture. The work spans dozens of files and requires careful decisions about service boundaries, shared dependencies, and data flow between components. Which approach should you take?",
     "options": [
       "Use direct execution with detailed upfront instructions specifying each module's exact structure and responsibilities",
@@ -77,7 +77,7 @@
   {
     "id": "d3-p1-q06",
     "domain": 3,
-    "sources": ["practice-1"],
+    "sources": ["practice-1", "final-pool"],
     "stem": "You are using Claude to generate validation logic for a form processing system. The first version handles basic cases but breaks on edge cases like null values and invalid formats. You want to systematically improve it while guaranteeing correctness across all scenarios. Which approach is most effective?",
     "options": [
       "Add more written instructions describing how each edge case should be handled",
@@ -242,7 +242,7 @@
   {
     "id": "d3-p2-q02",
     "domain": 3,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "A platform team keeps org-wide standards in a root-level .claude/CLAUDE.md. During a production outage, infrastructure teams added directory-scoped CLAUDE.md files holding temporary emergency deployment overrides. Months later, unrelated workflows in those directories still follow the emergency behavior even though the incident is resolved. Which governance change prevents this persistent drift while still allowing emergency overrides when truly needed?",
     "options": [
       "Store all emergency operational procedures permanently in repository-scoped configuration so future incidents can reuse them automatically",
@@ -317,7 +317,7 @@
   {
     "id": "d3-p2-q07",
     "domain": 3,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "A reliability team uses Claude Code to investigate a complex cross-service latency issue, accumulating dependency maps, validated findings, disproven theories, and infrastructure observations over several hours. The investigation must then hand off to another team in a different time zone, who historically spend significant effort reconstructing context and sometimes revisit already-disproven hypotheses. Which workflow adjustment best improves investigation continuity across the handoff?",
     "options": [
       "Export the complete conversation transcript and require the receiving team to review the entire history before continuing",
@@ -362,7 +362,7 @@
   {
     "id": "d3-p2-q10",
     "domain": 3,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "You are analyzing a large legacy codebase to understand dependencies before a refactor. The discovery phase produces extensive output, including file relationships, module usage, and configuration patterns. In testing you notice that after this analysis, later steps become less accurate and the model starts missing important details. What is the most appropriate improvement?",
     "options": [
       "Use the Explore subagent to isolate the discovery output and return a concise summary",
@@ -377,7 +377,7 @@
   {
     "id": "d3-p2-q11",
     "domain": 3,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "An engineer uses Claude Code to debug an intermittent data corruption issue in a distributed pipeline. Two competing theories emerge, one about serialization inconsistencies and another about async retry ordering. The engineer wants to pursue both independently while ensuring that assumptions and reasoning from one path do not unintentionally bias the other. Which workflow best supports this?",
     "options": [
       "Merge all evidence from both theories into a shared summary document before continuing exploration sequentially",
@@ -392,7 +392,7 @@
   {
     "id": "d3-p2-q12",
     "domain": 3,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "A Claude-based deployment orchestration workflow packs system policies, rollback procedures, compliance requirements, incident history, infrastructure metadata, and runtime diagnostics into one prompt before generating remediation recommendations. During incidents, the model occasionally prioritizes detailed diagnostic logs over critical deployment safety constraints defined earlier. Which configuration adjustment best ensures higher-priority organizational constraints get appropriate attention relative to lower-priority guidance?",
     "options": [
       "Compress all infrastructure diagnostics aggressively so the prompt holds only high-level summaries during remediation",

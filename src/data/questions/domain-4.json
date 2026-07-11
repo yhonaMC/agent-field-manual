@@ -62,7 +62,7 @@
   {
     "id": "d4-p1-q05",
     "domain": 4,
-    "sources": ["practice-1"],
+    "sources": ["practice-1", "final-pool"],
     "stem": "Your agent labels issues under two categories, \"security risks\" and \"improper input handling.\" During evaluation, conceptually identical issues sometimes land in different categories, producing inconsistent classification and confusing reports. What is the most appropriate improvement?",
     "options": [
       "Add instructions telling the model to stay consistent when categorizing",
@@ -107,7 +107,7 @@
   {
     "id": "d4-p1-q08",
     "domain": 4,
-    "sources": ["practice-1"],
+    "sources": ["practice-1", "final-pool"],
     "stem": "A Claude workflow generates deeply nested structured outputs for deployment plans, dependency maps, rollback procedures, and environment checks. The outputs pass schema validation, yet engineers find that some nested relationships are logically inconsistent, such as rollback steps referencing infrastructure states incompatible with the deployment order defined earlier in the same output. Which architectural adjustment would best improve reliability?",
     "options": [
       "Add semantic validation layers that check cross-field dependencies and operational consistency after generation finishes",
@@ -122,7 +122,7 @@
   {
     "id": "d4-p1-q09",
     "domain": 4,
-    "sources": ["practice-1"],
+    "sources": ["practice-1", "final-pool"],
     "stem": "A prompt uses system-level constraints requiring strict JSON output, but the few-shot examples included in the prompt occasionally show slight formatting deviations. At runtime the model sometimes follows the examples rather than the constraints. Which change would best ensure consistent adherence to the required format?",
     "options": [
       "Switch to a model with stronger instruction-following ability",
@@ -242,7 +242,7 @@
   {
     "id": "d4-p2-q02",
     "domain": 4,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "Your agent decides whether a change should be flagged as a \"performance issue.\" You provide a few examples where obvious inefficiencies are correctly flagged. During testing, however, the agent starts flagging minor inefficiencies with negligible impact, even though your criteria say only meaningful performance issues should be reported. What is the most likely cause?",
     "options": [
       "The model needs more examples to understand the performance rules",
@@ -257,7 +257,7 @@
   {
     "id": "d4-p2-q03",
     "domain": 4,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "Your agent extracts structured data via tool calls using a schema with both critical fields and supplementary metadata. In testing, some outputs succeed but omit metadata fields, while others fail validation entirely. The metadata fields are marked required in the schema even though they are not always present in the source data. Which adjustment best resolves this inconsistency?",
     "options": [
       "Mark the non-essential metadata fields as optional in the schema",
@@ -317,7 +317,7 @@
   {
     "id": "d4-p2-q07",
     "domain": 4,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "Your team wants to cut API costs for automated workflows. Two processes currently use real-time Claude calls: a blocking validation step that must finish before code can deploy, and a nightly analytics report reviewed the next morning. A proposal suggests moving both to a batch processing API to save money. How should you evaluate this proposal?",
     "options": [
       "Migrate both workflows to batch processing with a fallback to real-time execution if results are delayed",
@@ -362,7 +362,7 @@
   {
     "id": "d4-p2-q10",
     "domain": 4,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "A Claude deployment assistant generates rollout plans that must satisfy three competing objectives: minimizing deployment duration, reducing operational risk, and limiting infrastructure cost. Engineers observe that when prompts emphasize speed, rollback safeguards weaken; when prompts emphasize risk reduction, duration grows. Outputs vary depending on which objective appears most prominent. Which prompt-engineering adjustment would best improve consistency across all objectives?",
     "options": [
       "Assign priority weights to all objectives at workflow initialization and apply them uniformly regardless of execution context",
@@ -422,7 +422,7 @@
   {
     "id": "d4-p2-q14",
     "domain": 4,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "Your agent flags multiple categories of issues: bugs, security risks, performance concerns, and style inconsistencies. During evaluation, developers start ignoring the tool because style-related findings are frequently wrong, even though bug and security findings are accurate. You want to restore trust without degrading detection of critical issues. Which adjustment would best address this?",
     "options": [
       "Temporarily disable the style-related category while its detection criteria are refined",

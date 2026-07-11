@@ -2,7 +2,7 @@
   {
     "id": "d1-p1-q01",
     "domain": 1,
-    "sources": ["practice-1"],
+    "sources": ["practice-1", "final-pool"],
     "stem": "An agent audits a large codebase for security flaws. The scope is initially vague, and early findings frequently surface new areas worth investigating. The current build follows a fixed chain (scan, analyze, report), so newly discovered issues never feed back into the process. Which approach best resolves this?",
     "options": [
       "Supply examples showing how to spot extra vulnerabilities inside the existing fixed workflow",
@@ -107,7 +107,7 @@
   {
     "id": "d1-p1-q08",
     "domain": 1,
-    "sources": ["practice-1"],
+    "sources": ["practice-1", "final-pool"],
     "stem": "Your agent investigates billing issues and escalates cases it cannot resolve. Sometimes it escalates the moment it detects a possible issue even though more tools could have resolved it; other times it tries several uncertain actions before escalating, delaying resolution. What change would best improve escalation behavior?",
     "options": [
       "Escalate right away whenever the agent hits any ambiguity in the workflow",
@@ -152,7 +152,7 @@
   {
     "id": "d1-p1-q11",
     "domain": 1,
-    "sources": ["practice-1"],
+    "sources": ["practice-1", "final-pool"],
     "stem": "Your agent retrieves customer data and then decides the next action from the result. In testing it sometimes makes wrong follow-up decisions even though the right tool was called and returned valid data. Investigation shows only a summarized version of the tool output is passed into the next iteration, dropping fields needed for the decision. What is the most effective improvement?",
     "options": [
       "Pass the complete tool results into the conversation context for the next iteration instead of partial summaries",
@@ -182,7 +182,7 @@
   {
     "id": "d1-p1-q13",
     "domain": 1,
-    "sources": ["practice-1", "practice-3"],
+    "sources": ["practice-1", "practice-3", "final-pool"],
     "stem": "You use Claude Code to analyze a large codebase. After an initial session, your team modifies several files. You resume the previous session with --resume, but the agent gives outdated recommendations based on old file states. What is the most effective way to handle this?",
     "options": [
       "Use fork_session to branch from the previous session and continue analysis from there",
@@ -197,7 +197,7 @@
   {
     "id": "d1-p1-q14",
     "domain": 1,
-    "sources": ["practice-1", "practice-2"],
+    "sources": ["practice-1", "practice-2", "final-pool"],
     "stem": "A production audit finds that in roughly 9% of cases your agent calls issue_credit using a customer's email address without first confirming account ownership through verify_identity. This has applied credits to the wrong accounts when duplicate or outdated emails are supplied. Which change most effectively addresses this reliability issue?",
     "options": [
       "Add a programmatic prerequisite that blocks issue_credit and fetch_account until verify_identity returns a confirmed account ID",
@@ -272,7 +272,7 @@
   {
     "id": "d1-p2-q05",
     "domain": 1,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "Your system has a lightweight lookup subagent and a deep analysis subagent. In testing, the coordinator frequently invokes the deep analysis subagent for simple fact-based queries, adding latency without improving results. Which change would most effectively improve this behavior?",
     "options": [
       "Update the coordinator to assess query complexity and pick the appropriate subagent based on task requirements",
@@ -302,7 +302,7 @@
   {
     "id": "d1-p2-q07",
     "domain": 1,
-    "sources": ["practice-2"],
+    "sources": ["practice-2", "final-pool"],
     "stem": "You resume a previous session with --resume to keep analyzing a codebase. Several files have changed since the last session, but the overall system structure is largely unchanged. After resuming, the agent keeps referencing outdated implementations and produces incorrect recommendations. Which action most effectively corrects this?",
     "options": [
       "Continue the session and rely on the agent to adapt to the updated code automatically",
@@ -467,7 +467,7 @@
   {
     "id": "d1-p3-q06",
     "domain": 1,
-    "sources": ["practice-3"],
+    "sources": ["practice-3", "final-pool"],
     "stem": "Your agent handles product replacements. The correct workflow verifies warranty eligibility with check_warranty before generating a shipping label with create_replacement_order. In production, the agent occasionally creates replacement orders for products no longer under warranty, even though the system prompt clearly defines the correct sequence. What is the most effective way to ensure correct workflow execution?",
     "options": [
       "Update the system prompt to emphasize that warranty checks must always occur before replacement",
