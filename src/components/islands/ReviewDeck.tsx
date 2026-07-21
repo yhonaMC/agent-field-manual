@@ -22,9 +22,9 @@ export default function ReviewDeck() {
   );
 
   if (!q || !shuffled) {
-    return <p className="mono" style={{ fontSize: "1.1rem" }}>
-      {sessionDone.length > 0 ? `Queue cleared — ${sessionDone.length} card(s) reviewed. ` : ""}
-      Nothing due. Come back tomorrow.
+    return <p style={{ fontSize: "1.1rem" }}>
+      {sessionDone.length > 0 ? `Cola vacía — ${sessionDone.length} tarjeta(s) repasada(s). ` : ""}
+      Nada pendiente. Vuelve mañana.
     </p>;
   }
 
@@ -37,10 +37,10 @@ export default function ReviewDeck() {
 
   return (
     <div>
-      <p className="mono" style={{ fontSize: ".72rem", letterSpacing: ".1em" }}>
-        {due.length} CARD(S) DUE · § {q.domain}.0
+      <p style={{ fontFamily: "var(--font-mono)", fontSize: ".75rem", letterSpacing: ".08em", color: "var(--ink-3)" }}>
+        {due.length} TARJETA(S) PENDIENTE(S) · Dominio {q.domain}
       </p>
-      <p style={{ fontSize: "1.05rem", maxWidth: "var(--measure)" }}>{q.stem}</p>
+      <p style={{ fontSize: "1.1rem", maxWidth: "var(--measure)" }}>{q.stem}</p>
       <ol style={{ listStyle: "lower-alpha", paddingLeft: "1.6rem", maxWidth: "var(--measure)" }}>
         {shuffled.options.map((opt, pos) => {
           const isCorrect = revealed && pos === shuffled.correctPosition;
@@ -63,7 +63,7 @@ export default function ReviewDeck() {
           <p style={{ margin: 0 }}>{q.explanation}</p>
           <button className="btn" style={{ marginTop: ".8rem" }}
             onClick={() => { setSessionDone((d) => [...d, q.id]); setSelected(null); }}>
-            Next card
+            Siguiente tarjeta
           </button>
         </div>
       )}

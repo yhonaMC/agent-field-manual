@@ -16,7 +16,7 @@ const { Content } = await render(entry);
 ---
 <ManualLayout title={entry.data.title} description={entry.data.summary}>
   <article class="prose">
-    <span class="section-no">§ {entry.data.section}</span>
+    <span class="section-no"><a href={`/manual/${entry.data.domain}`} style="color:var(--accent); text-decoration:none">Dominio {entry.data.domain}</a></span>
     <h1>{entry.data.title}</h1>
     <Content />
   </article>

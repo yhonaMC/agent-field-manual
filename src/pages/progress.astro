@@ -8,10 +8,10 @@ const lessons = await getCollection("lessons");
 const lessonMeta = lessons.map((l) => ({ id: l.id, domain: l.data.domain, title: l.data.title, section: l.data.section }));
 const questionMeta = allQuestions.map((q) => ({ id: q.id, domain: q.domain }));
 ---
-<ManualLayout title="Progress" description="Your study log: domain mastery gauges, exam history, and review queue.">
+<ManualLayout title="Progreso" description="Tu registro de estudio: dominio por dominio, historial de exámenes y cola de repaso.">
   <section>
-    <span class="section-no">FLIGHT LOG</span>
-    <h1>Progress</h1>
+    <span class="section-no">Tu registro</span>
+    <h1>Progreso</h1>
     <ProgressPanel client:load lessonMeta={lessonMeta} questionMeta={questionMeta} />
   </section>
 </ManualLayout>

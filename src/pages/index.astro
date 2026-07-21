@@ -3,48 +3,74 @@ import { getCollection } from "astro:content";
 import ManualLayout from "../layouts/ManualLayout.astro";
 
 const domains = (await getCollection("domains")).sort((a, b) => a.data.domain - b.data.domain);
-const lessons = (await getCollection("lessons")).sort((a, b) => a.data.chapter - b.data.chapter);
-const scenarios = (await getCollection("scenarios")).sort((a, b) => a.data.order - b.data.order);
+const lessons = await getCollection("lessons");
+const lessonsIn = (d: number) => lessons.filter((l) => l.data.domain === d).length;
 ---
-<ManualLayout title="Cover" description="A field manual for the Claude certification: 18 lessons, practice drills per domain, scenario deep-dives, and a full 60-question exam simulator.">
-  <section class="prose">
-    <span class="section-no">DOC. AFM-CCAF-2026 · REV A</span>
-    <h1 style="font-size:3rem">The Agent Field Manual</h1>
-    <p style="font-size:1.15rem">
-      Operating instructions for Claude agents. Study the manual, run the drills,
-      pass the certification. Free, no account, your progress stays in your browser.
+<ManualLayout
+  title="Estudia para la certificación de Claude"
+  description="Guía de estudio gratuita para la certificación de agentes de Claude: 18 lecciones, más de 190 preguntas de práctica y un simulador de examen de 60 preguntas. Sin cuenta.">
+
+  <section class="hero">
+    <span class="badge">Guía de estudio gratuita · Certificación de Claude</span>
+    <h1>Todo lo que necesitas para pasar la certificación de Claude</h1>
+    <p class="lead">
+      Lecciones estructuradas, práctica por dominio y un simulador de examen cronometrado —
+      igual al examen real de Anthropic. Sin cuenta: tu progreso queda en tu navegador.
     </p>
-    <p>
-      <a class="btn" href="/manual/1" style="text-decoration:none">Open § 1.0</a>
-      <a class="btn ghost" href="/exam" style="text-decoration:none">Exam simulator</a>
-    </p>
+    <div class="actions">
+      <a class="btn" href="/manual/1">Empezar a estudiar</a>
+      <a class="btn ghost" href="/exam">Probar el simulacro →</a>
+    </div>
   </section>
 
-  <section id="contents" style="margin-top:4rem">
-    <h2><span class="section-no">INDEX</span>Table of Contents</h2>
-    {domains.map((d) => (
-      <div class="rule-row">
-        <a href={`/manual/${d.data.domain}`} style="font-weight:600; text-decoration:none">
-          <span class="mono" style="color:var(--accent)">§ {d.data.domain}.0</span> {d.data.title}
-        </a>
-        <ul style="list-style:none; padding-left:2.2rem; margin:.4rem 0 0">
-          {lessons.filter((l) => l.data.domain === d.data.domain).map((l) => (
-            <li>
-              <a href={`/manual/${l.data.domain}/${l.id.split("/")[1]}`}>
-                <span class="mono">§ {l.data.section}</span> {l.data.title}
-              </a>
-            </li>
-          ))}
-        </ul>
+  <section class="stats" aria-label="Resumen del contenido">
+    <div class="stat"><b>5</b><span>dominios</span></div>
+    <div class="stat"><b>18</b><span>lecciones</span></div>
+    <div class="stat"><b>190+</b><span>preguntas</span></div>
+    <div class="stat"><b>60</b><span>preguntas en el simulacro</span></div>
+  </section>
+
+  <section style="margin-top:3.5rem">
+    <h2 style="text-align:center">Cómo funciona</h2>
+    <div class="grid-3" style="margin-top:1.5rem">
+      <div>
+        <div class="step-num">1</div>
+        <h3 style="margin:.6rem 0 .3rem; font-size:1.1rem">Estudia las lecciones</h3>
+        <p style="color:var(--ink-2); margin:0">18 lecciones en inglés (como el examen real), organizadas por dominio oficial.</p>
       </div>
-    ))}
-    <div class="rule-row">
-      <span class="mono" style="color:var(--accent)">§ 6.0</span> <strong>Scenario deep-dives</strong>
-      <ul style="list-style:none; padding-left:2.2rem; margin:.4rem 0 0">
-        {scenarios.map((s) => (
-          <li><a href={`/scenarios/${s.data.order}`}><span class="mono">§ 6.{s.data.order}</span> {s.data.title}</a></li>
-        ))}
-      </ul>
+      <div>
+        <div class="step-num">2</div>
+        <h3 style="margin:.6rem 0 .3rem; font-size:1.1rem">Practica cada dominio</h3>
+        <p style="color:var(--ink-2); margin:0">Drills con explicaciones. Aprueba con 70% para desbloquear el siguiente dominio.</p>
+      </div>
+      <div>
+        <div class="step-num">3</div>
+        <h3 style="margin:.6rem 0 .3rem; font-size:1.1rem">Haz el simulacro</h3>
+        <p style="color:var(--ink-2); margin:0">60 preguntas cronometradas con resultados por dominio, como el examen de verdad.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="temario" style="margin-top:3.5rem; scroll-margin-top:1rem">
+    <h2 style="text-align:center">Los 5 dominios del examen</h2>
+    <div class="grid-2" style="margin-top:1.5rem">
+      {domains.map((d) => (
+        <a href={`/manual/${d.data.domain}`} class="card" style="text-decoration:none; color:inherit; display:block">
+          <span class="section-no">Dominio {d.data.domain} · {lessonsIn(d.data.domain)} lecciones</span>
+          <h3 style="margin:.2rem 0 .4rem; font-size:1.15rem">{d.data.title}</h3>
+          <p style="color:var(--ink-2); margin:0; font-size:.95rem">{d.data.summary}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section style="margin-top:3.5rem">
+    <div class="cta-card">
+      <h2 style="margin-top:0">¿Ya te sientes listo?</h2>
+      <p style="color:var(--ink-2); max-width:34rem; margin:.4rem auto 1.2rem">
+        Mide tu nivel con el simulador: 60 preguntas, cronometrado y con desglose por dominio al final.
+      </p>
+      <a class="btn accent" href="/exam">Iniciar simulacro</a>
     </div>
   </section>
 </ManualLayout>

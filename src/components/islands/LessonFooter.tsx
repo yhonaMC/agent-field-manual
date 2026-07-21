@@ -5,16 +5,13 @@ export default function LessonFooter({ lessonId, domain }: { lessonId: string; d
   const progress = useStore($progress);
   const read = progress.lessonsRead.includes(lessonId);
   return (
-    <div style={{ marginTop: "3rem", display: "flex", alignItems: "center", gap: "1rem" }}>
+    <div style={{ marginTop: "3rem", display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
       {read ? (
-        <span className="mono" style={{ color: "var(--stamp-red)", border: "2px solid var(--stamp-red)",
-          padding: ".2rem .6rem", transform: "rotate(-4deg)", fontSize: ".7rem", letterSpacing: ".18em" }}>
-          LOGGED
-        </span>
+        <span style={{ color: "var(--ok)", fontWeight: 600 }}>✓ Lección registrada</span>
       ) : (
-        <button className="btn" onClick={() => readLesson(lessonId)}>Log this chapter as read</button>
+        <button className="btn" onClick={() => readLesson(lessonId)}>Marcar lección como leída</button>
       )}
-      <a href={`/manual/${domain}`}>Back to § {domain}.0</a>
+      <a href={`/manual/${domain}`}>← Volver al dominio {domain}</a>
     </div>
   );
 }
