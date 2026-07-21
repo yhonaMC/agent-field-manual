@@ -1,0 +1,36 @@
+---
+// Framework-free theme boot + toggle wiring. Must be placed in <head>.
+// The first <script is:inline> runs before paint to avoid a flash of the wrong theme.
+---
+<script is:inline>
+  (function () {
+    var KEY = "agentprep-theme";
+    var stored = null;
+    try { stored = localStorage.getItem(KEY); } catch (e) {}
+    var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var theme = (stored === "light" || stored === "dark") ? stored : (prefersDark ? "dark" : "light");
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  })();
+</script>
+<script>
+  const KEY = "agentprep-theme";
+  function currentTheme() {
+    return document.documentElement.classList.contains("dark") ? "dark" : "light";
+  }
+  function applyTheme(theme: string) {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    try { localStorage.setItem(KEY, theme); } catch (e) {}
+    for (const btn of document.querySelectorAll<HTMLButtonElement>(".theme-toggle")) {
+      btn.textContent = theme === "dark" ? "☀️" : "🌙";
+      btn.setAttribute("aria-label", theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro");
+    }
+  }
+  function wire() {
+    applyTheme(currentTheme()); // sync button glyphs to the already-applied theme
+    for (const btn of document.querySelectorAll<HTMLButtonElement>(".theme-toggle")) {
+      btn.addEventListener("click", () => applyTheme(currentTheme() === "dark" ? "light" : "dark"));
+    }
+  }
+  document.addEventListener("astro:page-load", wire);
+  wire();
+</script>
