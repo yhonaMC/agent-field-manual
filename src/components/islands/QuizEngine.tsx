@@ -7,7 +7,7 @@ import { DRILL_PASS_THRESHOLD } from "../../lib/progress";
 interface Props { questions: Question[]; domain: number }
 
 export default function QuizEngine({ questions, domain }: Props) {
-  const [runIds, setRunIds] = useState<string[] | null>(null); // null = not started
+  const [runIds, setRunIds] = useState<string[] | null>(null); // null = sin empezar
   const [seed, setSeed] = useState(1);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
@@ -39,32 +39,32 @@ export default function QuizEngine({ questions, domain }: Props) {
   }
 
   if (!runIds) {
-    return <button className="btn" onClick={() => start(questions.map((x) => x.id))}>
-      Start drill · {questions.length} questions
+    return <button className="btn accent" onClick={() => start(questions.map((x) => x.id))}>
+      Empezar drill · {questions.length} preguntas
     </button>;
   }
 
   if (!q) {
-    // finished
+    // terminado
     return (
       <div className="rule-row">
-        <p className="mono" style={{ fontSize: "1.4rem" }}>
-          {correctCount}/{run.length || runIds.length} correct
+        <p style={{ fontFamily: "var(--font-prose)", fontSize: "1.6rem", fontWeight: 600 }}>
+          {correctCount}/{run.length || runIds.length} correctas
         </p>
         {isFullRun && (
           (correctCount / (run.length || runIds.length)) >= DRILL_PASS_THRESHOLD ? (
-            <p className="mono" style={{ color: "var(--ok)", fontWeight: 600 }}>DRILL PASSED — the next domain is now unlocked.</p>
+            <p style={{ color: "var(--ok)", fontWeight: 600 }}>Drill aprobado — el siguiente dominio queda desbloqueado.</p>
           ) : (
-            <p className="mono" style={{ color: "var(--stamp-red)" }}>Below {Math.round(DRILL_PASS_THRESHOLD * 100)}% — retake the full drill to unlock the next domain.</p>
+            <p style={{ color: "var(--stamp-red)" }}>Por debajo del {Math.round(DRILL_PASS_THRESHOLD * 100)}% — repite el drill completo para desbloquear el siguiente dominio.</p>
           )
         )}
         {missed.length > 0 && (
           <button className="btn" onClick={() => { setSeed((s) => s + 1); start(missed); }}>
-            Retry the {missed.length} missed
+            Reintentar las {missed.length} falladas
           </button>
         )}{" "}
         <button className="btn ghost" onClick={() => { setSeed((s) => s + 1); start(questions.map((x) => x.id)); }}>
-          Restart full drill
+          Reiniciar drill completo
         </button>
       </div>
     );
@@ -73,10 +73,10 @@ export default function QuizEngine({ questions, domain }: Props) {
   const revealed = selected !== null;
   return (
     <div>
-      <p className="mono" style={{ fontSize: ".72rem", letterSpacing: ".1em" }}>
-        ITEM {index + 1} / {run.length} · § {q.domain}.0
+      <p style={{ fontFamily: "var(--font-mono)", fontSize: ".75rem", letterSpacing: ".08em", color: "var(--ink-3)" }}>
+        PREGUNTA {index + 1} / {run.length} · Dominio {q.domain}
       </p>
-      <p style={{ fontSize: "1.05rem", maxWidth: "var(--measure)" }}>{q.stem}</p>
+      <p style={{ fontSize: "1.1rem", maxWidth: "var(--measure)" }}>{q.stem}</p>
       <ol style={{ listStyle: "lower-alpha", paddingLeft: "1.6rem", maxWidth: "var(--measure)" }}>
         {shuffled!.options.map((opt, pos) => {
           const isCorrect = revealed && pos === shuffled!.correctPosition;
@@ -108,7 +108,7 @@ export default function QuizEngine({ questions, domain }: Props) {
               if (index + 1 >= run.length && isFullRun) saveDrill(domain, correctCount, run.length);
               setIndex((i) => i + 1); setSelected(null);
             }}>
-            {index + 1 < run.length ? "Next item" : "Finish drill"}
+            {index + 1 < run.length ? "Siguiente" : "Terminar drill"}
           </button>
         </div>
       )}
