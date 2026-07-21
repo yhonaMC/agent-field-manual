@@ -4,10 +4,10 @@ import ExamSimulator from "../components/islands/ExamSimulator";
 import { finalPool } from "../lib/question-bank";
 const pool = finalPool();
 ---
-<ManualLayout title="Exam Simulator" description="A timed 60-question CCAF exam simulator with per-domain scoring." examRoom>
+<ManualLayout title="Simulador de examen" description="Simulador de examen cronometrado de 60 preguntas con desglose por dominio, igual al examen real de la certificación de Claude.">
   <section>
-    <span class="section-no">EXAMINATION ROOM</span>
-    <h1>Final Exam Simulator</h1>
+    <span class="section-no">Simulacro</span>
+    <h1>Simulador de examen</h1>
     <ExamSimulator client:load pool={pool} />
   </section>
 </ManualLayout>
