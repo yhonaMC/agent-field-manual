@@ -1,8 +1,8 @@
-# The Agent Field Manual
+# AgentPrep
 
-A free, open study manual for the Claude Certified Agent Fluency (CCAF) exam — styled as a 1970s technical field manual.
+Una guía de estudio gratuita y de código abierto para la certificación de agentes de Claude (CCAF). Interfaz en español, contenido de lecciones en inglés (como el examen real).
 
-**Live:** [https://agent-field-manual.vercel.app](https://agent-field-manual.vercel.app) *(update if domain changes)*
+**Demo:** [https://agent-field-manual.vercel.app](https://agent-field-manual.vercel.app) *(actualiza si cambia el dominio)*
 
 ## Features
 
@@ -17,9 +17,9 @@ A free, open study manual for the Claude Certified Agent Fluency (CCAF) exam —
 
 No accounts, no backend, no tracking. Everything lives in `localStorage`.
 
-## Design
+## Diseño
 
-The manual leans fully into a retro technical-document identity: cream paper backgrounds, navy ink typography, mil-spec `§`-numbered sections, and a dedicated dark "exam room" mode for timed runs. All styling is hand-built CSS — no UI component libraries, no CSS frameworks.
+Diseño editorial moderno: fondo claro cálido, tinta navy, acento naranja quemado, títulos en serif (Crimson Pro) y cuerpo en sans (Inter). Modo claro y oscuro con toggle, persistido en `localStorage` y sin flash al cargar. Todo el CSS está hecho a mano — sin librerías de componentes ni frameworks de CSS.
 
 ## Architecture
 
