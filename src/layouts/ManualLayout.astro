@@ -1,43 +1,41 @@
 ---
-import "@fontsource-variable/crimson-pro";
-import "@fontsource/ibm-plex-mono/400.css";
-import "@fontsource/ibm-plex-mono/600.css";
 import "../styles/global.css";
+import ThemeScript from "../components/ThemeScript.astro";
 
 interface Props {
   title: string;
   description: string;
-  examRoom?: boolean;
 }
-const { title, description, examRoom = false } = Astro.props;
+const { title, description } = Astro.props;
 ---
-<html lang="en" class={examRoom ? "exam-room" : ""}>
+<html lang="es">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <title>{title} · The Agent Field Manual</title>
-    <meta property="og:title" content={`${title} · The Agent Field Manual`} />
+    <title>{title} · AgentPrep</title>
+    <meta property="og:title" content={`${title} · AgentPrep`} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <ThemeScript />
   </head>
   <body>
     <div class="sheet">
       <header class="doc-header">
-        <a href="/" style="text-decoration:none">AFM · THE AGENT FIELD MANUAL</a>
+        <a href="/" class="brand">AgentPrep</a>
         <nav>
-          <a href="/#contents">Contents</a>
-          <a href="/exam">Exam</a>
-          <a href="/review">Review</a>
-          <a href="/progress">Progress</a>
+          <a href="/#temario">Temario</a>
+          <a href="/exam">Simulacro</a>
+          <a href="/review">Repaso</a>
+          <a href="/progress">Progreso</a>
+          <button class="theme-toggle" type="button" aria-label="Cambiar tema">🌙</button>
         </nav>
       </header>
       <slot />
       <footer class="doc-footer">
-        <span>DOC. AFM-CCAF-2026 · REV A</span>
-        <span>UNCONTROLLED WHEN PRINTED</span>
-        <span>© {new Date().getFullYear()} YHONAIKER MONCADA</span>
+        <span>AgentPrep — guía no oficial para la certificación de Claude</span>
+        <span>Gratis · Sin cuenta · Código abierto</span>
       </footer>
     </div>
   </body>
