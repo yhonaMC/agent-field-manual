@@ -2,6 +2,8 @@ import { useRef } from "react";
 import { useStore } from "@nanostores/react";
 import { $progress, exportProgress, importProgress, resetProgress } from "../../stores/progress-store";
 import { dueQuestionIds } from "../../lib/progress";
+import { t } from "../../lib/i18n";
+import { useLang } from "./useLang";
 import ProgressRing from "./ProgressRing";
 
 interface Props {
@@ -11,6 +13,7 @@ interface Props {
 
 export default function ProgressPanel({ lessonMeta, questionMeta }: Props) {
   const progress = useStore($progress);
+  const lang = useLang();
   const fileRef = useRef<HTMLInputElement>(null);
   const due = dueQuestionIds(progress, new Date()).length;
 
@@ -18,7 +21,7 @@ export default function ProgressPanel({ lessonMeta, questionMeta }: Props) {
     const blob = new Blob([exportProgress()], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `agentprep-progreso-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `agentprep-progress-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(a.href);
   }
@@ -26,9 +29,9 @@ export default function ProgressPanel({ lessonMeta, questionMeta }: Props) {
   async function upload(file: File) {
     try {
       importProgress(await file.text());
-      alert("Progreso importado.");
+      alert(t(lang, "progress.imported"));
     } catch {
-      alert("Ese archivo no es una exportación válida de AgentPrep.");
+      alert(t(lang, "progress.badFile"));
     }
   }
 
@@ -38,13 +41,13 @@ export default function ProgressPanel({ lessonMeta, questionMeta }: Props) {
         {[1, 2, 3, 4, 5].map((d) => {
           const qs = questionMeta.filter((q) => q.domain === d);
           const mastered = qs.filter((q) => progress.answers[q.id]?.lastCorrect).length;
-          return <ProgressRing key={d} value={qs.length ? (mastered / qs.length) * 100 : 0} label={`Dominio ${d}`} />;
+          return <ProgressRing key={d} value={qs.length ? (mastered / qs.length) * 100 : 0} label={`${t(lang, "common.domain")} ${d}`} />;
         })}
       </div>
 
-      <p>{due} tarjeta(s) pendiente(s) en el <a href="/review">mazo de repaso</a>.</p>
+      <p>{due} {t(lang, "progress.due")} <a href="/review">{t(lang, "progress.reviewDeck")}</a>.</p>
 
-      <h2>Lecciones registradas</h2>
+      <h2>{t(lang, "progress.lessonsLogged")}</h2>
       <ul style={{ listStyle: "none", padding: 0 }}>
         {[...lessonMeta].sort((a, b) => a.section.localeCompare(b.section)).map((l) => (
           <li key={l.id} className="rule-row" style={{ fontSize: ".92rem" }}>
@@ -53,12 +56,12 @@ export default function ProgressPanel({ lessonMeta, questionMeta }: Props) {
         ))}
       </ul>
 
-      <h2>Historial de exámenes</h2>
+      <h2>{t(lang, "progress.examHistory")}</h2>
       {progress.examHistory.length === 0 ? (
-        <p>Aún no has hecho exámenes. <a href="/exam">Prueba el simulador.</a></p>
+        <p>{t(lang, "progress.noExams")} <a href="/exam">{t(lang, "progress.takeSim")}</a></p>
       ) : (
         <table style={{ borderCollapse: "collapse", fontSize: ".92rem" }}>
-          <thead><tr><th style={{ textAlign: "left", paddingRight: "2rem" }}>FECHA</th><th>PUNTAJE</th></tr></thead>
+          <thead><tr><th style={{ textAlign: "left", paddingRight: "2rem" }}>{t(lang, "progress.date")}</th><th>{t(lang, "progress.score")}</th></tr></thead>
           <tbody>
             {progress.examHistory.map((e, i) => (
               <tr key={i}><td style={{ paddingRight: "2rem" }}>{e.date}</td><td>{e.score}/{e.total}</td></tr>
@@ -67,16 +70,16 @@ export default function ProgressPanel({ lessonMeta, questionMeta }: Props) {
         </table>
       )}
 
-      <h2>Datos</h2>
+      <h2>{t(lang, "progress.data")}</h2>
       <div style={{ display: "flex", gap: ".6rem", flexWrap: "wrap" }}>
-        <button className="btn" onClick={download}>Exportar progreso</button>
-        <button className="btn ghost" onClick={() => fileRef.current?.click()}>Importar progreso</button>
-        <button className="btn ghost" onClick={() => { if (confirm("¿Borrar todo el progreso local?")) resetProgress(); }}>Reiniciar</button>
+        <button className="btn" onClick={download}>{t(lang, "progress.export")}</button>
+        <button className="btn ghost" onClick={() => fileRef.current?.click()}>{t(lang, "progress.import")}</button>
+        <button className="btn ghost" onClick={() => { if (confirm(t(lang, "progress.confirmReset"))) resetProgress(); }}>{t(lang, "progress.reset")}</button>
         <input ref={fileRef} type="file" accept="application/json" hidden
           onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
       </div>
       <p style={{ fontSize: ".92rem", maxWidth: "var(--measure)", color: "var(--ink-2)" }}>
-        Tu progreso vive solo en este navegador. Expórtalo antes de cambiar de dispositivo.
+        {t(lang, "progress.localNote")}
       </p>
     </div>
   );

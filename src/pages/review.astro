@@ -4,9 +4,9 @@ import ReviewDeck from "../components/islands/ReviewDeck";
 ---
 <ManualLayout title="Repaso" description="Repaso espaciado de cada pregunta que has fallado, con recordatorios a 1, 3, 7, 16 y 35 días.">
   <div class="hero" style="padding:clamp(2.4rem,5vw,3.6rem) 0; border-bottom:var(--heavy)">
-    <span class="eyebrow">Repaso espaciado · 1·3·7·16·35 días</span>
-    <h1 style="font-size:clamp(2.2rem,6vw,4rem); margin-top:1rem">Mazo de repaso</h1>
-    <p class="lead">Cada pregunta que fallas en cualquier parte del manual se programa aquí a 1, 3, 7, 16 y luego 35 días. Vacía la cola cada día.</p>
+    <span class="eyebrow" data-i18n="review.eyebrow">Spaced review · 1·3·7·16·35 days</span>
+    <h1 style="font-size:clamp(2.2rem,6vw,4rem); margin-top:1rem" data-i18n="review.title">Review deck</h1>
+    <p class="lead" style="text-align:left; hyphens:none" data-i18n="review.lead">Every question you miss anywhere in the manual is scheduled here at 1, 3, 7, 16 and then 35 days. Clear the queue daily.</p>
   </div>
   <section>
     <ReviewDeck client:load />

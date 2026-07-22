@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import ThemeScript from "../components/ThemeScript.astro";
+import { dict, LANG_KEY } from "../lib/i18n";
 
 interface Props {
   title: string;
@@ -8,7 +9,7 @@ interface Props {
 }
 const { title, description } = Astro.props;
 ---
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -25,19 +26,53 @@ const { title, description } = Astro.props;
       <header class="doc-header">
         <a href="/" class="brand">Agent<b>Prep</b></a>
         <nav>
-          <a href="/#temario">Temario</a>
-          <a href="/exam">Simulacro</a>
-          <a href="/review">Repaso</a>
-          <a href="/progress">Progreso</a>
+          <a href="/#syllabus" data-i18n="nav.syllabus">Syllabus</a>
+          <a href="/exam" data-i18n="nav.exam">Mock exam</a>
+          <a href="/review" data-i18n="nav.review">Review</a>
+          <a href="/progress" data-i18n="nav.progress">Progress</a>
           <span class="chip">CCAF · 2026</span>
-          <button class="theme-toggle" type="button" aria-label="Cambiar tema">🌙</button>
+          <button class="lang-toggle" type="button" aria-label="Switch language">ES</button>
+          <button class="theme-toggle" type="button" aria-label="Switch theme"></button>
         </nav>
       </header>
       <slot />
       <footer class="doc-footer">
-        <span>AgentPrep — guía no oficial para la certificación de Claude</span>
-        <span>Gratis · Sin cuenta · Código abierto</span>
+        <span data-i18n="footer.right">Free · No account · Open source</span>
       </footer>
     </div>
+
+    <script is:inline define:vars={{ I18N: dict, LANG_KEY }}>
+      (function () {
+        function getLang() {
+          try { return localStorage.getItem(LANG_KEY) === "es" ? "es" : "en"; } catch (e) { return "en"; }
+        }
+        function apply(lang) {
+          var table = I18N[lang] || I18N.en;
+          document.documentElement.setAttribute("lang", lang);
+          document.querySelectorAll("[data-i18n]").forEach(function (el) {
+            var k = el.getAttribute("data-i18n");
+            var v = table[k] != null ? table[k] : (I18N.en[k] != null ? I18N.en[k] : null);
+            if (v != null) el.textContent = v;
+          });
+          document.querySelectorAll(".lang-toggle").forEach(function (b) {
+            b.textContent = lang === "en" ? "ES" : "EN";
+            b.setAttribute("aria-label", lang === "en" ? "Cambiar a español" : "Switch to English");
+          });
+        }
+        function wire() {
+          apply(getLang());
+          document.querySelectorAll(".lang-toggle").forEach(function (b) {
+            b.addEventListener("click", function () {
+              var next = getLang() === "en" ? "es" : "en";
+              try { localStorage.setItem(LANG_KEY, next); } catch (e) {}
+              apply(next);
+              window.dispatchEvent(new CustomEvent("agentprep-langchange", { detail: next }));
+            });
+          });
+        }
+        document.addEventListener("astro:page-load", wire);
+        wire();
+      })();
+    </script>
   </body>
 </html>

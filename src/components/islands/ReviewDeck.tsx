@@ -4,9 +4,12 @@ import { $progress, answer } from "../../stores/progress-store";
 import { dueQuestionIds } from "../../lib/progress";
 import { questionById } from "../../lib/question-bank";
 import { mulberry32, shuffleOptions } from "../../lib/rng";
+import { t } from "../../lib/i18n";
+import { useLang } from "./useLang";
 
 export default function ReviewDeck() {
   const progress = useStore($progress);
+  const lang = useLang();
   const [sessionDone, setSessionDone] = useState<string[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
 
@@ -23,8 +26,8 @@ export default function ReviewDeck() {
 
   if (!q || !shuffled) {
     return <p style={{ fontSize: "1.1rem" }}>
-      {sessionDone.length > 0 ? `Cola vacía — ${sessionDone.length} tarjeta(s) repasada(s). ` : ""}
-      Nada pendiente. Vuelve mañana.
+      {sessionDone.length > 0 ? `${t(lang, "review.cleared")} ${sessionDone.length} ${t(lang, "review.reviewed")} ` : ""}
+      {t(lang, "review.nothing")}
     </p>;
   }
 
@@ -38,7 +41,7 @@ export default function ReviewDeck() {
   return (
     <div>
       <p style={{ fontFamily: "var(--font-mono)", fontSize: ".75rem", letterSpacing: ".08em", color: "var(--ink-3)" }}>
-        {due.length} TARJETA(S) PENDIENTE(S) · Dominio {q.domain}
+        {due.length} {t(lang, "review.due")} · {t(lang, "common.domain")} {q.domain}
       </p>
       <p style={{ fontSize: "1.1rem", maxWidth: "var(--measure)" }}>{q.stem}</p>
       <ol style={{ listStyle: "lower-alpha", paddingLeft: "1.6rem", maxWidth: "var(--measure)" }}>
@@ -50,7 +53,7 @@ export default function ReviewDeck() {
               <button onClick={() => choose(pos)} disabled={revealed}
                 style={{ font: "inherit", textAlign: "left", width: "100%", border: "none", padding: ".15rem .3rem",
                   cursor: revealed ? "default" : "pointer",
-                  background: isCorrect ? "var(--accent-soft)" : "transparent",
+                  background: isCorrect ? "var(--ok-soft)" : "transparent",
                   color: isWrongPick ? "var(--stamp-red)" : "inherit" }}>
                 {opt} {isCorrect ? "✓" : isWrongPick ? "✗" : ""}
               </button>
@@ -63,7 +66,7 @@ export default function ReviewDeck() {
           <p style={{ margin: 0 }}>{q.explanation}</p>
           <button className="btn" style={{ marginTop: ".8rem" }}
             onClick={() => { setSessionDone((d) => [...d, q.id]); setSelected(null); }}>
-            Siguiente tarjeta
+            {t(lang, "review.nextCard")}
           </button>
         </div>
       )}

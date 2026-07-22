@@ -10,8 +10,8 @@ const questionMeta = allQuestions.map((q) => ({ id: q.id, domain: q.domain }));
 ---
 <ManualLayout title="Progreso" description="Tu registro de estudio: dominio por dominio, historial de exámenes y cola de repaso.">
   <div class="hero" style="padding:clamp(2.4rem,5vw,3.6rem) 0; border-bottom:var(--heavy)">
-    <span class="eyebrow">Tu registro de estudio</span>
-    <h1 style="font-size:clamp(2.2rem,6vw,4rem); margin-top:1rem">Progreso</h1>
+    <span class="eyebrow" data-i18n="progress.eyebrow">Your study log</span>
+    <h1 style="font-size:clamp(2.2rem,6vw,4rem); margin-top:1rem" data-i18n="progress.title">Progress</h1>
   </div>
   <section>
     <ProgressPanel client:load lessonMeta={lessonMeta} questionMeta={questionMeta} />
