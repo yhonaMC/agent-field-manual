@@ -10,9 +10,13 @@ const { entry } = Astro.props;
 const { Content } = await render(entry);
 ---
 <ManualLayout title={entry.data.title} description={entry.data.summary}>
-  <article class="prose">
-    <span class="section-no">Escenario {entry.data.order}</span>
-    <h1>{entry.data.title}</h1>
-    <Content />
-  </article>
+  <div class="hero" style="padding:clamp(2.4rem,5vw,3.6rem) 0; border-bottom:var(--heavy)">
+    <span class="eyebrow">Escenario {String(entry.data.order).padStart(2, "0")}</span>
+    <h1 style="font-size:clamp(2rem,5vw,3.4rem); max-width:24ch; margin-top:1rem">{entry.data.title}</h1>
+  </div>
+  <section>
+    <article class="prose">
+      <Content />
+    </article>
+  </section>
 </ManualLayout>
