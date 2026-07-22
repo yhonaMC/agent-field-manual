@@ -17,24 +17,37 @@ const lessons = (await getCollection("lessons", (l) => l.data.domain === entry.d
 const questions = practiceQuestions(entry.data.domain);
 ---
 <ManualLayout title={entry.data.title} description={entry.data.summary}>
-  <article class="prose">
-    <span class="section-no">Dominio {entry.data.domain}</span>
-    <h1>{entry.data.title}</h1>
-    <DomainGauge client:load domain={entry.data.domain} questionIds={questions.map((q) => q.id)} />
-    <Content />
-    <h2>Objetivos oficiales del examen</h2>
-    <ul>{entry.data.objectives.map((o) => <li>{o}</li>)}</ul>
-    <h2>Lecciones</h2>
-    <ul style="list-style:none; padding:0">
-      {lessons.map((l) => (
-        <li class="rule-row">
-          <a href={`/manual/${l.data.domain}/${l.id.split("/")[1]}`}>{l.data.title}</a>
-        </li>
+  <div class="hero" style="border-bottom:var(--heavy)">
+    <div class="ghostnum" aria-hidden="true">{String(entry.data.domain).padStart(2, "0")}</div>
+    <span class="eyebrow">Dominio {String(entry.data.domain).padStart(2, "0")} · CCAF</span>
+    <h1 style="max-width:20ch">{entry.data.title}</h1>
+    <p class="lead">{entry.data.summary}</p>
+    <div style="margin-top:2rem"><DomainGauge client:load domain={entry.data.domain} questionIds={questions.map((q) => q.id)} /></div>
+  </div>
+
+  <section>
+    <article class="prose">
+      <Content />
+      <h2>Objetivos oficiales del examen</h2>
+      <ul>{entry.data.objectives.map((o) => <li>{o}</li>)}</ul>
+    </article>
+  </section>
+
+  <section>
+    <div class="sechead"><h2>Lecciones</h2><span class="mono">{lessons.length} capítulos</span></div>
+    <div class="idx">
+      {lessons.map((l, i) => (
+        <a class="row" href={`/manual/${l.data.domain}/${l.id.split("/")[1]}`} style="grid-template-columns:5rem 1fr 9rem">
+          <div class="rnum">{String(i + 1).padStart(2, "0")}</div>
+          <div class="rbody"><div class="rt">{l.data.title}</div></div>
+          <div class="rstate"><span class="go">Leer →</span></div>
+        </a>
       ))}
-    </ul>
-  </article>
-  <section style="margin-top:4rem">
-    <h2><span class="section-no">Drill</span>Práctica — {questions.length} preguntas</h2>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead"><h2>Práctica del dominio</h2><span class="mono">Drill · {questions.length} preguntas</span></div>
     <DrillGate client:visible domain={entry.data.domain} questions={questions} />
   </section>
 </ManualLayout>

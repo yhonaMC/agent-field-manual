@@ -1,76 +1,66 @@
 ---
 import { getCollection } from "astro:content";
 import ManualLayout from "../layouts/ManualLayout.astro";
+import DomainIndex, { type DomainRow } from "../components/islands/DomainIndex";
+import { practiceQuestions } from "../lib/question-bank";
 
 const domains = (await getCollection("domains")).sort((a, b) => a.data.domain - b.data.domain);
 const lessons = await getCollection("lessons");
-const lessonsIn = (d: number) => lessons.filter((l) => l.data.domain === d).length;
+
+const rows: DomainRow[] = domains.map((d) => ({
+  domain: d.data.domain,
+  title: d.data.title,
+  summary: d.data.summary,
+  lessonCount: lessons.filter((l) => l.data.domain === d.data.domain).length,
+  questionIds: practiceQuestions(d.data.domain).map((q) => q.id),
+}));
 ---
 <ManualLayout
   title="Estudia para la certificación de Claude"
-  description="Guía de estudio gratuita para la certificación de agentes de Claude: 18 lecciones, más de 190 preguntas de práctica y un simulador de examen de 60 preguntas. Sin cuenta.">
+  description="Manual de campo para la certificación de agentes de Claude (CCAF): 18 lecciones, más de 190 preguntas y un simulador de examen de 60 preguntas. Sin cuenta.">
 
-  <section class="hero">
-    <span class="badge">Guía de estudio gratuita · Certificación de Claude</span>
-    <h1>Todo lo que necesitas para pasar la certificación de Claude</h1>
+  <div class="hero">
+    <div class="ghostnum" aria-hidden="true">A</div>
+    <span class="eyebrow">Preparación · Certificación de Claude</span>
+    <h1>Domina el examen de <span class="u">agentes de Claude.</span></h1>
     <p class="lead">
-      Lecciones estructuradas, práctica por dominio y un simulador de examen cronometrado —
-      igual al examen real de Anthropic. Sin cuenta: tu progreso queda en tu navegador.
+      Un manual de campo para la certificación CCAF: 18 lecciones, 190+ preguntas y un
+      simulacro cronometrado idéntico al examen real. Sin cuenta — tu progreso vive en tu navegador.
     </p>
     <div class="actions">
-      <a class="btn" href="/manual/1">Empezar a estudiar</a>
-      <a class="btn ghost" href="/exam">Probar el simulacro →</a>
+      <a class="btn" href="/manual/1">Empezar el temario</a>
+      <a class="btn ghost" href="/exam">Ir al simulacro</a>
+    </div>
+  </div>
+
+  <div class="strip">
+    <div class="cell"><div class="n">05</div><div class="k">dominios oficiales</div></div>
+    <div class="cell"><div class="n">18</div><div class="k">lecciones guiadas</div></div>
+    <div class="cell"><div class="n">190+</div><div class="k">preguntas con solución</div></div>
+    <div class="cell"><div class="n">60</div><div class="k">preguntas · simulacro</div></div>
+  </div>
+
+  <section id="temario" style="scroll-margin-top:1rem">
+    <div class="sechead"><h2>El temario</h2><span class="mono">Índice · 5 dominios</span></div>
+    <DomainIndex client:load rows={rows} />
+  </section>
+
+  <section>
+    <div class="sechead"><h2>Cómo se estudia</h2><span class="mono">Método · 3 fases</span></div>
+    <div class="tracks">
+      <div class="track"><div class="step">FASE 01</div><h3>Lee el manual</h3><p>18 lecciones en inglés — como el examen real — organizadas por dominio oficial.</p></div>
+      <div class="track"><div class="step">FASE 02</div><h3>Practica y desbloquea</h3><p>Drills con solución explicada. Aprueba un dominio al 70% y se abre el siguiente.</p></div>
+      <div class="track"><div class="step">FASE 03</div><h3>Presenta el simulacro</h3><p>60 preguntas cronometradas con desglose por dominio, igual que el día del examen.</p></div>
     </div>
   </section>
 
-  <section class="stats" aria-label="Resumen del contenido">
-    <div class="stat"><b>5</b><span>dominios</span></div>
-    <div class="stat"><b>18</b><span>lecciones</span></div>
-    <div class="stat"><b>190+</b><span>preguntas</span></div>
-    <div class="stat"><b>60</b><span>preguntas en el simulacro</span></div>
-  </section>
-
-  <section style="margin-top:3.5rem">
-    <h2 style="text-align:center">Cómo funciona</h2>
-    <div class="grid-3" style="margin-top:1.5rem">
+  <section>
+    <div class="exam">
       <div>
-        <div class="step-num">1</div>
-        <h3 style="margin:.6rem 0 .3rem; font-size:1.1rem">Estudia las lecciones</h3>
-        <p style="color:var(--ink-2); margin:0">18 lecciones en inglés (como el examen real), organizadas por dominio oficial.</p>
+        <h2>¿Listo para el simulacro?</h2>
+        <p>60 preguntas, 90 minutos, sin feedback hasta enviar. Mide dónde estás antes del examen real.</p>
       </div>
-      <div>
-        <div class="step-num">2</div>
-        <h3 style="margin:.6rem 0 .3rem; font-size:1.1rem">Practica cada dominio</h3>
-        <p style="color:var(--ink-2); margin:0">Drills con explicaciones. Aprueba con 70% para desbloquear el siguiente dominio.</p>
-      </div>
-      <div>
-        <div class="step-num">3</div>
-        <h3 style="margin:.6rem 0 .3rem; font-size:1.1rem">Haz el simulacro</h3>
-        <p style="color:var(--ink-2); margin:0">60 preguntas cronometradas con resultados por dominio, como el examen de verdad.</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="temario" style="margin-top:3.5rem; scroll-margin-top:1rem">
-    <h2 style="text-align:center">Los 5 dominios del examen</h2>
-    <div class="grid-2" style="margin-top:1.5rem">
-      {domains.map((d) => (
-        <a href={`/manual/${d.data.domain}`} class="card" style="text-decoration:none; color:inherit; display:block">
-          <span class="section-no">Dominio {d.data.domain} · {lessonsIn(d.data.domain)} lecciones</span>
-          <h3 style="margin:.2rem 0 .4rem; font-size:1.15rem">{d.data.title}</h3>
-          <p style="color:var(--ink-2); margin:0; font-size:.95rem">{d.data.summary}</p>
-        </a>
-      ))}
-    </div>
-  </section>
-
-  <section style="margin-top:3.5rem">
-    <div class="cta-card">
-      <h2 style="margin-top:0">¿Ya te sientes listo?</h2>
-      <p style="color:var(--ink-2); max-width:34rem; margin:.4rem auto 1.2rem">
-        Mide tu nivel con el simulador: 60 preguntas, cronometrado y con desglose por dominio al final.
-      </p>
-      <a class="btn accent" href="/exam">Iniciar simulacro</a>
+      <a href="/exam" class="btn accent">Iniciar simulacro →</a>
     </div>
   </section>
 </ManualLayout>
