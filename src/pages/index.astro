@@ -16,51 +16,51 @@ const rows: DomainRow[] = domains.map((d) => ({
 }));
 ---
 <ManualLayout
-  title="Estudia para la certificación de Claude"
-  description="Manual de campo para la certificación de agentes de Claude (CCAF): 18 lecciones, más de 190 preguntas y un simulador de examen de 60 preguntas. Sin cuenta.">
+  title="Study for the Claude certification"
+  description="A free field manual for the Claude agent certification (CCAF): 18 lessons, 190+ practice questions and a 60-question mock exam. No account.">
 
   <div class="hero">
     <div class="ghostnum" aria-hidden="true">A</div>
-    <span class="eyebrow">Preparación · Certificación de Claude</span>
-    <h1>Domina el examen de <span class="u">agentes de Claude.</span></h1>
-    <p class="lead">
-      Un manual de campo para la certificación CCAF: 18 lecciones, 190+ preguntas y un
-      simulacro cronometrado idéntico al examen real. Sin cuenta — tu progreso vive en tu navegador.
+    <span class="eyebrow" data-i18n="home.eyebrow">Prep · Claude certification</span>
+    <h1><span data-i18n="home.titleA">Master the Claude</span> <span class="u" data-i18n="home.titleB">agents exam.</span></h1>
+    <p class="lead" data-i18n="home.lead">
+      A field manual for the CCAF certification: 18 lessons, 190+ questions and a timed mock exam
+      identical to the real thing. No account — your progress lives in your browser.
     </p>
     <div class="actions">
-      <a class="btn" href="/manual/1">Empezar el temario</a>
-      <a class="btn ghost" href="/exam">Ir al simulacro</a>
+      <a class="btn" href="/manual/1" data-i18n="home.ctaStart">Start studying</a>
+      <a class="btn ghost" href="/exam" data-i18n="home.ctaExam">Go to the mock exam →</a>
     </div>
   </div>
 
   <div class="strip">
-    <div class="cell"><div class="n">05</div><div class="k">dominios oficiales</div></div>
-    <div class="cell"><div class="n">18</div><div class="k">lecciones guiadas</div></div>
-    <div class="cell"><div class="n">190+</div><div class="k">preguntas con solución</div></div>
-    <div class="cell"><div class="n">60</div><div class="k">preguntas · simulacro</div></div>
+    <div class="cell"><div class="n">05</div><div class="k" data-i18n="home.statDomains">official domains</div></div>
+    <div class="cell"><div class="n">18</div><div class="k" data-i18n="home.statLessons">guided lessons</div></div>
+    <div class="cell"><div class="n">190+</div><div class="k" data-i18n="home.statQuestions">questions with answers</div></div>
+    <div class="cell"><div class="n">60</div><div class="k" data-i18n="home.statExam">questions · mock exam</div></div>
   </div>
 
-  <section id="temario" style="scroll-margin-top:1rem">
-    <div class="sechead"><h2>El temario</h2><span class="mono">Índice · 5 dominios</span></div>
+  <section id="syllabus" style="scroll-margin-top:1rem">
+    <div class="sechead"><h2 data-i18n="home.syllabus">The syllabus</h2><span class="mono" data-i18n="home.syllabusMeta">Index · 5 domains</span></div>
     <DomainIndex client:load rows={rows} />
   </section>
 
   <section>
-    <div class="sechead"><h2>Cómo se estudia</h2><span class="mono">Método · 3 fases</span></div>
+    <div class="sechead"><h2 data-i18n="home.how">How it works</h2><span class="mono" data-i18n="home.howMeta">Method · 3 phases</span></div>
     <div class="tracks">
-      <div class="track"><div class="step">FASE 01</div><h3>Lee el manual</h3><p>18 lecciones en inglés — como el examen real — organizadas por dominio oficial.</p></div>
-      <div class="track"><div class="step">FASE 02</div><h3>Practica y desbloquea</h3><p>Drills con solución explicada. Aprueba un dominio al 70% y se abre el siguiente.</p></div>
-      <div class="track"><div class="step">FASE 03</div><h3>Presenta el simulacro</h3><p>60 preguntas cronometradas con desglose por dominio, igual que el día del examen.</p></div>
+      <div class="track"><div class="step" data-i18n="home.phase1">PHASE 01</div><h3 data-i18n="home.p1title">Read the manual</h3><p data-i18n="home.p1desc">18 lessons in English — like the real exam — organized by official domain.</p></div>
+      <div class="track"><div class="step" data-i18n="home.phase2">PHASE 02</div><h3 data-i18n="home.p2title">Practice &amp; unlock</h3><p data-i18n="home.p2desc">Drills with explained answers. Pass a domain at 70% and the next one opens.</p></div>
+      <div class="track"><div class="step" data-i18n="home.phase3">PHASE 03</div><h3 data-i18n="home.p3title">Take the mock exam</h3><p data-i18n="home.p3desc">60 timed questions with a per-domain breakdown, just like exam day.</p></div>
     </div>
   </section>
 
   <section>
     <div class="exam">
       <div>
-        <h2>¿Listo para el simulacro?</h2>
-        <p>60 preguntas, 90 minutos, sin feedback hasta enviar. Mide dónde estás antes del examen real.</p>
+        <h2 data-i18n="home.examTitle">Ready for the mock exam?</h2>
+        <p data-i18n="home.examText">60 questions, 90 minutes, no feedback until you submit. Measure where you stand before the real exam.</p>
       </div>
-      <a href="/exam" class="btn accent">Iniciar simulacro →</a>
+      <a href="/exam" class="btn accent" data-i18n="home.examBtn">Start the mock exam →</a>
     </div>
   </section>
 </ManualLayout>

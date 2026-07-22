@@ -3,34 +3,35 @@
   --paper: #e7e9e3;         /* page background */
   --paper-deep: #eef0ea;    /* insets, subtle fills */
   --surface: #f4f5f1;       /* panels */
-  --ink: #15171b;           /* primary text (cool near-black) */
-  --ink-2: #5c615c;         /* secondary text */
-  --ink-3: #8b8f88;         /* tertiary/label text */
-  --border: #c9ccc3;        /* hairlines */
-  --grid-line: #d4d7ce;     /* background grid */
+  --ink: #191712;           /* primary text (warm near-black to pair with the serif) */
+  --ink-2: #5f5c54;         /* secondary text */
+  --ink-3: #8d8a80;         /* tertiary/label text */
+  --border: #cbc9bf;        /* hairlines */
+  --grid-line: #d6d4c9;     /* background grid */
 
   /* legacy aliases kept so island inline styles keep working */
-  --ink-soft: #8b8f8880;
-  --ink-faint: #c9ccc3;
+  --ink-soft: #8d8a8080;
+  --ink-faint: #cbc9bf;
 
   /* accents */
-  --accent: #1f34d6;        /* electric cobalt — the one bold move */
-  --accent-soft: #1f34d618; /* tint behind correct answers */
-  --badge-bg: #dfe2f7;
-  --badge-ink: #1f34d6;
-  --ok: #2f7d55;            /* progress green */
-  --stamp-red: #cf3b2d;     /* errors / wrong answers */
-  --panel-glow: #1f34d6;    /* legacy exam-room accent → now the accent */
+  --accent: #8a2c4d;        /* mulberry / wine — the one bold move */
+  --accent-soft: #8a2c4d14; /* tint behind accented UI */
+  --badge-bg: #efdfe6;
+  --badge-ink: #8a2c4d;
+  --ok: #2f7d55;            /* success / progress green */
+  --ok-soft: #2f7d5518;    /* tint behind correct answers */
+  --stamp-red: #c4442b;     /* errors / wrong answers (orange-red, distinct from mulberry) */
+  --panel-glow: #8a2c4d;    /* legacy exam-room accent → now the accent */
 
   /* type */
   --font-sans: "Hanken Grotesk Variable", system-ui, sans-serif;
-  --font-prose: "Bricolage Grotesque Variable", Georgia, serif;
-  --font-display: "Bricolage Grotesque Variable", Georgia, serif;
+  --font-prose: "Fraunces Variable", Georgia, serif;
+  --font-display: "Fraunces Variable", Georgia, serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
   /* metrics */
   --measure: 68ch;
-  --radius: 0px;            /* sharp editorial corners */
+  --radius: 0px;            /* sharp editorial corners by default */
   --radius-sm: 0px;
   --rule: 1px solid var(--border);
   --heavy: 1.5px solid var(--ink);
@@ -38,24 +39,25 @@
 }
 
 html.dark {
-  --paper: #101319;
-  --paper-deep: #1b202a;
-  --surface: #171b22;
-  --ink: #e7e9e3;
-  --ink-2: #9aa09a;
-  --ink-3: #6f756f;
-  --border: #2a2f38;
-  --grid-line: #1e232c;
+  --paper: #14130f;
+  --paper-deep: #1d1b16;
+  --surface: #1b1a15;
+  --ink: #ece8df;
+  --ink-2: #a09c90;
+  --ink-3: #74716a;
+  --border: #2c2a24;
+  --grid-line: #201e19;
 
-  --ink-soft: #9aa09a66;
-  --ink-faint: #2a2f38;
+  --ink-soft: #a09c9066;
+  --ink-faint: #2c2a24;
 
-  --accent: #7183ff;
-  --accent-soft: #7183ff22;
-  --badge-bg: #1c2233;
-  --badge-ink: #9aa8ff;
+  --accent: #de8aa6;
+  --accent-soft: #de8aa622;
+  --badge-bg: #2a1c22;
+  --badge-ink: #e79bb4;
   --ok: #4fae7e;
-  --stamp-red: #e0736a;
-  --panel-glow: #7183ff;
+  --ok-soft: #4fae7e22;
+  --stamp-red: #e0765f;
+  --panel-glow: #de8aa6;
   color-scheme: dark;
 }

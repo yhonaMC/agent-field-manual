@@ -1,5 +1,5 @@
 @import "./tokens.css";
-@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/fraunces";
 @import "@fontsource-variable/hanken-grotesk";
 @import "@fontsource/ibm-plex-mono/400.css";
 @import "@fontsource/ibm-plex-mono/500.css";
@@ -27,7 +27,7 @@ body {
   background-size: 100% 3.2rem, 4rem 100%;
 }
 
-h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; line-height: 1.05; letter-spacing: -0.02em; }
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 620; line-height: 1.03; letter-spacing: -0.015em; font-optical-sizing: auto; text-align: left; }
 /* default vertical rhythm for headings in flow (islands, panels) */
 section h2, section h3 { margin-top: 1.8em; margin-bottom: .5em; }
 .hero h1, .sechead h2, .track h3, .exam h2, .prose h2:first-child, section > .sechead h2 { margin-top: 0; }
@@ -59,12 +59,19 @@ pre code { background: none; padding: 0; }
 .doc-header nav a:hover { color: var(--accent); text-decoration: none; }
 .doc-header .chip { font-family: var(--font-mono); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; border: 1.5px solid var(--ink); padding: .3rem .55rem; color: var(--ink); }
 
-.theme-toggle {
+.theme-toggle, .lang-toggle {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 34px; height: 32px; border: 1.5px solid var(--ink); background: transparent;
-  cursor: pointer; font-size: .95rem; line-height: 1; padding: 0; color: var(--ink);
+  height: 32px; border: 1.5px solid var(--ink); background: transparent;
+  cursor: pointer; line-height: 1; padding: 0; color: var(--ink);
 }
-.theme-toggle:hover { background: var(--ink); }
+.theme-toggle { width: 34px; }
+.theme-toggle:hover { background: var(--ink); color: var(--paper); }
+.theme-toggle svg { display: block; }
+.lang-toggle {
+  min-width: 34px; padding: 0 .5rem;
+  font-family: var(--font-mono); font-size: .72rem; font-weight: 500; letter-spacing: .08em;
+}
+.lang-toggle:hover { background: var(--ink); color: var(--paper); }
 
 .doc-footer {
   margin-top: 4rem; padding: 2rem 0 0;
@@ -89,8 +96,10 @@ section { padding: clamp(2.6rem, 5vw, 4.4rem) 0; }
 .sechead h2 { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.5rem, 3vw, 2.1rem); }
 .sechead .mono { color: var(--ink-3); }
 
-.prose { max-width: var(--measure); }
+.prose { max-width: var(--measure); text-align: justify; text-justify: inter-word; hyphens: auto; }
 .prose :where(p, li, h2, h3) { overflow-wrap: break-word; }
+.prose :where(h1, h2, h3, h4) { text-align: left; hyphens: none; }
+.prose :where(pre, .mono, code) { hyphens: none; }
 .prose h2, .prose h3 { margin-top: 2em; margin-bottom: .5em; }
 .prose p, .prose ul, .prose ol { margin-bottom: 1rem; }
 .prose ul, .prose ol { padding-left: 1.4rem; }
@@ -168,7 +177,7 @@ section { padding: clamp(2.6rem, 5vw, 4.4rem) 0; }
 .track p { color: var(--ink-2); font-size: .92rem; line-height: 1.5; }
 
 /* ── exam CTA block ─────────────────────────────── */
-.exam { background: var(--ink); color: var(--paper); padding: clamp(2.2rem, 5vw, 3.6rem); display: flex; flex-wrap: wrap; gap: 1.4rem; align-items: center; justify-content: space-between; }
+.exam { background: var(--ink); color: var(--paper); border-radius: 18px; padding: clamp(2.2rem, 5vw, 3.6rem); display: flex; flex-wrap: wrap; gap: 1.4rem; align-items: center; justify-content: space-between; }
 .exam h2 { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.8rem, 4vw, 2.6rem); max-width: 16ch; line-height: 1; color: var(--paper); }
 .exam p { color: var(--ink-3); margin-top: .6rem; max-width: 40ch; font-size: .96rem; }
 
